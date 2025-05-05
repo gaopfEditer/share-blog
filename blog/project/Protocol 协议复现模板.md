@@ -17,7 +17,7 @@ image: /img/project/protocol.png
 
 就在前段时间接触了 SSR 框架（Nuxt3）与 Serverless Function，并用其写了一些项目，如 [api-service](https://github.com/kuizuo/api-service 'api-service') 。而[某了个羊刷次数的网站](https://7y8y.vercel.app)的实现，则让我意外发现这貌似就是我理想中的的协议复现最佳实现？于是我立马开启了 VSCode，将我的这一想法用代码的方式来实现出来，在经历了两周几乎不间断的开发，最终达到了我的预期效果！
 
-在 [模拟请求|协议复现方案](https://kuizuo.cn/request-protocol-scheme '模拟请求|协议复现方案') 这篇文章中我对协议复现的一些方案总结，而这篇就是对 SSR 框架方案的一个具体实践。
+在 [模拟请求|协议复现方案](https://gaopf.top/request-protocol-scheme '模拟请求|协议复现方案') 这篇文章中我对协议复现的一些方案总结，而这篇就是对 SSR 框架方案的一个具体实践。
 
 ## 技术栈
 
@@ -68,7 +68,7 @@ protocol
 
 ### 全栈开发
 
-这里我不想过多介绍 Nuxt3 的基本功能与使用，在我的一个 [基于 Nuxt3 的 API 接口服务网站](https://kuizuo.cn/use-nuxt3-build-api-server#nuxt3-介绍 '基于Nuxt3的API接口服务网站') 的项目中，有简单介绍过 Nuxt3，有兴趣可以去看看。
+这里我不想过多介绍 Nuxt3 的基本功能与使用，在我的一个 [基于 Nuxt3 的 API 接口服务网站](https://gaopf.top/use-nuxt3-build-api-server#nuxt3-介绍 '基于Nuxt3的API接口服务网站') 的项目中，有简单介绍过 Nuxt3，有兴趣可以去看看。
 
 这里你只需要知道 Nuxt3 具有全栈开发的能力，如果你想，完成可以基于 Nuxt3 这个技术栈来实现 Web 开发的前端后端工作。
 
@@ -238,7 +238,7 @@ export default defineAppConfig({
   title: 'Protocol',
   description: '一个用于快速复现请求协议的Web开发模板。',
   author: {
-    name: 'kuizuo',
+    name: 'gaopf',
     link: 'https://github.com/kuizuo',
     qq: 'https://im.qq.com/',
     wx: 'https://wx.qq.com/',
@@ -310,7 +310,7 @@ export class Blog {
 定义完这些后，我只需要实例化一个对象 account，调用 login 方法即可登录，后续的获取博文列表与评论操作我只需要拿这个 account 来操作即可。
 
 ```javascript
-const account = new Blog({ username: 'kuizuo', password: '123456' })
+const account = new Blog({ username: 'gaopf', password: '123456' })
 await account.login()
 
 const blogList = await account.getBlogList()
@@ -409,7 +409,7 @@ export const useUserStore = definePiniaStore('user', () => {
 
 ```vue title='components\Demo.vue'
 <script setup lang="ts">
-let username = $ref('kuizuo')
+let username = $ref('gaopf')
 let loading = $ref(false)
 
 const userStore = useUserStore()

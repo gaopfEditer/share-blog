@@ -106,14 +106,14 @@ SSR 通常是将数据通过服务端的前端框架渲染成 HTML，直接将 H
 
 项目还是相对比较简单的，将链接转化为一个卡片样式的预览效果（包含链接的标题，图片，描述）。
 
-核心代码在 [`routes\api\link.ts`](https://github.com/kuizuo/link-maker/blob/main/routes/api/link.ts) 下，将会生成 `/api/link` 接口，例如访问 [https://link-maker.deno.dev/api/link?q=https://kuizuo.cn](https://link-maker.deno.dev/api/link?q=https://kuizuo.cn 'https://link-maker.deno.dev/api/link?q=https://kuizuo.cn') 你就可以得到如下 json 数据
+核心代码在 [`routes\api\link.ts`](https://github.com/kuizuo/link-maker/blob/main/routes/api/link.ts) 下，将会生成 `/api/link` 接口，例如访问 [https://link-maker.deno.dev/api/link?q=https://gaopf.top](https://link-maker.deno.dev/api/link?q=https://gaopf.top 'https://link-maker.deno.dev/api/link?q=https://gaopf.top') 你就可以得到如下 json 数据
 
 ```json
 {
-  "title": "愧怍的小站",
+  "title": "长篙的小站",
   "description": "Blog",
-  "image": "https://kuizuo.cn/img/logo.png",
-  "url": "https://kuizuo.cn"
+  "image": "https://gaopf.top/img/logo.png",
+  "url": "https://gaopf.top"
 }
 ```
 
@@ -151,7 +151,7 @@ const q = url.searchParams.get('q')
 
 当时我尝试用 ctx.query 和 req.query 来获取 q 参数，然而 ctx 与 req 并没有 query 属性，在翻阅文档与源码，才得知 fresh 并没有将 query 参数解析到 req 或 ctx 下。
 
-至于说为何要用 query 而不是用 param，主要是因为 url 的缘故，比如说 `/api/link/https://kuizuo.cn` 这个链接，这时 param 是解析不出 `https://kuizuo.cn` 完整 url 的，除非 url 编码，但这对使用者来说就不是很好，于是就舍弃了 param 参数的方案。
+至于说为何要用 query 而不是用 param，主要是因为 url 的缘故，比如说 `/api/link/https://gaopf.top` 这个链接，这时 param 是解析不出 `https://gaopf.top` 完整 url 的，除非 url 编码，但这对使用者来说就不是很好，于是就舍弃了 param 参数的方案。
 
 ### 有些 npm 包在 fresh 无法正常使用
 

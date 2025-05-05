@@ -110,7 +110,7 @@ $env:PYTHONIOENCODING="utf-8"
 Import-Module posh-git
 Import-Module oh-my-posh
 
-$DefaultUser = 'kuizuo'
+$DefaultUser = 'gaopf'
 # Set theme
 Set-PoshPrompt jandedobbeleer
 Set-PSReadlineKeyHandler -Key Tab -Function MenuComplete

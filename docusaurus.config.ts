@@ -9,10 +9,10 @@ const beian1 = '闽公网安备35021102000847号'
 
 const config: Config = {
   title: '长篙',
-  url: 'https://kuizuo.cn',
+  url: 'https://gaopf.top',
   baseUrl: '/',
   favicon: 'img/favicon.ico',
-  organizationName: 'kuizuo',
+  organizationName: 'gaopf',
   projectName: 'blog',
   customFields: {
     bio: '道阻且长，行则将至',
@@ -52,23 +52,23 @@ const config: Config = {
       },
       hideOnScroll: true,
       items: [
-        { label: '博客', position: 'right', to: 'blog' },
+        { label: '笔记', position: 'right', to: 'docs/skill' },
+        // { label: '博客', position: 'right', to: 'blog' },
         { label: '项目', position: 'right', to: 'project' },
         { label: '友链', position: 'right', to: 'friends' },
         // { label: '关于', position: 'right', to: 'about' },
-        { label: '笔记', position: 'right', to: 'docs/skill' },
         {
           label: '更多',
           position: 'right',
           items: [
-            { label: '归档', to: 'blog/archive' },
+            // { label: '归档', to: 'blog/archive' },
             { label: '工具推荐', to: 'docs/tools' },
           ],
         },
-        // {
-        //   type: 'localeDropdown',
-        //   position: 'right',
-        // },
+        {
+          type: 'localeDropdown',
+          position: 'right',
+        },
       ],
     },
     footer: {
@@ -87,7 +87,7 @@ const config: Config = {
         {
           title: '社交媒体',
           items: [
-            { label: '关于我', to: '/about' },
+            // { label: '关于我', to: '/about' },
             { label: 'GitHub', href: social.github.href },
             { label: 'Twitter', href: social.x.href },
             { label: '掘金', href: social.juejin.href },
@@ -129,7 +129,7 @@ const config: Config = {
     algolia: {
       appId: 'GV6YN1ODMO',
       apiKey: '50303937b0e4630bec4a20a14e3b7872',
-      indexName: 'kuizuo',
+      indexName: 'gaopf',
     },
     prism: {
       theme: themes.oneLight,
@@ -179,7 +179,7 @@ const config: Config = {
         },
         blog: false,
         theme: {
-          customCss: ['./src/css/custom.css'], // ./src/css/tweet-theme.css
+          customCss: ['./src/css/custom.css', './src/css/tweet-theme.css'],
         },
         sitemap: {
           priority: 0.5,
@@ -204,7 +204,7 @@ const config: Config = {
         pwaHead: [
           { tagName: 'link', rel: 'icon', href: '/img/logo.png' },
           { tagName: 'link', rel: 'manifest', href: '/manifest.json' },
-          { tagName: 'meta', name: 'theme-color', content: 'pink' },
+          { tagName: 'meta', name: 'theme-color', content: '#12affa' },
         ],
       },
     ],
@@ -297,8 +297,16 @@ Love what you do and do what you love.
     'https://cdn.jsdelivr.net/npm/misans@4.0.0/lib/Normal/MiSans-Semibold.min.css',
   ],
   i18n: {
-    defaultLocale: 'zh-CN',
-    locales: ['zh-CN', 'en'],
+    defaultLocale: 'zh',
+    locales: ['zh', 'en'],
+    localeConfigs: {
+      zh: {
+        label: '中文',
+      },
+      en: {
+        label: 'English',
+      },
+    },
   },
   onBrokenLinks: 'warn',
 }

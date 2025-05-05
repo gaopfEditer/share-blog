@@ -18,7 +18,7 @@
     --ifm-heading-font-family: ui-sans-serif, system-ui, -apple-system;
 
     --ifm-navbar-background-color: white;
-    --ifm-navbar-shadow: 0 2px 1px rgb(0 0 0 / 10%);
+    --ifm-navbar-shadow: 0 4px 28px rgb(0 0 0 / 10%);
 
     --ifm-menu-color: #0d203a;
 
@@ -97,7 +97,7 @@ body {
 }
 
 body {
-  font-family: sans-serif,  system-ui, -apple-system, 'PingFang SC',
+  font-family: misans, system-ui, -apple-system, 'PingFang SC',
     'Microsoft YaHei';
 }
 
@@ -150,18 +150,15 @@ article .markdown video {
 }
 
 article .markdown > h2 {
-  font-size: 1.8em;
-  font-weight: 600;
+  font-size: 1.6em;
 }
 
 article .markdown > h3 {
-  font-size: 1.2em;
-  font-weight: 600;
+  font-size: 1.4em;
 }
 
 article .markdown > h4 {
-  font-size: 1em;
-  font-weight: 600;
+  font-size: 1.2em;
 }
 
 article .markdown-body a:hover::before {
@@ -185,7 +182,7 @@ article p > span > a {
 }
 
 .navbar {
-  /* box-shadow: none; */
+  box-shadow: none;
 }
 
 .navbar-sidebar__items {

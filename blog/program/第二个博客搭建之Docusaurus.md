@@ -9,7 +9,7 @@ description: 使用 docusaurus 搭建个人博客，并对其主题进行魔改
 image: /img/project/blog.png
 ---
 
-博客地址: [愧怍的小站](https://kuizuo.cn/)
+博客地址: [长篙的小站](https://gaopf.top/)
 
 时隔近半年没好好整理文章，博客也写的不像个人样。:joy:
 
@@ -21,7 +21,7 @@ image: /img/project/blog.png
 
 ## 安装
 
-如果你想搭建一个类似的博客，可以 [fork 本项目](https://github.com/kuizuo/blog/fork)，修改个人信息，并将文章迁移过来。这里推荐使用 [Vercel 部署个人博客](https://kuizuo.cn/vercel-deploy-blog)，以下是本地安装示例。
+如果你想搭建一个类似的博客，可以 [fork 本项目](https://github.com/kuizuo/blog/fork)，修改个人信息，并将文章迁移过来。这里推荐使用 [Vercel 部署个人博客](https://gaopf.top/vercel-deploy-blog)，以下是本地安装示例。
 
 ```bash
 git clone https://github.com/kuizuo/blog
@@ -30,7 +30,7 @@ yarn
 yarn start
 ```
 
-关于主题魔改可以看 [Docusaurus 主题魔改](https://kuizuo.cn/docs/docusaurus-guides)
+关于主题配置可以看 [Docusaurus 主题配置](https://gaopf.top/docs/docusaurus-guides)
 
 ## 一些页面
 

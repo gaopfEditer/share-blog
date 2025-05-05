@@ -182,7 +182,7 @@ Prisma 的贡献者中有 [ts-toolbelt](https://github.com/millsp/ts-toolbelt) �
 
 ```ts
 const newUser = new User()
-newUser.name = 'kuizuo'
+newUser.name = 'gaopf'
 newUser.email = 'hi@kuizuo.cn'
 const user = userRepository.save(newUser)
 ```
@@ -209,7 +209,7 @@ export class User {
 
 ```ts
 const newUser = new User({
-  name: 'kuizuo',
+  name: 'gaopf',
   email: 'hi@kuizuo.cn',
 })
 const user = userRepository.save(newUser)
@@ -224,7 +224,7 @@ const user = userRepository.save(newUser)
 ```ts
 const user = await prisma.user.create({
   data: {
-    name: 'kuizuo',
+    name: 'gaopf',
     email: 'hi@kuizuo.cn',
   },
 })
@@ -269,7 +269,7 @@ const raw = await this.userRepository
 ```ts
 {
 	user_id: 1,
-	user_name: 'kuizuo',
+	user_name: 'gaopf',
 	user_email： 'hi@kuizuo.cn',
 	sum: '1'
 }

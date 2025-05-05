@@ -246,7 +246,7 @@ User.find({}, (err, doc) => {
 // 增加数据
 // 实例化对象
 let user = new User({
-  username: 'kuizuo',
+  username: 'gaopf',
   password: 'a12345678',
 })
 

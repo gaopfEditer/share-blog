@@ -51,7 +51,7 @@ export default function App(props) {
   }
 
   const [user, setUser] = React.useState<User>({
-    name: 'kuizuo',
+    name: 'gaopf',
     age: 20,
   })
 

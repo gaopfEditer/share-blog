@@ -57,7 +57,7 @@ keywords: [记录, github]
 
 意思：感谢您签署我们的贡献者许可协议。我们现在可以接受您的代码为这个(和任何)元开放源码项目。谢谢!
 
-然后审核人为我的错误 commit 标题进行了修改~~docs: Add Changgao's Personal Website to showcase page~~ docs: add Changgao's Personal Website to showcase，**第一个单词 Add 不应该首字母大写**，不符合规范。
+然后审核人为我的错误 commit 标题进行了修改~~docs: Add Kuizuo's Personal Website to showcase page~~ docs: add Kuizuo's Personal Website to showcase，**第一个单词 Add 不应该首字母大写**，不符合规范。
 
 然后为我提交的代码做了一些小调整 minor tweaks，也就是上面所提到的 sortBy 空格，然后为我提供的展示图裁剪成标准尺寸。
 
