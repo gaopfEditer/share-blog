@@ -5,7 +5,7 @@ date: 2021-08-20
 authors: kuizuo
 tags: [blog, docusaurus, project]
 keywords: [blog, docusaurus, project]
-description: 使用 docusaurus 搭建个人博客，并对其主题进行魔改
+description: 使用 docusaurus 搭建个人博客，并对其主题进行配置
 image: /img/project/blog.png
 ---
 
@@ -13,7 +13,7 @@ image: /img/project/blog.png
 
 时隔近半年没好好整理文章，博客也写的不像个人样。:joy:
 
-大半年没更新博客，一直忙着写项目（写到手软的那种），然后无意间在 B 站看到一个 Up 主 [峰华前端工程师](https://zxuqian.cn/) 基于 React 驱动的静态网站生成器搭建的个人博客。第一眼看到该站点的时候惊艳到我了，于是我在其基础上并魔改了一些页面功能，作为个人站点使用。
+大半年没更新博客，一直忙着写项目（写到手软的那种），然后无意间在 B 站看到一个 Up 主 [峰华前端工程师](https://zxuqian.cn/) 基于 React 驱动的静态网站生成器搭建的个人博客。第一眼看到该站点的时候惊艳到我了，于是我在其基础上并配置了一些页面功能，作为个人站点使用。
 
 > 不过国内 docusaurus 的使用者是真的少，Vuepress 都快烂大街了...
 
