@@ -5,15 +5,15 @@ date: 2021-08-20
 authors: kuizuo
 tags: [blog, docusaurus, project]
 keywords: [blog, docusaurus, project]
-description: 使用 docusaurus 搭建个人博客，并对其主题进行魔改
+description: 使用 docusaurus 搭建个人博客，并对其主题进行配置
 image: /img/project/blog.png
 ---
 
-博客地址: [愧怍的小站](https://kuizuo.cn/)
+博客地址: [长篙的小站](https://gaopf.top/)
 
 时隔近半年没好好整理文章，博客也写的不像个人样。:joy:
 
-大半年没更新博客，一直忙着写项目（写到手软的那种），然后无意间在 B 站看到一个 Up 主 [峰华前端工程师](https://zxuqian.cn/) 基于 React 驱动的静态网站生成器搭建的个人博客。第一眼看到该站点的时候惊艳到我了，于是我在其基础上并魔改了一些页面功能，作为个人站点使用。
+大半年没更新博客，一直忙着写项目（写到手软的那种），然后无意间在 B 站看到一个 Up 主 [峰华前端工程师](https://zxuqian.cn/) 基于 React 驱动的静态网站生成器搭建的个人博客。第一眼看到该站点的时候惊艳到我了，于是我在其基础上并配置了一些页面功能，作为个人站点使用。
 
 > 不过国内 docusaurus 的使用者是真的少，Vuepress 都快烂大街了...
 
@@ -21,7 +21,7 @@ image: /img/project/blog.png
 
 ## 安装
 
-如果你想搭建一个类似的博客，可以 [fork 本项目](https://github.com/kuizuo/blog/fork)，修改个人信息，并将文章迁移过来。这里推荐使用 [Vercel 部署个人博客](https://kuizuo.cn/vercel-deploy-blog)，以下是本地安装示例。
+如果你想搭建一个类似的博客，可以 [fork 本项目](https://github.com/kuizuo/blog/fork)，修改个人信息，并将文章迁移过来。这里推荐使用 [Vercel 部署个人博客](https://gaopf.top/vercel-deploy-blog)，以下是本地安装示例。
 
 ```bash
 git clone https://github.com/kuizuo/blog
@@ -30,7 +30,7 @@ yarn
 yarn start
 ```
 
-关于主题魔改可以看 [Docusaurus 主题魔改](https://kuizuo.cn/docs/docusaurus-guides)
+关于主题配置可以看 [Docusaurus 主题配置](https://gaopf.top/docs/docusaurus-guides)
 
 ## 一些页面
 

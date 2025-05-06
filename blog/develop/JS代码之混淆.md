@@ -695,7 +695,7 @@ traverse(ast, {
 `replaceWith` 一对一替换当前节点，且严格替换。
 
 ```javascript
-path.replaceWith(t.valueToNode('kuizuo'))
+path.replaceWith(t.valueToNode('gaopf'))
 ```
 
 `replaceWithMultiple` 则是一对多，将多个节点替换到一个节点上。
@@ -706,7 +706,7 @@ traverse(ast, {
     path.replaceWithMultiple([
       t.expressionStatement(
         t.callExpression(t.memberExpression(t.identifier('console'), t.identifier('log')), [
-          t.stringLiteral('kuizuo'),
+          t.stringLiteral('gaopf'),
         ]),
       ),
       t.returnStatement(),
@@ -847,7 +847,7 @@ body
 
 ```javascript
 let obj = {
-  name: 'kuizuo',
+  name: 'gaopf',
 }
 ```
 
@@ -915,7 +915,7 @@ Node {
 ```javascript
 function test() {
   let obj = {
-    name: 'kuizuo',
+    name: 'gaopf',
   }
   return obj
 }
@@ -935,7 +935,7 @@ traverse(ast, {
 
 // function test() {
 //   let obj = {
-//     name: 'kuizuo'
+//     name: 'gaopf'
 //   };
 //   return obj;
 // }
@@ -953,7 +953,7 @@ traverse(ast, {
 
 // function test() {
 //   let obj = {
-//     name: 'kuizuo'
+//     name: 'gaopf'
 //   };
 //   return obj;
 // }
@@ -1086,7 +1086,7 @@ function _0xabcdef2() {
 演示代码
 
 ```javascript
-let a = 'kuizuo'
+let a = 'gaopf'
 ;`${a}nb${12}3${'456'}`
 ```
 
@@ -1147,7 +1147,7 @@ class Test {
   }
 }
 
-let test = new Test('kuizuo')
+let test = new Test('gaopf')
 console.log(test.run())
 ```
 

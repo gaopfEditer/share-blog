@@ -27,7 +27,7 @@ const str = 'foo'
 typeof str === 'string' // true
 
 const user = {
-  name: 'kuizuo',
+  name: 'gaopf',
   age: 12,
   address: {
     province: '福建',
@@ -359,7 +359,7 @@ interface User {
 }
 
 const user: User = {
-  name: 'kuizuo',
+  name: 'gaopf',
   age: 20,
 }
 ```

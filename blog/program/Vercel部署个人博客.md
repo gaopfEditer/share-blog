@@ -23,7 +23,7 @@ image: https://img.kuizuo.cn/image-20220511170700075.png
 
 与之相似的产品 [Netfily](https://netlify.com)，如果你想部署私有化，推荐 [Coolify](https://coolify.io)
 
-如果你想搭建一个类似这样的站点，不妨参考我的 [Docusaurus 主题魔改](/docs/docusaurus-guides)
+如果你想搭建一个类似这样的站点，不妨参考我的 [Docusaurus 主题配置](/docs/docusaurus-guides)
 
 :::danger DNS 污染
 

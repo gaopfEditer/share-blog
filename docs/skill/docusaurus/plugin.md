@@ -71,7 +71,7 @@ plugins: [
 
 ## plugin-content-blog
 
-由于官方的 [plugin-content-blog](https://docusaurus.io/zh-CN/docs/api/plugins/@docusaurus/plugin-content-blog) 插件没有将有关博客的数据设置为全局，所以只能在博客列表页面 `BlogListPage` 组件中获取到，而由于本博客的某些组件需要使用到部分数据，因此这里对 `plugin-content-blog` 进行魔改，将 blog 信息添加至全局数据中，可在任意页面中都访问到所有博文的信息。
+由于官方的 [plugin-content-blog](https://docusaurus.io/zh-CN/docs/api/plugins/@docusaurus/plugin-content-blog) 插件没有将有关博客的数据设置为全局，所以只能在博客列表页面 `BlogListPage` 组件中获取到，而由于本博客的某些组件需要使用到部分数据，因此这里对 `plugin-content-blog` 进行配置，将 blog 信息添加至全局数据中，可在任意页面中都访问到所有博文的信息。
 
 ```typescript title='src/plugin/plugin-content-blog.ts'
 async function blogPluginEnhanced(context, options) {

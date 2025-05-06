@@ -253,7 +253,7 @@ VALUES ('管理员'),('代理'),('用户')
 UPDATE 表名 SET `字段1`='值1' WHERE 条件1
 
 -- 修改用户名与命名
-UPDATE `user` SET `username`='kuizuo',`password`='a12345678` WHERE id = 1
+UPDATE `user` SET `username`='gaopf',`password`='a12345678` WHERE id = 1
 ```
 
 #### 3.2.3、删除（delete）
@@ -514,8 +514,8 @@ SELECT RAND() --返回0~1之间的随机数
 ```sql
 SELECT CHAR_LENGTH('这是一串文本') --返回字符串长度
 SELECT CONCAT('JavaScript','是世界上最好用的语言') --拼接字符串
-SELECT LOWER('Changgao') --到小写
-SELECT UPPER('Changgao') --到大写
+SELECT LOWER('gaopf') --到小写
+SELECT UPPER('gaopf') --到大写
 ```
 
 时间日期

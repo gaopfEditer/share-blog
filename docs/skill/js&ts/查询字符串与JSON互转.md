@@ -30,7 +30,7 @@ username=kuizuo&password=a12345678
 
 ```javascript
 let url = 'https://xxx.xxx.com/xxx/login'
-let username = 'kuizuo'
+let username = 'gaopf'
 let password = 'a12345678'
 
 let data = 'username=' + username + '&password=' + password
@@ -47,7 +47,7 @@ axios.post(url, data).then(function (res) {
 所以一般的做法都是将 data 用 js 对象或者用 json 格式表示，像下面这样
 
 ```javascript
-let username = 'kuizuo'
+let username = 'gaopf'
 let password = 'a12345678'
 let data = {
   username: username,
@@ -63,7 +63,7 @@ let data = {
 const qs = require('querystring')
 
 let obj = {
-  username: 'kuizuo',
+  username: 'gaopf',
   password: 'a12345678',
 }
 let data = qs.stringify(obj)
@@ -75,7 +75,7 @@ const qs = require('querystring')
 
 let data = 'username=kuizuo&password=a12345678'
 let json = qs.parse(data)
-// { username: 'kuizuo', password: 'a12345678' }
+// { username: 'gaopf', password: 'a12345678' }
 ```
 
 ### 使用正则与 array.reduce
@@ -110,7 +110,7 @@ function json2Qs(obj) {
 let obj = qs2Json('username=kuizuo&password=a12345678')
 // {username: "kuizuo", password: "a12345678"}
 
-let param = json2Qs({ username: 'kuizuo', password: 'a12345678' })
+let param = json2Qs({ username: 'gaopf', password: 'a12345678' })
 // username=kuizuo&password=a12345678
 ```
 

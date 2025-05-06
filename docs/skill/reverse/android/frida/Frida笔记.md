@@ -524,8 +524,8 @@ var arrayList = Java.use('java.util.ArrayList').$new()
 var integer = Java.use('java.lang.Integer')
 var boolean = Java.use('java.lang.Boolean')
 var Person = Java.use('com.kuizuo.app.Person')
-var person = Person.$new('kuizuo', 20)
-arrayList.add('kuizuo')
+var person = Person.$new('gaopf', 20)
+arrayList.add('gaopf')
 arrayList.add(integer.$new(10))
 arrayList.add(boolean.$new(true))
 arrayList.add(person)
@@ -711,7 +711,7 @@ chmod 777 fiarm64
 
 ### frida-gadget.so
 
-**免 root 使用 frida**，但需要重打包 app，比较稳定。可通过魔改系统，让系统帮我们注入 so，免去重打包的繁琐
+**免 root 使用 frida**，但需要重打包 app，比较稳定。可通过配置系统，让系统帮我们注入 so，免去重打包的繁琐
 
 ##### 环境
 

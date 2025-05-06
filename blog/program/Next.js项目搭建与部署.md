@@ -64,7 +64,7 @@ export default User
 
 此时访问 http://localhost:3000/user/1 便可得到 `User ID: 1`
 
-在 router 对象下没有 param 属性，都是存放在 query 参数中，例如访问 user/1?username=kuizuo，此时的 query 值为 `{username: 'kuizuo', id: '2'}`
+在 router 对象下没有 param 属性，都是存放在 query 参数中，例如访问 user/1?username=kuizuo，此时的 query 值为 `{username: 'gaopf', id: '2'}`
 
 :::tip
 
@@ -312,7 +312,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
 既然说到部署，那肯定离不开 nextjs 的母公司[Vercel](https://vercel.com)了，关于 Vercel 之前也写过相关文章，关于 Vercel 就不过多介绍。
 
-nextjs 部署到 vercel 实在简单，将项目推送到 github 仓库中，然后在 vercel 中 New Project，接着选择 nextjs 的仓库，点击 Deploy，静等部署即可。关于部署可以看这篇文章 [Vercel 部署个人博客](https://kuizuo.cn/develop/Vercel部署个人博客)
+nextjs 部署到 vercel 实在简单，将项目推送到 github 仓库中，然后在 vercel 中 New Project，接着选择 nextjs 的仓库，点击 Deploy，静等部署即可。关于部署可以看这篇文章 [Vercel 部署个人博客](https://gaopf.top/develop/Vercel部署个人博客)
 
 现在你可以通过访问 [kz-next-app-demo.vercel.app](https://kz-next-app-demo.vercel.app/) 来访问该项目，并尝试访问`/api/post`，`user/1`来看看。
 

@@ -14,10 +14,10 @@ authors: kuizuo
 ```typescript title='docusaurus.config.ts' icon='logos:docusaurus'
 const config: Config = {
   title: '长篙的小站',
-  url: 'https://kuizuo.cn',
+  url: 'https://gaopf.top',
   baseUrl: '/',
   favicon: 'img/favicon.ico',
-  organizationName: 'kuizuo',
+  organizationName: 'gaopf',
   projectName: 'blog',
   themeConfig: {
     image: 'img/logo.png',

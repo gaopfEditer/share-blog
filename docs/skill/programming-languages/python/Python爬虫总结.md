@@ -83,7 +83,7 @@ print(username, password)
 print(user.keys())
 # dict_keys(['username', 'password'])
 print(user.values())
-# dict_values(['kuizuo', 'a123456'])
+# dict_values(['gaopf', 'a123456'])
 ```
 
 解构赋值没什么好说的，和 js 类似，只不过对字典的解构赋值的话，要取值则要调用 values()，取 key 的话默认不填，但是也可以调用 keys()
@@ -91,7 +91,7 @@ print(user.values())
 ## 模板字符串
 
 ```python
-user = 'kuizuo'
+user = 'gaopf'
 print(f'username: {user} age: {20+1}')
 # username: kuizuo age: 21
 ```
@@ -107,7 +107,7 @@ print(f'username: {user} age: {20+1}')
 而 js 中的模板字符串则是使用反引号`和${}，像下面这样
 
 ```javascript
-user = 'kuizuo'
+user = 'gaopf'
 console.log(`username: ${user} age: ${20+1}`)
 # username: kuizuo age: 21
 ```
@@ -117,14 +117,14 @@ console.log(`username: ${user} age: ${20+1}`)
 python 的字典与 js 的对象有些许相像，个人总体感觉没有 js 的对象灵活，演示如下
 
 ```python
-user = { 'username':'kuizuo','password':'a123456' }
+user = { 'username':'gaopf','password':'a123456' }
 print(user['username'])
 ```
 
 想要获取字典中的值，就需要写成`user['username']`，如果习惯了 js 的写法（比如我），就会习惯的写成`user.username`，这在 python 中将会报错，`AttributeError: 'dict' object has no attribute 'username'`，并且字典的 key 还需要使用引号进行包裹，如果是 js 的话，代码如下
 
 ```javascript
-user = { username: 'kuizuo', password:'a123456'
+user = { username: 'gaopf', password:'a123456'
 console.log(user.username)
 ```
 

@@ -3,9 +3,9 @@
     "message": "Next",
     "description": "The label for version current"
   },
-  "sidebar.skill.category.Docusaurus2 主题魔改": {
-    "message": "Docusaurus2 主题魔改",
-    "description": "The label for category Docusaurus2 主题魔改 in sidebar skill"
+  "sidebar.skill.category.Docusaurus2 主题配置": {
+    "message": "Docusaurus2 主题配置",
+    "description": "The label for category Docusaurus2 主题配置 in sidebar skill"
   },
   "sidebar.skill.category.代码规范": {
     "message": "代码规范",

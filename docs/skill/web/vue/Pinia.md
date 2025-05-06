@@ -56,7 +56,7 @@ export const useUserStore = defineStore({
   id: 'user',
   state: (): UserState => {
     return {
-      name: 'kuizuo',
+      name: 'gaopf',
     }
   },
   getters: {
@@ -157,7 +157,7 @@ export const useUserStore = defineStore({
   id: 'user',
   state: (): UserState => {
     return {
-      name: 'kuizuo',
+      name: 'gaopf',
     }
   },
   persist: {

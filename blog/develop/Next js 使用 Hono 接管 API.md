@@ -174,7 +174,7 @@ app.onError(handleError)
 
 Hono 有个特性我很喜欢也很好用，可以像 [TRPC](https://trpc.io/) 那样，导出一个 [client](https://hono.dev/docs/guides/rpc#client) 供前端直接调用，省去编写前端 api 调用代码以及对应的类型。
 
-这里我不想在过多叙述 RPC(可见我之前所写有关 [TRPC 的使用](https://kuizuo.cn/blog/typescript-full-stack-technology-trpc#end-to-end-typesafe-apis%E7%AB%AF%E5%88%B0%E7%AB%AF%E7%B1%BB%E5%9E%8B%E5%AE%89%E5%85%A8))，直接来说说有哪些注意点。
+这里我不想在过多叙述 RPC(可见我之前所写有关 [TRPC 的使用](https://gaopf.top/blog/typescript-full-stack-technology-trpc#end-to-end-typesafe-apis%E7%AB%AF%E5%88%B0%E7%AB%AF%E7%B1%BB%E5%9E%8B%E5%AE%89%E5%85%A8))，直接来说说有哪些注意点。
 
 ### 链式调用
 

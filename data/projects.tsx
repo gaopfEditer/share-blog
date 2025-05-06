@@ -1,9 +1,9 @@
 export const projects: Project[] = [
   {
-    title: '愧怍的小站',
+    title: '长篙的小站',
     description: '🦖 基于 Docusaurus 静态网站生成器实现个人博客',
     preview: '/img/project/blog.png',
-    website: 'https://kuizuo.cn',
+    website: 'https://gaopf.top',
     source: 'https://github.com/kuizuo/blog',
     tags: ['opensource', 'design', 'favorite'],
     type: 'web',
