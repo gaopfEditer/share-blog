@@ -54,7 +54,7 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ vars.SSH_PRIVATE_KEY }}
           ARGS: '-avzr --delete'
-          SOURCE: 'build'
+          SOURCE: ''
           REMOTE_HOST: ${{ vars.REMOTE_HOST }}
           REMOTE_USER: ${{ vars.REMOTE_USER }}
           TARGET: ${{ vars.TARGET }}
