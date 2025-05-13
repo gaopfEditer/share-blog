@@ -26,9 +26,7 @@ keywords:
   - Css
   - Browser
 - backend
-  - Java
-  - Python
-  - Go
+  - NestJs
 - 算法
 - 杂项
 - 代码规范
