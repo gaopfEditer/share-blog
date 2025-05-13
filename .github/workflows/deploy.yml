@@ -10,8 +10,8 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+      matrix: #, macos-latest, windows-latest
+        os: [ubuntu-latest]
         node-version: [20.x]
 
     steps:
@@ -39,13 +39,15 @@ jobs:
           echo "REMOTE_USER: ${{ vars.REMOTE_USER }}"
           echo "TARGET: ${{ vars.TARGET }}"
           echo "SSH_PRIVATE_KEY: ${{ vars.SSH_PRIVATE_KEY }}"
-          
-          echo "Checking Repository Secrets:"
-          echo "777777777 Secrets: ${{ secrets }}"
-          echo "777777777 REMOTE_HOST: ${{ secrets.REMOTE_HOST }}"
-          echo "REMOTE_USER: ${{ secrets.REMOTE_USER }}"
-          echo "TARGET: ${{ secrets.TARGET }}"
-          echo "SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}"
+
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ vars.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan 60.205.120.196 >> ~/.ssh/known_hosts
+        env:
+          SSH_PRIVATE_KEY: ${{ vars.SSH_PRIVATE_KEY }}
 
       - name: SSH Deploy
         uses: easingthemes/ssh-deploy@v4.1.10
