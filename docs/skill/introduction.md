@@ -1,7 +1,7 @@
 ---
 id: introduction
 slug: /skill
-title: 技术笔记
+title: 笔记概览
 keywords:
   - docusaurus
   - 前端
@@ -17,8 +17,7 @@ keywords:
 
 本页面为个人学习中所涉及相关技术栈的笔记汇总，包含但不限于
 
-- Docusaurus
-- Web
+- frontend
   - Vue
   - React
   - JavaScript & TypeScript
@@ -29,6 +28,7 @@ keywords:
   - Java
   - Python
   - Go
+- Docusaurus
 - 算法
 - 杂项
 - 代码规范

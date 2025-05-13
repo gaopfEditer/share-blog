@@ -24,3 +24,8 @@ yarn-error.log*
 pnpm-error.log*
 
 .vercel
+# SpecStory explanation file
+.cursorindexingignore
+.specstory/
+# SpecStory explanation file
+.specstory/.what-is-this.md
