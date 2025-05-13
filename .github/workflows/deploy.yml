@@ -31,12 +31,28 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Debug Variables
+        run: |
+          echo "Checking Repository Variables:"
+          echo "777777777 vars: ${{ vars }}"
+          echo "REMOTE_HOST: ${{ vars.REMOTE_HOST }}"
+          echo "REMOTE_USER: ${{ vars.REMOTE_USER }}"
+          echo "TARGET: ${{ vars.TARGET }}"
+          echo "SSH_PRIVATE_KEY: ${{ vars.SSH_PRIVATE_KEY }}"
+          
+          echo "Checking Repository Secrets:"
+          echo "777777777 Secrets: ${{ secrets }}"
+          echo "777777777 REMOTE_HOST: ${{ secrets.REMOTE_HOST }}"
+          echo "REMOTE_USER: ${{ secrets.REMOTE_USER }}"
+          echo "TARGET: ${{ secrets.TARGET }}"
+          echo "SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}"
+
       - name: SSH Deploy
         uses: easingthemes/ssh-deploy@v4.1.10
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_PRIVATE_KEY: ${{ vars.SSH_PRIVATE_KEY }}
           ARGS: '-avzr --delete'
           SOURCE: 'build'
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          TARGET: ${{ secrets.TARGET }}
+          REMOTE_HOST: ${{ vars.REMOTE_HOST }}
+          REMOTE_USER: ${{ vars.REMOTE_USER }}
+          TARGET: ${{ vars.TARGET }}
