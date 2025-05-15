@@ -47,7 +47,7 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ vars.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan 60.205.120.196 >> ~/.ssh/known_hosts
+          ssh-keyscan ${{ vars.REMOTE_HOST }} >> ~/.ssh/known_hosts
         env:
           SSH_PRIVATE_KEY: ${{ vars.SSH_PRIVATE_KEY }}
 
