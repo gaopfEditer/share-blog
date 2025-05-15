@@ -151,10 +151,11 @@ const config: Config = {
     giscus: {
       repo: 'gaopfEditer/share-blog',
       repoId: 'R_kgDOOiLTjA',
-      category: 'General',
-      categoryId: 'DIC_kwDOOiLTjM4CpoD-',
+      category: 'Announcements',
+      categoryId: 'DIC_kwDOOiLTjM4CpoD9',
       theme: 'light',
       darkTheme: 'dark_dimmed',
+      mapping: 'title',
     } satisfies Partial<GiscusConfig>,
     tableOfContents: {
       minHeadingLevel: 2,
