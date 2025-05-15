@@ -149,13 +149,12 @@ const config: Config = {
       ],
     },
     giscus: {
-      repo: 'gaopfEditer/share-blog',
-      repoId: 'R_kgDOOiLTjA',
-      category: 'Announcements',
-      categoryId: 'DIC_kwDOOiLTjM4CpoD9',
+      repo: 'kuizuo/blog',
+      repoId: 'MDEwOlJlcG9zaXRvcnkzOTc2Mxxxxx',
+      category: 'General',
+      categoryId: 'DIC_kwDOF7NJDM4CPK95',
       theme: 'light',
-      darkTheme: 'dark_dimmed',
-      mapping: 'title',
+      darkTheme: 'dark',
     } satisfies Partial<GiscusConfig>,
     tableOfContents: {
       minHeadingLevel: 2,
