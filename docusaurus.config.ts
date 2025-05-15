@@ -298,16 +298,17 @@ Love what you do and do what you love.
     'https://cdn.jsdelivr.net/npm/misans@4.0.0/lib/Normal/MiSans-Semibold.min.css',
   ],
   i18n: {
-    defaultLocale: 'zh',
-    locales: ['zh', 'en'],
-    localeConfigs: {
-      zh: {
-        label: '中文',
-      },
-      en: {
-        label: 'English',
-      },
-    },
+    defaultLocale: 'zh-CN',
+    locales: ['zh-CN'],
+    // locales: ['zh-CN', 'en'],
+    // localeConfigs: {
+    //   'zh-CN': {
+    //     label: '中文',
+    //   },
+    //   en: {
+    //     label: 'English',
+    //   },
+    // },
   },
   onBrokenLinks: 'warn',
 }

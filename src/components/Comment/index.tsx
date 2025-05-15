@@ -6,10 +6,6 @@ import Giscus, { type GiscusProps, type Theme } from '@giscus/react'
 
 export type GiscusConfig = GiscusProps & { darkTheme: Theme }
 
-interface CommentProps {
-  hidden?: boolean;
-}
-
 const defaultConfig: Partial<GiscusProps> & { darkTheme: string } = {
   id: 'comments',
   mapping: 'title',
@@ -34,7 +30,9 @@ export default function Comment(): JSX.Element {
   }
 
   giscus.theme = useColorMode().colorMode === 'dark' ? giscus.darkTheme : giscus.theme
-  // giscus.lang = i18n.currentLocale
+  
+  // 处理语言代码映射
+  giscus.lang = i18n.currentLocale
 
-  return <BrowserOnly fallback={<div>Loading Comments...</div>}>{() => <Giscus {...giscus } />}</BrowserOnly>
+  return <BrowserOnly fallback={<div>Loading Comments...</div>}>{() => <Giscus {...giscus} />}</BrowserOnly>
 }
