@@ -2,6 +2,7 @@ import { type BlogSidebar } from '@docusaurus/plugin-content-blog'
 import { BlogPostProvider, useBlogPost } from '@docusaurus/plugin-content-blog/client'
 import { HtmlClassNameProvider, ThemeClassNames } from '@docusaurus/theme-common'
 import Comment from '@site/src/components/Comment'
+import MyComment from './components/Comment'
 import { cn } from '@site/src/lib/utils'
 import BackToTopButton from '@theme/BackToTopButton'
 import BlogLayout from '@theme/BlogLayout'
@@ -11,6 +12,7 @@ import BlogPostPageMetadata from '@theme/BlogPostPage/Metadata'
 import BlogPostPaginator from '@theme/BlogPostPaginator'
 import TOC from '@theme/TOC'
 import { type ReactNode } from 'react'
+import Giscus from '@giscus/react';
 
 function BlogPostPageContent({
   sidebar,
@@ -46,8 +48,10 @@ function BlogPostPageContent({
           <BlogPostPaginator nextItem={nextItem} prevItem={prevItem} />
         </div>
       )}
-      {!hideComment && <Comment />}
+      {/* {!hideComment && <Comment />} */}
       <BackToTopButton />
+      <MyComment />
+      
     </BlogLayout>
   )
 }

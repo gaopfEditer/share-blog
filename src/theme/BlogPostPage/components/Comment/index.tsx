@@ -6,10 +6,6 @@ import Giscus, { type GiscusProps, type Theme } from '@giscus/react'
 
 export type GiscusConfig = GiscusProps & { darkTheme: Theme }
 
-interface CommentProps {
-  hidden?: boolean;
-}
-
 const defaultConfig: Partial<GiscusProps> & { darkTheme: string } = {
   id: 'comments',
   mapping: 'title',
@@ -25,7 +21,6 @@ export default function Comment(): JSX.Element {
   const themeConfig = useThemeConfig() as ThemeConfig & { giscus: GiscusConfig }
   const { i18n } = useDocusaurusContext()
 
-  console.log(7777777123,themeConfig.giscus)
   // merge default config
   const giscus = { ...defaultConfig, ...themeConfig.giscus }
 
@@ -34,7 +29,21 @@ export default function Comment(): JSX.Element {
   }
 
   giscus.theme = useColorMode().colorMode === 'dark' ? giscus.darkTheme : giscus.theme
-  // giscus.lang = i18n.currentLocale
+  giscus.lang = i18n.currentLocale
 
-  return <BrowserOnly fallback={<div>Loading Comments...</div>}>{() => <Giscus {...giscus } />}</BrowserOnly>
+  return <BrowserOnly fallback={<div>Loading Comments...</div>}>{() => <Giscus 
+    id="comments"
+      repo="gaopfEditer/share-blog"
+      repoId="R_kgDOOiLTjA"
+      category="Announcements"
+      categoryId="DIC_kwDOOiLTjM4CpoD9"
+      mapping="title"
+      term="Welcome to @giscus/react component!"
+      reactionsEnabled="1"
+      emitMetadata="0"
+      inputPosition="top"
+      theme="light"
+      lang="zh-CN"
+      loading="lazy"
+    />}</BrowserOnly>
 }

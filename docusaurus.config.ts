@@ -155,6 +155,7 @@ const config: Config = {
       categoryId: 'DIC_kwDOF7NJDM4CPK95',
       theme: 'light',
       darkTheme: 'dark',
+      lang: 'zh-CN',
     } satisfies Partial<GiscusConfig>,
     tableOfContents: {
       minHeadingLevel: 2,
