@@ -48,6 +48,7 @@ function BlogPostPageContent({
       )}
       {!hideComment && <Comment />}
       <BackToTopButton />
+      
     </BlogLayout>
   )
 }

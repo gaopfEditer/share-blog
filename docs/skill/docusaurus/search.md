@@ -25,8 +25,8 @@ authors: kuizuo
 
 ```javascript title='docusaurus.config.ts'
 algolia: {
-  appId: 'GV6YN1ODMO',
-  apiKey: '50303937b0e4630bec4a20a14e3b7872',
+  appId: 'GNK52KBP4N',
+  apiKey: '8aa26248bf297d7cd910c9b248c9b77e',
   indexName: 'gaopf',
 }
 ```
