@@ -21,7 +21,7 @@ Waline：需要搭建后端服务与数据库服务，提供评论与浏览量�
 2. **[giscus](https://github.com/apps/giscus) app 已安装**否则访客将无法评论和回应。
 3. **Discussions** 功能已[在你的仓库中启用](https://docs.github.com/en/github/administering-a-repository/managing-repository-settings/enabling-or-disabling-github-discussions-for-a-repository)。
 
-本博客已经内置好评论组件 [src/component/Comment](https://github.com/kuizuo/blog/blob/main/src/components/Comment/index.tsx)，所以只需要在 `docusaurus.config.ts` 中设置 giscus 的配置即可。
+本博客已经内置好评论组件 [src/component/Comment](https://github.com/gaopfEditer/share-blog/blob/main/src/components/Comment/index.tsx)，所以只需要在 `docusaurus.config.ts` 中设置 giscus 的配置即可。
 
 ### 配置 giscus
 
@@ -30,7 +30,7 @@ Waline：需要搭建后端服务与数据库服务，提供评论与浏览量�
 ```html
 <script
   src="https://giscus.app/client.js"
-  data-repo="kuizuo/blog"
+  data-repo="gaopfEditer/share-blog"
   data-repo-id="MDEwOlJlcG9zaXRvcnkzOTc2Mxxxxx"
   data-category="General"
   data-category-id="DIC_kwDOF7NJDM4CPK95"
@@ -50,7 +50,7 @@ Waline：需要搭建后端服务与数据库服务，提供评论与浏览量�
 
 ```javascript title='docusaurus.config.ts' icon='logos:docusaurus'
 giscus: {
-  repo: 'kuizuo/blog',
+  repo: 'gaopfEditer/share-blog',
   repoId: 'MDEwOlJlcG9zaXRvcnkzOTc2Mxxxxx',
   category: 'General',
   categoryId: 'DIC_kwDOF7NJDM4CPK95',

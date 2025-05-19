@@ -16,15 +16,15 @@ keywords: [git]
 git remote set-url --add origin 远程仓库地址
 ```
 
-如：`git remote set-url --add origin https://git.kuizuo.cn/kuizuo/blog.git`
+如：`git remote set-url --add origin https://git.kuizuo.cn/gaopfEditer/share-blog.git`
 
 此时打开 `.git/config`，可以看到这样的配置
 
 ```bash {4}
 [remote "origin"]
-    url = https://github.com/kuizuo/blog.git
+    url = https://github.com/gaopfEditer/share-blog.git
     fetch = +refs/heads/*:refs/remotes/origin/*
-    url = https://git.kuizuo.cn/kuizuo/blog.git
+    url = https://git.kuizuo.cn/gaopfEditer/share-blog.git
 ```
 
 上述命令 git 配置添加新的 url 记录。也可手动添加、修改。

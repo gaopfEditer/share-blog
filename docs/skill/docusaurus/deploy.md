@@ -27,7 +27,7 @@ authors: kuizuo
 
 由于 Vercel 能够自动拉取仓库代码，并自行构建部署，因此通常什么配置都不需要。
 
-由于代码提交到代码仓库(github)，则需要借用 CI 服务来帮助我们完成这些任务，这里我使用了 [Github Action](https://github.com/marketplace) 来帮助我构建，构建记录可以在 [Actions · kuizuo/blog](https://github.com/kuizuo/blog/actions) 中查看。以下是我的配置文件
+由于代码提交到代码仓库(github)，则需要借用 CI 服务来帮助我们完成这些任务，这里我使用了 [Github Action](https://github.com/marketplace) 来帮助我构建，构建记录可以在 [Actions · gaopfEditer/share-blog](https://github.com/gaopfEditer/share-blog/actions) 中查看。以下是我的配置文件
 
 ```yaml title='.github/workflows/ci.yml' icon='logos:github-actions'
 name: CI

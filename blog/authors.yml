@@ -1,9 +1,19 @@
+gaopfEditer:
+  name: 长篙
+  title: 全栈 typescripter 
+  url: https://github.com/gaopfEditer
+  image_url: https://gaopf.top/img/logo.png
+  email: 1241961245@qq.com
+  socials:
+    x: gaopfEditer
+    github: gaopfEditer
+
 kuizuo:
   name: 长篙
-  title: 全栈 typescripter / 刚毕业的学生
-  url: https://github.com/kuizuo
+  title: 全栈 typescripter 
+  url: https://github.com/gaopfEditer
   image_url: https://gaopf.top/img/logo.png
-  email: hi@kuizuo.cn
+  email: 1241961245@qq.com
   socials:
-    x: kuizuo
-    github: kuizuo
+    x: gaopfEditer
+    github: gaopfEditer

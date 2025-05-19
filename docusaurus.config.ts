@@ -4,8 +4,8 @@ import { themes } from 'prism-react-renderer'
 import social from './data/social'
 import type { GiscusConfig } from './src/components/Comment'
 
-const beian = '闽ICP备2020017848号-2'
-const beian1 = '闽公网安备35021102000847号'
+const beian = '' // '闽ICP备2020017848号-2'
+const beian1 = '浙ICP备2024113995号-2' // '闽公网安备35021102000847号'
 
 const config: Config = {
   title: '长篙',
@@ -77,21 +77,21 @@ const config: Config = {
         {
           title: '学习',
           items: [
-            { label: '博客', to: 'blog' },
-            { label: '归档', to: 'blog/archive' },
+            // { label: '博客', to: 'blog' },
+            // { label: '归档', to: 'blog/archive' },
             { label: '技术笔记', to: 'docs/skill' },
             { label: '实战项目', to: 'project' },
-            { label: '前端示例', to: 'https://example.kuizuo.cn' },
+            // { label: '前端示例', to: 'https://example.kuizuo.cn' },
           ],
         },
         {
           title: '社交媒体',
           items: [
-            // { label: '关于我', to: '/about' },
+            { label: '关于我', to: '/about' },
             { label: 'GitHub', href: social.github.href },
-            { label: 'Twitter', href: social.x.href },
-            { label: '掘金', href: social.juejin.href },
-            { label: 'Discord', href: social.discord.href },
+            // { label: 'Twitter', href: social.x.href },
+            // { label: '掘金', href: social.juejin.href },
+            // { label: 'Discord', href: social.discord.href },
           ],
         },
         {
@@ -123,7 +123,7 @@ const config: Config = {
         <p style="display: inline-flex; align-items: center;"><img style="height:20px;margin-right: 0.5rem;" src="/img/police.png" alt="police" height="20"/><a href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=${
           beian1.match(/\d+/)?.[0]
         }" >${beian1}</a></p>
-        <p>Copyright © 2020 - ${new Date().getFullYear()} kuizuo. | Built with Docusaurus.</p>
+        <p>Copyright © 2020 - ${new Date().getFullYear()} gaopf.top | Built with Docusaurus.</p>
         `,
     },
     algolia: {
@@ -148,11 +148,26 @@ const config: Config = {
         },
       ],
     },
+    // <script src="https://giscus.app/client.js"
+    //         data-repo="gaopfEditer/share-blog"
+    //         data-repo-id="R_kgDOOiLTjA"
+    //         data-category="General"
+    //         data-category-id="DIC_kwDOOiLTjM4CpoD-"
+    //         data-mapping="title"
+    //         data-strict="0"
+    //         data-reactions-enabled="1"
+    //         data-emit-metadata="0"
+    //         data-input-position="bottom"
+    //         data-theme="preferred_color_scheme"
+    //         data-lang="zh-CN"
+    //         crossorigin="anonymous"
+    //         async>
+    // </script>
     giscus: {
-      repo: 'kuizuo/blog',
-      repoId: 'MDEwOlJlcG9zaXRvcnkzOTc2Mxxxxx',
+      repo: 'gaopfEditer/share-blog',
+      repoId: 'R_kgDOOiLTjA',
       category: 'General',
-      categoryId: 'DIC_kwDOF7NJDM4CPK95',
+      categoryId: 'DIC_kwDOOiLTjM4CpoD-',
       theme: 'light',
       darkTheme: 'dark',
       lang: 'zh-CN',
@@ -221,7 +236,7 @@ const config: Config = {
       {
         path: 'blog',
         editUrl: ({ locale, blogDirPath, blogPath, permalink }) =>
-          `https://github.com/kuizuo/blog/edit/main/${blogDirPath}/${blogPath}`,
+          `https://github.com/gaopfEditer/share-blog/edit/main/${blogDirPath}/${blogPath}`,
         editLocalizedFiles: false,
         blogDescription: '代码人生：编织技术与生活的博客之旅',
         blogSidebarCount: 10,
@@ -260,7 +275,7 @@ const config: Config = {
                 innerHTML: `
     (${function () {
       console.log(
-        `%c Kz Blog %c https://github.com/kuizuo/blog`,
+        `%c Gaopf Blog %c https://github.com/gaopfEditer/share-blog`,
         'color: #fff; margin: 1em 0; padding: 5px 0; background: #12affa;',
         'margin: 1em 0; padding: 5px 0; background: #efefef;',
       )
