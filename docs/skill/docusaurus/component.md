@@ -2,7 +2,7 @@
 id: docusaurus-component
 slug: /docusaurus-component
 title: 自定义组件
-authors: kuizuo
+authors: gaopf
 description: 介绍如何自定义 docusaurus 组件
 ---
 

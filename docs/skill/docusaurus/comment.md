@@ -2,7 +2,7 @@
 id: docusaurus-comment
 slug: /docusaurus-comment
 title: 评论服务
-authors: kuizuo
+authors: gaopf
 ---
 
 这里推荐两种评论服务
@@ -68,3 +68,7 @@ giscus: {
 目前比较流行的博客评论系统还有 waline，它可以提供评论与浏览量服务，由于需要搭配后端服务与数据库服务，所以在配置方面会比 giscus 来的麻烦，但它无需 github Discussions，所以也是绝大多数博客作者的标配。
 
 关于如何配置，参见官方 [快速上手 | Waline](https://waline.js.org/guide/get-started.html)
+
+:::warning docusaurus.config.ts配置中的title不要配置生僻汉字，否则giscus的评论请求报404，如长篙会被编码解析为长眠，这样就不能获取到评论列表
+
+:::

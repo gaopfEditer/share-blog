@@ -2,7 +2,7 @@
 id: prettier
 slug: /prettier
 title: prettier
-authors: kuizuo
+authors: gaopf
 keywords: ['code-specification', 'prettier']
 ---
 

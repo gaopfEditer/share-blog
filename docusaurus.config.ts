@@ -8,7 +8,7 @@ const beian = '' // '闽ICP备2020017848号-2'
 const beian1 = '浙ICP备2024113995号-2' // '闽公网安备35021102000847号'
 
 const config: Config = {
-  title: '长篙',
+  title: 'gaopf',
   url: 'https://gaopf.top',
   baseUrl: '/',
   favicon: 'img/favicon.ico',
@@ -57,18 +57,18 @@ const config: Config = {
         { label: '项目', position: 'right', to: 'project' },
         { label: '友链', position: 'right', to: 'friends' },
         // { label: '关于', position: 'right', to: 'about' },
-        {
-          label: '更多',
-          position: 'right',
-          items: [
-            // { label: '归档', to: 'blog/archive' },
-            { label: '工具推荐', to: 'docs/tools' },
-          ],
-        },
-        {
-          type: 'localeDropdown',
-          position: 'right',
-        },
+        // {
+        //   label: '更多',
+        //   position: 'right',
+        //   items: [
+        //     // { label: '归档', to: 'blog/archive' },
+        //     { label: '工具推荐', to: 'docs/tools' },
+        //   ],
+        // },
+        // {
+        //   type: 'localeDropdown',
+        //   position: 'right',
+        // },
       ],
     },
     footer: {
@@ -81,7 +81,7 @@ const config: Config = {
             // { label: '归档', to: 'blog/archive' },
             { label: '技术笔记', to: 'docs/skill' },
             { label: '实战项目', to: 'project' },
-            // { label: '前端示例', to: 'https://example.kuizuo.cn' },
+            // { label: '前端示例', to: 'https://example.gaopf.top' },
           ],
         },
         {
@@ -97,11 +97,11 @@ const config: Config = {
         {
           title: '网站',
           items: [
-            { label: 'js反混淆', to: 'https://js-deobfuscator.kuizuo.cn' },
+            { label: 'js反混淆', to: 'https://js-deobfuscator.gaopf.top' },
             { label: 'cyberChef', to: 'https://gchq.github.io/CyberChef' },
-            { label: 'api服务', to: 'https://api.kuizuo.cn' },
-            { label: '便民服务', to: 'https://service.kuizuo.cn' },
-            { label: '站点监控', to: 'https://uptime.kuizuo.cn' },
+            { label: 'api服务', to: 'https://api.gaopf.top' },
+            { label: '便民服务', to: 'https://service.gaopf.top' },
+            { label: '站点监控', to: 'https://uptime.gaopf.top' },
           ],
         },
         {

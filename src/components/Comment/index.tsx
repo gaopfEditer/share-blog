@@ -21,7 +21,6 @@ export default function Comment(): JSX.Element {
   const themeConfig = useThemeConfig() as ThemeConfig & { giscus: GiscusConfig }
   const { i18n } = useDocusaurusContext()
 
-  console.log(7777777123,themeConfig.giscus)
   // merge default config
   const giscus = { ...defaultConfig, ...themeConfig.giscus }
 

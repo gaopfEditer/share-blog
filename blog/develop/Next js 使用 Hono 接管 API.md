@@ -2,18 +2,18 @@
 slug: nextjs-with-hono
 title: Next.js 使用 Hono 接管 API
 date: 2024-10-02
-authors: kuizuo
+authors: gaopf
 tags: [nextjs, honojs]
 keywords: [nextjs, honojs]
 description: 这篇文章详细介绍了如何在 Next.js 项目中使用 Hono 框架来接管 API 路由，以解决 Next.js 自带 API Routes 功能的限制。并探讨了集成步骤、数据验证、错误处理、RPC功能等方面，并提供了实用的代码示例和优化建议。
-image: https://img.kuizuo.cn/2024/1002213046-nextjs-with-hono.png
+image: https://img.gaopf.top/2024/1002213046-nextjs-with-hono.png
 ---
 
 直入正题，Next.js 自带的 API Routes (现已改名为 [**Route Handlers**](https://nextjs.org/docs/app/building-your-application/routing/route-handlers)) 异常难用，例如当你需要编写一个 RESTful API 时，尤为痛苦
 
 <!-- truncate -->
 
-![image.png](https://img.kuizuo.cn/2024%2F0930171329-image.png)
+![image.png](https://img.gaopf.top/2024%2F0930171329-image.png)
 
 这还没完，当你需要数据验证、错误处理、中间件等等功能，又得花费不小的功夫，所以 Next.js 的 API Route 更多是为你的全栈项目编写一些简易的 API 供外部服务，这也可能是为什么 Next.js 宁可设计 [Server Action](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations) 也不愿为 API Route 提供传统后端的能力。
 
@@ -47,7 +47,7 @@ export const DELETE = handle(app)
 
 一开始的 User CRUD 例子，则可以将其**归属到一个文件内**下，这里我不建议将后端业务代码放在 app/api 下，因为 Next.js 会自动扫描 app 下的文件夹，这可能会导致不必要的热更新，并且也不易于服务相关代码的拆分。而是在根目录下创建名为 server 的目录，并将有关后端服务的工具库(如 db、redis、zod)放置该目录下以便调用。
 
-![image.png](https://img.kuizuo.cn/2024%2F0930171342-imageundefined1.png)
+![image.png](https://img.gaopf.top/2024%2F0930171342-imageundefined1.png)
 
 至此 next.js 的 api 接口都将由 hono.js 来接管，接下来只需要按照 Hono 的开发形态便可。
 
@@ -89,7 +89,7 @@ export default app
 
 但此时触发数据验证失败，响应的结果令人不是很满意。下图为访问 `/api/todo/xxx` 的响应结果（其中 xxx 不为 cuid 格式，因此抛出数据验证异常)
 
-![image.png](https://img.kuizuo.cn/2024%2F0930171510-imageundefined2.png)
+![image.png](https://img.gaopf.top/2024%2F0930171510-imageundefined2.png)
 
 所返回的响应体是完整的 zodError 内容，并且状态码为 400
 
@@ -162,7 +162,7 @@ app.onError(handleError)
 
 这样就将错误统一处理，响应体也自定义，且后续自定义业务错误也同样如此。
 
-![](https://img.kuizuo.cn/2024%2F1003095801-20241003095800.png)
+![](https://img.gaopf.top/2024%2F1003095801-20241003095800.png)
 
 :::note 顺带一提
 
@@ -180,7 +180,7 @@ Hono 有个特性我很喜欢也很好用，可以像 [TRPC](https://trpc.io/) �
 
 还是以 User CRUD 的代码为例，不难发现 `.get` `.post` `.put` 都是以链式调用的写法来写的，一旦拆分后，此时接口还是能够调用，但这将会丢失此时路由对应的类型，导致 client 无法使用获取正常类型，使用链式调用的 app 实例化对象则正常。
 
-![image.png](https://img.kuizuo.cn/2024%2F0930171730-imageundefined3.png)
+![image.png](https://img.gaopf.top/2024%2F0930171730-imageundefined3.png)
 
 ### 替换原生 Fetch 库
 
@@ -375,7 +375,7 @@ app.doc('/api/doc', {
 app.get('/api/ui', swaggerUI({ url: '/api/doc' }))
 ```
 
-![image.png](https://img.kuizuo.cn/2024%2F0930171730-imageundefined4.png)
+![image.png](https://img.gaopf.top/2024%2F0930171730-imageundefined4.png)
 
 从目前来看，OpenAPI 文档的生成仍面临挑战。我们期待 Hono 未来能推出一个功能，可以根据 app 下的路由自动生成接口文档（相关[Issue](https://github.com/honojs/hono/issues/2970)已存在）。
 

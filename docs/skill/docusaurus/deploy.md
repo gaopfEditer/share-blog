@@ -2,7 +2,7 @@
 id: docusaurus-deploy
 slug: /docusaurus-deploy
 title: 部署
-authors: kuizuo
+authors: gaopf
 ---
 
 我之前使用 [Vercel](https://vercel.com) 一把梭，无需任何配置。这样我就只需要专注输出内容即可。这是我当时使用 Vercel 部署的文章 [Vercel 部署个人博客](/blog/vercel-deploy-blog)
@@ -15,7 +15,7 @@ authors: kuizuo
 
 这样我国内访问就是访问国内的 CDN，访问国外访问就是 Vercel 的 CDN，这样针对不同的地区的网络都能有一个不错的访问速度，可以到 [Ping.cn:网站测速-ping 检测](https://www.ping.cn/) 中测试测试你的站点访问速度如何。
 
-以下是我的网站测速结果，也可通过访问 [kuizuo.cn 在全国各地区网络速度测试情况-Ping.cn](https://www.ping.cn/http/kuizuo.cn) 在线查看
+以下是我的网站测速结果，也可通过访问 [gaopf.top 在全国各地区网络速度测试情况-Ping.cn](https://www.ping.cn/http/gaopf.top) 在线查看
 
 ![image-20221204161146327](https://img.gaopf.top/LightPicture/2025/05/e2b2498d8bb123cd.jpg)
 
@@ -71,7 +71,7 @@ jobs:
           SOURCE: 'build'
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
           REMOTE_USER: 'root'
-          TARGET: '/opt/1panel/apps/openresty/openresty/www/sites/kuizuo.cn/index'
+          TARGET: '/opt/1panel/apps/openresty/openresty/www/sites/gaopf.top/index'
 ```
 
 等待 CI 将最终构建的产物通过 rsync 放到自己的服务器上，便完成了整套部署的流程。

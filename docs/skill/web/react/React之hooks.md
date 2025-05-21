@@ -3,7 +3,7 @@ id: react-hooks
 slug: /react-hooks
 title: React之hooks
 date: 2022-09-07
-authors: kuizuo
+authors: gaopf
 tags: [react, hook]
 keywords: [react, hook]
 ---
@@ -146,7 +146,7 @@ export default function App() {
 
   React.useEffect(() => {
     async function fetchData() {
-      const data = await (await fetch('https://api.kuizuo.cn/api/one')).text()
+      const data = await (await fetch('https://api.gaopf.top/api/one')).text()
       console.log(data)
       setData(data)
     }

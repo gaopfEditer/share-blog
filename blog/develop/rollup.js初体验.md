@@ -2,10 +2,10 @@
 slug: rollup-js-experience
 title: rollup.js 初体验
 date: 2022-10-18
-authors: kuizuo
+authors: gaopf
 tags: [rollup, webpack, utils]
 keywords: [rollup, webpack, utils]
-image: https://img.kuizuo.cn/202312270253535.pnghttps://img.kuizuo.cn/202312270253535.png
+image: https://img.gaopf.top/202312270253535.pnghttps://img.gaopf.top/202312270253535.png
 ---
 
 # rollup.js 初体验
