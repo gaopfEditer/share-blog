@@ -7,9 +7,9 @@ authors: kuizuo
 
 ## docusaurus.config.ts
 
-`docusaurus.config.ts` 位于你的网站的根目录，包含了你的站点的配置信息。
+`docusaurus.config.ts` 主要配置文件。
 
-在这里可以修改 logo，站点名(title)，作者名，顶部的公告(announcementBar)，导航栏(navbar)，底部导航(footer)等等。
+可修改 logo，站点名(title)，作者名，顶部的公告(announcementBar)，导航栏(navbar)，底部导航(footer)等等。
 
 ```typescript title='docusaurus.config.ts' icon='logos:docusaurus'
 const config: Config = {
@@ -33,7 +33,22 @@ const config: Config = {
 export default config
 ```
 
-同时绝大部分的配置信息都可以放在这里，例如搜索(algolia)，评论(giscus)，社交链接(socials)等等。这些配置都可以通过docusaurus内置的hook(useThemeConfig、useDocusaurusContext)来获取。
+同时绝大部分配置信息都在这里，同时可以增加自定义配置信息，例如搜索(algolia)，评论(giscus)，社交链接(socials)等等。这些配置都可以通过docusaurus内置的hook(useThemeConfig、useDocusaurusContext)来获取。
+
+```typescript title='docusaurus.config.ts' 
+  // 配置giscus
+  giscus: {
+      repo: 'gaopfEditer/share-blog',
+      repoId: 'R_kgDOOiLTjA',
+      category: 'General',
+      ...
+  }
+
+  // 可以使用钩子获取到这些参数
+  const themeConfig = useThemeConfig() as ThemeConfig & { giscus: GiscusConfig }
+
+  const giscus = { ...defaultConfig, ...themeConfig.giscus }
+```
 
 完整的配置信息说明 [docusaurus.config.ts | Docusaurus](https://docusaurus.io/zh-CN/docs/api/docusaurus-config)
 

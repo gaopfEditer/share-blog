@@ -19,7 +19,6 @@ authors: kuizuo
 
 关于申请 Algolia DocSearch 在文档中有详细介绍，主要是要申请麻烦，需要等待邮箱，并且还需要回复内容给对方进行确认。所以免费托管的 DocSearch 条件是，比较苛刻的，但申请完几乎是一劳永逸，也是我非常推荐的。如果申请成功后就可以在 [Crawler Admin Console](https://crawler.algolia.com/admin/crawlers) 中查看
 
-![image-20220627232545640](https://img.kuizuo.cn/image-20220627232545640.png)
 
 然后将得到 algolia 的 appId，apiKey，indexName 填写到 `docusaurus.config.ts` 中即可。
 
@@ -33,7 +32,6 @@ algolia: {
 
 爬取完毕后还会定时发送到你邮箱
 
-![image-20230219144035031](https://img.kuizuo.cn/image-20230219144035031.png)
 
 ### 方案2
 
@@ -43,9 +41,9 @@ algolia: {
 
 首先去申请 [Algolia](https://www.algolia.com/) 账号，然后在左侧 indices 创建索引，在 API Keys 中获取 Application ID 和 API Key（注意，有两个 API KEY）
 
-![image-20210821230135749](https://img.kuizuo.cn/image-20210821230135749.png)
+![image-20210821230135749](https://img.gaopf.top/LightPicture/2025/05/4786e20b0c902179.jpg)
 
-![image-20210821230232837](https://img.kuizuo.cn/image-20210821230232837.png)
+![image-20210821230232837](https://img.gaopf.top/LightPicture/2025/05/35f2cf8370cf8daf.jpg)
 
 填入到 `docusaurus.config.ts` 中的 API KEY 是 **Search-Only API Key**
 
