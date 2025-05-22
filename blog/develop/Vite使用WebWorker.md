@@ -2,7 +2,7 @@
 slug: vite-webworker
 title: Vite使用WebWorker
 date: 2022-07-26
-authors: gaopf
+authors: gaopfEditer
 tags: [vite, webworker]
 keywords: [vite, webworker]
 ---

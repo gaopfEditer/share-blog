@@ -2,30 +2,28 @@
 id: docusaurus-deploy
 slug: /docusaurus-deploy
 title: 部署
-authors: gaopf
+authors: gaopfEditerEditer
 ---
 
-我之前使用 [Vercel](https://vercel.com) 一把梭，无需任何配置。这样我就只需要专注输出内容即可。这是我当时使用 Vercel 部署的文章 [Vercel 部署个人博客](/blog/vercel-deploy-blog)
+本文档介绍 Docusaurus 博客的部署方案。之前采用 [Vercel](https://vercel.com) 进行部署，无需额外配置，便于专注于内容创作。相关部署经验可参考文章 [Vercel 部署个人博客](/blog/vercel-deploy-blog)。
 
-但如今，`vercel.app` 被 DNS 污染，即被墙了，导致国内无法访问，虽然使用有自己的域名解析到 Vercel 上也可能访问，但被墙了，也就意味着国内 DNS 的解析速度必然有所下降，导致站点访问速度有所下降。
+由于 `vercel.app` 域名受到 DNS 污染，导致国内访问受限。虽然可以通过自定义域名解析到 Vercel 实现访问，但受限于 DNS 解析速度，国内访问体验会受到影响。
 
-加上我想有更好的访客体验，于是我决定采用国内国外不同的解析方式来加快访问。
+为提升访问体验，本文采用国内外差异化解析方案：
 
-首先在线路类型中，分别针对境内和境外做了不同的记录值，境内使用国内的 CDN 服务，而境外就使用 Vercel。
+1. 在 DNS 配置中，针对境内和境外分别设置不同的记录值
+2. 境内访问使用国内 CDN 服务
+3. 境外访问使用 Vercel CDN
 
-这样我国内访问就是访问国内的 CDN，访问国外访问就是 Vercel 的 CDN，这样针对不同的地区的网络都能有一个不错的访问速度，可以到 [Ping.cn:网站测速-ping 检测](https://www.ping.cn/) 中测试测试你的站点访问速度如何。
-
-以下是我的网站测速结果，也可通过访问 [gaopf.top 在全国各地区网络速度测试情况-Ping.cn](https://www.ping.cn/http/gaopf.top) 在线查看
+通过 [Ping.cn:网站测速-ping 检测](https://www.ping.cn/) 可以测试站点访问速度。测试结果可通过 [gaopf.top 在全国各地区网络速度测试情况-Ping.cn](https://www.ping.cn/http/gaopf.top) 在线查看。
 
 ![image-20221204161146327](https://img.gaopf.top/LightPicture/2025/05/e2b2498d8bb123cd.jpg)
 
-果然，花钱了就是不一样。
-
 ## 持续集成
 
-由于 Vercel 能够自动拉取仓库代码，并自行构建部署，因此通常什么配置都不需要。
+Vercel 支持自动拉取仓库代码并完成构建部署，通常无需额外配置。
 
-由于代码提交到代码仓库(github)，则需要借用 CI 服务来帮助我们完成这些任务，这里我使用了 [Github Action](https://github.com/marketplace) 来帮助我构建，构建记录可以在 [Actions · gaopfEditer/share-blog](https://github.com/gaopfEditer/share-blog/actions) 中查看。以下是我的配置文件
+对于代码仓库（GitHub）的提交，需要借助 CI 服务完成构建任务。本文使用 [Github Action](https://github.com/marketplace) 进行构建，构建记录可在 [Actions · gaopfEditer/share-blog](https://github.com/gaopfEditer/share-blog/actions) 查看。配置文件如下：
 
 ```yaml title='.github/workflows/ci.yml' icon='logos:github-actions'
 name: CI
@@ -74,12 +72,12 @@ jobs:
           TARGET: '/opt/1panel/apps/openresty/openresty/www/sites/gaopf.top/index'
 ```
 
-等待 CI 将最终构建的产物通过 rsync 放到自己的服务器上，便完成了整套部署的流程。
+CI 服务将构建产物通过 rsync 同步到服务器，完成部署流程。
 
-当一切都配置好了之后，我只需要将代码推送到远程仓库上，Github Action 与 Vercel 分别完成它们所该做的任务。等待片刻，再次访问站点，刚刚提交的代码就成功生效了。
+配置完成后，只需将代码推送到远程仓库，Github Action 与 Vercel 将自动执行各自任务。等待片刻后，访问站点即可看到更新内容。
 
-## 没有域名和服务器该怎么部署？
+## 无域名和服务器部署方案
 
-当然了上述只是我的配置方案，有许多伙伴可能没有自己的域名或者自己的服务器，就想着白嫖，那么这里目前我只能推荐 [Netlify](https://www.netlify.com/)，然后通过 netlify 的二级域名如 kuizuo-blog.netlify.app 来进行访问。
+对于没有域名或服务器的用户，推荐使用 [Netlify](https://www.netlify.com/) 服务，可通过 netlify 提供的二级域名（如 kuizuo-blog.netlify.app）访问。
 
-我个人还是非常建议去弄一个属于自己的域名，通过 Vercel 的自定义域名就可以访问。并且由于自己的域名解析的不是大陆的服务器（Vercel 的服务器就不是国内大陆的），因此无需备案这一更繁琐的步骤。
+建议申请个人域名，通过 Vercel 的自定义域名功能进行访问。由于域名解析指向非大陆服务器（Vercel 服务器位于境外），因此无需进行备案。

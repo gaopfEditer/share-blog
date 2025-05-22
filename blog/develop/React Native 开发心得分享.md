@@ -2,7 +2,7 @@
 slug: react-native-develop-experience
 title: React Native 开发心得分享
 date: 2024-05-14
-authors: gaopf
+authors: gaopfEditer
 tags: [react native, 原生, 心得分享]
 keywords: [react native, 原生, 心得分享]
 image: https://img.gaopf.top/2024/0514121158-react-native.png

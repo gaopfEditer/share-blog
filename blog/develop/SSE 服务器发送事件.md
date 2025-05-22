@@ -2,7 +2,7 @@
 slug: sse-server-send-event
 title: SSE 服务器发送事件
 date: 2022-03-16
-authors: gaopf
+authors: gaopfEditer
 tags: [http]
 keywords: [http]
 ---

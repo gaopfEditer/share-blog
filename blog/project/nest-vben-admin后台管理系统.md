@@ -2,7 +2,7 @@
 slug: nest-vben-admin
 title: nest-vben-admin后台管理系统
 date: 2022-05-08
-authors: gaopf
+authors: gaopfEditer
 tags: [project, admin, vue, nest]
 keywords: [project, admin, vue, nest]
 description: 一款基于 NestJs + TypeScript + TypeORM + Redis + MySql + Vben Admin 编写的一款前后端分离的权限管理系统

@@ -2,7 +2,7 @@
 id: editorconfig
 slug: /editorconfig
 title: editorconfig
-authors: gaopf
+authors: gaopfEditer
 keywords: ['code-specification', 'editorconfig']
 ---
 

@@ -3,7 +3,7 @@ id: react-hooks
 slug: /react-hooks
 title: React之hooks
 date: 2022-09-07
-authors: gaopf
+authors: gaopfEditer
 tags: [react, hook]
 keywords: [react, hook]
 ---

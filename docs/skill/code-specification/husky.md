@@ -2,7 +2,7 @@
 id: husky
 slug: /husky
 title: husky
-authors: gaopf
+authors: gaopfEditer
 keywords: ['code-style', 'husky']
 ---
 

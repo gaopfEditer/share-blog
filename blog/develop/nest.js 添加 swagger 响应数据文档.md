@@ -2,7 +2,7 @@
 slug: /nest-swagger-response-data
 title: nest.js 添加 swagger 响应数据文档
 date: 2023-07-18
-authors: gaopf
+authors: gaopfEditer
 tags: [nest, swagger]
 keywords: [nest, swagger]
 description: nest.js 添加 swagger 响应数据文档

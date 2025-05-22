@@ -3,7 +3,7 @@ id: git-push-multiple-remote-repos
 slug: git-push
 title: git 推送多个远程仓库
 date: 2023-11-09
-authors: gaopf
+authors: gaopfEditer
 tags: [git]
 keywords: [git]
 ---

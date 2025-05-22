@@ -2,7 +2,7 @@
 id: docusaurus-plugin
 slug: /docusaurus-plugin
 title: 插件
-authors: gaopf
+authors: gaopfEditer
 ---
 
 在 `docusaurus.config.ts` 下的 plugins，可以看到所有插件以及插件配置。如下所示

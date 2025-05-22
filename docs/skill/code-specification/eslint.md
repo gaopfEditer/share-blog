@@ -2,7 +2,7 @@
 id: eslint
 slug: /eslint
 title: eslint
-authors: gaopf
+authors: gaopfEditer
 keywords: ['code-specification', 'eslint']
 ---
 

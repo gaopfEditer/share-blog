@@ -1,0 +1,15 @@
+// 变量
+$primary-color: #12AFFA;
+$text-color: #333;
+$background-color: #fff;
+
+
+.menu__link {
+  font-size: 0.9rem;
+}
+
+.menu__caret:before {
+  background: var(--ifm-menu-link-sublist-icon) 50% / 1.2rem 1.2rem;
+}
+
+

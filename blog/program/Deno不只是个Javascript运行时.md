@@ -2,7 +2,7 @@
 slug: deno-is-not-only-a-javascript-runtime
 title: Deno 不只是个 Javascript 运行时
 date: 2023-01-20
-authors: gaopf
+authors: gaopfEditer
 tags: [deno, node, javascript, typescript]
 keywords: [deno, node, javascript, typescript]
 image: https://img.gaopf.top/202312270248371.png

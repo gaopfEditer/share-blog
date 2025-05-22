@@ -2,7 +2,7 @@
 slug: nextjs-with-hono
 title: Next.js 使用 Hono 接管 API
 date: 2024-10-02
-authors: gaopf
+authors: gaopfEditer
 tags: [nextjs, honojs]
 keywords: [nextjs, honojs]
 description: 这篇文章详细介绍了如何在 Next.js 项目中使用 Hono 框架来接管 API 路由，以解决 Next.js 自带 API Routes 功能的限制。并探讨了集成步骤、数据验证、错误处理、RPC功能等方面，并提供了实用的代码示例和优化建议。

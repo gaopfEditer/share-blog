@@ -2,7 +2,7 @@
 slug: with-prisma-dont-use-typeorm
 title: 有了 Prisma 就别用 TypeORM 了
 date: 2024-01-13
-authors: gaopf
+authors: gaopfEditer
 tags: [orm, prisma, typeorm]
 keywords: [orm, prisma, typeorm]
 image: https://img.gaopf.top/2024/0113174834-202401131748137.png

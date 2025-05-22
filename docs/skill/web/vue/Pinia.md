@@ -3,7 +3,7 @@ id: pinia
 slug: /pinia
 title: Pinia
 date: 2020-10-23
-authors: gaopf
+authors: gaopfEditer
 tags: [vue, pinia]
 keywords: [vue, pinia]
 ---

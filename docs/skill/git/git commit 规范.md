@@ -3,7 +3,7 @@ id: git-conmit-specification
 slug: git-conmit-specification
 title: git commit 规范
 date: 2021-08-31
-authors: gaopf
+authors: gaopfEditer
 tags: [git, commit]
 keywords: [git, commit]
 ---

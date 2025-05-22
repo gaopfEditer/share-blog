@@ -195,7 +195,7 @@ const config: Config = {
         },
         blog: false,
         theme: {
-          customCss: ['./src/css/custom.css', './src/css/tweet-theme.css'],
+          customCss: ['./src/css/base.scss', './src/css/custom.css', './src/css/tweet-theme.css'],
         },
         sitemap: {
           priority: 0.5,
@@ -210,6 +210,7 @@ const config: Config = {
   ],
   plugins: [
     'docusaurus-plugin-image-zoom',
+    'docusaurus-plugin-sass',
     '@docusaurus/plugin-ideal-image',
     // ['docusaurus-plugin-baidu-tongji', { token: 'c9a3849aa75f9c4a4e65f846cd1a5155' }],
     [

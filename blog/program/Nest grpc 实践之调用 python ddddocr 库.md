@@ -2,7 +2,7 @@
 slug: nest-grpc-ocr
 title: Nest grpc 实践之调用 python ddddocr 库
 date: 2023-07-29
-authors: gaopf
+authors: gaopfEditer
 tags: [nest, grpc, python, ddddocr]
 keywords: [nest, grpc, python, ddddocr]
 description: 本文将使用 nest 通过 grpc 的方式来调用 python 的 ddddocr 库来识别验证码。

@@ -2,7 +2,7 @@
 slug: rust-wasm-md5
 title: Rust实现MD5加密并打包成WebAssembly调用
 date: 2023-01-04
-authors: gaopf
+authors: gaopfEditer
 tags: [rust, wasm]
 keywords: [rust, wasm]
 image: https://img.gaopf.top/202312270251453.png

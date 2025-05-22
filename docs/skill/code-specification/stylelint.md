@@ -2,7 +2,7 @@
 id: stylelint
 slug: /stylelint
 title: stylelint
-authors: gaopf
+authors: gaopfEditer
 keywords: ['code-specification', 'stylelint']
 ---
 

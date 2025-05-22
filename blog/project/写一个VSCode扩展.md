@@ -2,7 +2,7 @@
 slug: vscode-extension
 title: 写一个 VSCode 扩展
 date: 2022-07-11
-authors: gaopf
+authors: gaopfEditer
 tags: [vscode, plugin, extension, develop]
 keywords: [vscode, plugin, extension, develop]
 description: 编写个人定制化的 VSCode 扩展，并将其发布到应用商店中。

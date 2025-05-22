@@ -2,7 +2,7 @@
 id: npmrc
 slug: /npmrc
 title: npmrc
-authors: gaopf
+authors: gaopfEditer
 keywords: ['code-specification', 'npmrc']
 ---
 
