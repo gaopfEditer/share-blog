@@ -8,7 +8,7 @@ keywords: [react native, 原生, 心得分享]
 image: https://img.gaopf.top/2024/0514121158-react-native.png
 ---
 
-最近研究了一下 React Native(简称RN)，并用它作为毕设项目（一个仿小红书的校园社交应用）。经过一段时间的折腾，对 RN 生态有了一些了解，是时候可以分享一些心得了。
+最近研究了一下 React Native(简称RN)，并用它做了一个小项目——仿小红书的校园社交应用。经过一段时间的折腾，对 RN 生态有了一些了解，是时候可以分享一些心得了。
 
 <!-- truncate -->
 
