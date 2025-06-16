@@ -8,6 +8,7 @@ tags: [react, features]
 keywords: [react, features]
 ---
 
+
 # React 18 新特性
 
 ## 3.4.1 Automatic Batching

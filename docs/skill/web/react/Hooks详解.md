@@ -8,9 +8,9 @@ tags: [react, hooks]
 keywords: [react, hooks]
 ---
 
+
 # React Hooks 详解
 
-Hooks 是 React 16.8 以后新增的钩子 API。
 
 目的：增加代码的可复用性，逻辑性，弥补无状态组件没有生命周期，没有数据管理状态 state 的缺陷。
 
