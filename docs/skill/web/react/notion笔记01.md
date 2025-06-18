@@ -1,14 +1,13 @@
 ---
-id: notion笔记
-slug: notion笔记
-title: Notion笔记
+id: notion笔记111
+slug: notion笔记111
+title: Notion笔记111
 date: 2024-03-21
 authors: [kz]
 tags: [notion, 笔记, 知识管理]
 keywords: [notion, 笔记, 知识管理]
 ---
 
-#### 提升物质：专业技能、职场副业、工作投资![💹]
 
 <details>
   <summary>行业 | 市场 🌐</summary>
@@ -360,7 +359,7 @@ keywords: [notion, 笔记, 知识管理]
       <li><strong>项目经理必看</strong>：<a href="https://www.xiaohongshu.com/discovery/item/62e8a3a50000000011011613?share_from_user_hidden=true&type=normal&xhsshare=CopyLink&appuid=591f1e7e50c4b4587b9dd97d&apptime=1659458810">项目立项九个原则</a></li>
     </ul>
     <p><strong>项目管理参考图集：</strong></p>
-    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+    <div>
       <img src="https://s3-us-west-2.amazonaws.com/secure.notion-static.com/497f8b39-3680-48be-b133-c79949fc7256/10005.jpg" alt="10005.jpg" width="200"/>
       <img src="https://s3-us-west-2.amazonaws.com/secure.notion-static.com/9bb902ce-809b-445f-b7ff-a22d2e7dc45a/10006.jpg" alt="10006.jpg" width="200"/>
       <img src="https://s3-us-west-2.amazonaws.com/secure.notion-static.com/5f3b95a0-2ee7-4e97-a682-2e1a0ae33cf4/10007.jpg" alt="10007.jpg" width="200"/>

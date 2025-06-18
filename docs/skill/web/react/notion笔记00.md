@@ -1,7 +1,7 @@
 ---
-id: notion笔记
-slug: notion笔记
-title: Notion笔记
+id: notion笔记000
+slug: notion笔记000
+title: Notion笔记000
 date: 2024-03-21
 authors: [kz]
 tags: [notion, 笔记, 知识管理]
@@ -9,8 +9,6 @@ keywords: [notion, 笔记, 知识管理]
 ---
 
 
-
-#### 提升认知：信息输入、知识管理、个人成长🧠
 
 
 <details>
@@ -360,7 +358,7 @@ keywords: [notion, 笔记, 知识管理]
 <details>
   <summary>「Grow Up With You」指路人系列 🙆‍♀️</summary>
   <div>
-    <aside style="background-color: #f0f0f0; padding: 10px; border-radius: 5px;">
+    <aside>
       💡 世上没有任何一人是绝对善恶，择善而从。
     </aside>
     <ul>
