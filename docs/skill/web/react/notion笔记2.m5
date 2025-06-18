@@ -1,0 +1,109 @@
+---
+id: react-hooks-detail1
+slug: /react-hooks-detail1
+title: ♥ React Hooks 详解
+date: 2022-09-07
+authors: gaopfEditer
+tags: [react, hooks]
+keywords: [react, hooks]
+---
+
+真是打开一个新世界，后续完善一个知识社区 for 国内（禁止意识形态问题）
+
+#### 提升效率：用 好工具、用好 工具![🔨]()
+<details>
+        <summary>心智提升 | 意识秩序 | 情绪维稳 | 自我了解 | 降低精神熵 💓</summary>
+        <div>
+          {/* 小提示 */}
+          <aside style={{backgroundColor: '#f0f0f0', padding: '10px', borderRadius: '5px'}}>
+            💡 心理学对个人的意义：<br />
+            1. 是更了解自己当下痛苦/烦恼/压抑的根源。<br />
+            2. 是如何在现有的条件和状态下，规划更好的未来。
+          </aside>
+          <aside style={{backgroundColor: '#f0f0f0', padding: '10px', borderRadius: '5px', marginTop: '10px'}}>
+            💡 当你有能力改变自己处境的时候，就不要再去扮演受害者的角色了。
+          </aside>
+          {/* 折叠内容 */}
+          <ul>
+            <li><strong>心态成长</strong>：<a href="https://www.xiaohongshu.com/discovery/item/61ea6c64000000002103eda4?share_from_user_hidden=true&xhsshare=WeixinSession&appuid=591f1e7e50c4b4587b9dd97d&apptime=1653392884">李健：三十难立</a>：成功晚来一些更好，任何时候都不要卑微、也不要自大
+            </li>
+            <li><strong>持续动力</strong>：<a href="http://wufazhuce.com/question/3427">如何让自己一直保持前进的动力？</a> - 「ONE · 一个」问答
+            </li>
+            <li><strong>处理失误</strong>：<a href="https://www.xiaohongshu.com/discovery/item/626794f700000000010241a9?share_from_user_hidden=true&xhsshare=WeixinSession&appuid=591f1e7e50c4b4587b9dd97d&apptime=1651425498">大大方方地处理自己的失误和错误</a></li>
+            <li><strong>情绪管理</strong>：<a href="https://www.xiaohongshu.com/discovery/item/626d0456000000002103520d?share_from_user_hidden=true&xhsshare=WeixinSession&appuid=591f1e7e50c4b4587b9dd97d&apptime=1651422814">不要在公开场合自我批评</a></li>
+            <li><strong>表达方式</strong>：<a href="https://www.xiaohongshu.com/discovery/item/626f0f3a000000000102f3d8?share_from_user_hidden=true&xhsshare=WeixinSession&appuid=591f1e7e50c4b4587b9dd97d&apptime=1652082677">学会低声慢速说话</a></li>
+            <li><strong>嘴笨反应慢推荐书单</strong>：
+              <ol>
+                <li><strong>《学会提问》</strong>：批判性思维入门经典。新版新增写作与演讲应用、图表辅助理解。</li>
+                <li><strong>《沟通的艺术》</strong>：心理学教授力荐，图文并茂，幽默风趣。</li>
+                <li><strong>《人性的弱点全集》</strong>：借助弱点找到闪光点，提升人际平和度。</li>
+                <li><strong>《掌控谈话》</strong>：职场沟通、家庭关系都能用到的实用技巧。</li>
+                <li><strong>《高效演讲》</strong>：不只是演讲，更是建立联系的艺术。</li>
+              </ol>
+            </li>
+            <li><strong>软弱印象成因</strong>：
+              <p>你是怎样给人留下软弱可欺的印象的？</p>
+              <ol>
+                <li>别人拒绝你轻描淡写，而你拒绝别人时却觉得自己犯了错。</li>
+                <li>帮别人比做自己的事还小心谨慎，甚至视为本分。</li>
+                <li>害怕冷场，总是主动找话题，微信聊天没秒回也会愧疚。</li>
+                <li>不敢表露坏情绪，怕负能量影响他人。</li>
+                <li>借钱给别人不敢谈还钱的事。</li>
+                <li>网购不满意也不敢退货。</li>
+                <li>极度敏感，害怕得罪人，评论前反复斟酌措辞。</li>
+                <li>朋友圈发多了怕打扰别人，经常撤回或秒删。</li>
+              </ol>
+            </li>
+            <li><strong>如何改变</strong>：<a href="https://www.xiaohongshu.com/discovery/item/625823f2000000000102483a?share_from_user_hidden=true&xhsshare=WeixinSession&appuid=591f1e7e50c4b4587b9dd97d&apptime=1652633334">性格软的人如何变强</a>
+              <ul>
+                <li>没事不要傻笑，底气不足的笑会暴露脆弱</li>
+                <li>说话语气自然，抬头挺胸走路，展现气场</li>
+                <li>拒绝要坚定，理由简短有力，不解释过多</li>
+                <li>有主见，别轻易征求意见</li>
+                <li>不随便夸奖不了解的人，避免被误认为谄媚</li>
+                <li>讲话语速不要太快，贵人语迟</li>
+                <li>姿态放高，不讨好，不谦卑</li>
+                <li>说话声音洪亮，展示自信</li>
+              </ul>
+            </li>
+            <li><strong>性格软建议</strong>：<a href="https://www.xiaohongshu.com/discovery/item/62768ce8000000002103c88a?share_from_user_hidden=true&xhsshare=WeixinSession&appuid=591f1e7e50c4b4587b9dd97d&apptime=1652637074">给性格软的人的小建议</a></li>
+            <li><strong>情绪劳动</strong>：<a href="https://www.xiaohongshu.com/discovery/item/628055c50000000021036064?share_from_user_hidden=true&xhsshare=WeixinSession&appuid=591f1e7e50c4b4587b9dd97d&apptime=1652633554">为什么一天什么事都没做却觉得很累？</a>——因为你在进行大量情绪劳动</li>
+            <li><strong>心态稳秘诀</strong>：<a href="https://www.xiaohongshu.com/discovery/item/62749943000000000102e668?share_from_user_hidden=true&xhsshare=WeixinSession&appuid=591f1e7e50c4b4587b9dd97d&apptime=1652634144">永远不要自证</a></li>
+            <li><strong>强大三要素</strong>：<a href="https://www.xiaohongshu.com/discovery/item/62738a32000000000102b446?share_from_user_hidden=true&xhsshare=WeixinSession&appuid=591f1e7e50c4b4587b9dd97d&apptime=1652634231">脸皮厚 + 钝感力 + 强心脏</a></li>
+            <li><strong>最有魅力的人</strong>：<a href="https://www.xiaohongshu.com/discovery/item/62883cdd0000000001029522?share_from_user_hidden=true&xhsshare=WeixinSession&appuid=591f1e7e50c4b4587b9dd97d&apptime=1653393494">盲目自信的人最有魅力</a></li>
+            <li><strong>心安之法</strong>：<a href="https://www.xiaohongshu.com/discovery/item/622c6789000000000102dc17?share_from_user_hidden=true&xhsshare=WeixinSession&appuid=591f1e7e50c4b4587b9dd97d&apptime=1655056141">慎独、真诚、少解释、因果观</a></li>
+            <li><strong>知行合一</strong>：<a href="https://www.xiaohongshu.com/discovery/item/62500540000000002103b10e?share_from_user_hidden=true&xhsshare=WeixinSession&appuid=591f1e7e50c4b4587b9dd97d&apptime=1655056407">人在事上磨，才能定得住</a></li>
+            <li><strong>罗翔金句</strong>：<a href="https://www.xiaohongshu.com/discovery/item/629e2b2a000000001b0396fd?share_from_user_hidden=true&xhsshare=WeixinSession&appuid=591f1e7e50c4b4587b9dd97d&apptime=1655057498">今天是天赐的礼物，像珍惜礼物那样珍惜今天</a></li>
+            <li><strong>罗翔哲学</strong>：<a href="https://www.xiaohongshu.com/discovery/item/625a96a1000000000102da42?share_from_user_hidden=true&xhsshare=WeixinSession&appuid=591f1e7e50c4b4587b9dd97d&apptime=1655181636">我们登上并不是我们所选择的舞台，去演出不是我们选择的剧本</a></li>
+            <li><strong>内心力量</strong>：<a href="https://www.xiaohongshu.com/discovery/item/62a0536d0000000021034955?share_from_user_hidden=true&xhsshare=WeixinSession&appuid=591f1e7e50c4b4587b9dd97d&apptime=1655096406">他人的话没有力量，是你给了它权力</a></li>
+            <li><strong>评价体系</strong>：<a href="https://www.xiaohongshu.com/discovery/item/62b876680000000021036c00?share_from_user_hidden=true&xhsshare=WeixinSession&appuid=591f1e7e50c4b4587b9dd97d&apptime=1656383209">外部评价多服务于他人的利益，而非你的幸福</a></li>
+            <li><strong>成为狠人</strong>：<a href="https://www.xiaohongshu.com/discovery/item/625965c4000000002103c3a9?share_from_user_hidden=true&xhsshare=WeixinSession&appuid=591f1e7e50c4b4587b9dd97d&apptime=1655054589">只需这6招，就能让你成为狠人</a><br />沉默 → 孤独 → 克制 → 冷血 → 接受 → 断舍离</li>
+            <li><strong>自卑缓解</strong>：<a href="http://wufazhuce.com/question/3423">贫穷导致的自卑可以缓解吗？</a></li>
+            <li><strong>庄子新解</strong>：<a href="https://www.xiaohongshu.com/discovery/item/629dab03000000002103d0c7?share_from_user_hidden=true&xhsshare=WeixinSession&appuid=591f1e7e50c4b4587b9dd97d&apptime=1654750833">用志向转移当下的情绪干扰</a></li>
+            <li><strong>无聊的本质</strong>：<a href="https://36kr.com/p/1732495785344002">是什么让人们看上去很无聊？</a> - 36氪文章</li>
+            <li><strong>自卑本质</strong>：<a href="http://wufazhuce.com/question/3362">接受自己的不好，承认问题难度，想办法解决</a></li>
+            <li><strong>情绪阈值</strong>：<a href="http://wufazhuce.com/question/3367">如何提高情绪阈值？</a>：避免悲观、放大心胸、持续学习、保持健康</li>
+            <li><strong>生活可视化</strong>：<a href="https://sspai.com/post/71268">个人生活的数字化与可视化表达</a> - 少数派</li>
+            <li><strong>内心充实</strong>：<a href="http://wufazhuce.com/question/3318">如何提升内心的充实感？</a></li>
+            <li><strong>心流体验</strong>：<a href="https://book.douban.com/subject/27186106/">《心流》| 最优体验心理学</a>：改变意识也能提升生活体验</li>
+            <li><strong>视频推荐</strong>：<a href="https://www.bilibili.com/video/BV1av4y1f714/?spm_id_from=trigger_reload">不要活在别人的评价体系中</a> - 小唯UP</li>
+            <li><strong>社恐自救</strong>：<a href="https://www.bilibili.com/video/BV1J44y147Mg">社恐自救指南</a>：Be yourself is cool enough</li>
+            <li><strong>HSP自救</strong>：<a href="https://www.bilibili.com/video/BV1yA411H79G">HSP自救指南</a>：接纳自己、停止共情泛滥、精简社交</li>
+            <li><strong>精力充沛</strong>：<a href="https://sspai.com/post/61722">如何追求精力充沛的生活？</a> - 少数派</li>
+            <li><strong>写日记意义</strong>：<a href="https://www.douban.com/gallery/topic/296222/">写日记的意义</a>：与自己对话、梳理思绪</li>
+            <li><strong>应对压力</strong>：<a href="http://wufazhuce.com/question/3148">成年人如何科学应对压力？</a></li>
+            <li><strong>幸福感练习</strong>：<a href="https://www.douban.com/gallery/topic/284123/">每天写下当天发生的3件好事</a>：低成本提升幸福感 </li>
+          </ul>
+        </div>
+      </details>
+
+
+
+
+
+
+
+
+
+
+
