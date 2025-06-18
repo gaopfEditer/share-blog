@@ -1,13 +1,14 @@
 ---
 id: notion笔记111
 slug: notion笔记111
-title: Notion笔记111
+title: 提升物质：专业技能、职场副业、工作投资![💹]
 date: 2024-03-21
 authors: [kz]
 tags: [notion, 笔记, 知识管理]
 keywords: [notion, 笔记, 知识管理]
 ---
 
+#### 提升物质：专业技能、职场副业、工作投资![💹]
 
 <details>
   <summary>行业 | 市场 🌐</summary>

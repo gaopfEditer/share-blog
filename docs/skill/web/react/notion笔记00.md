@@ -1,7 +1,7 @@
 ---
 id: notion笔记000
 slug: notion笔记000
-title: Notion笔记000
+title: 提升认知：信息输入、知识管理、个人成长🧠
 date: 2024-03-21
 authors: [kz]
 tags: [notion, 笔记, 知识管理]
@@ -9,7 +9,7 @@ keywords: [notion, 笔记, 知识管理]
 ---
 
 
-
+#### 提升认知：信息输入、知识管理、个人成长🧠
 
 <details>
   <summary><strong>信息源🔔</strong></summary>
