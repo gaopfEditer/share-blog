@@ -2,6 +2,10 @@
   justify-content: center;
 }
 
+h4, h5, h6{
+  font-weight: 600;
+}
+
 .mdxPageWrapper li p {
   margin: 0.5em 0;
 }
