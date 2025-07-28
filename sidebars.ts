@@ -10,7 +10,7 @@ const sidebars: SidebarsConfig
 = {
   skill: [
     'skill/introduction',
-   
+
     // {
     //   label: 'Node',
     //   type: 'category',
@@ -34,7 +34,7 @@ const sidebars: SidebarsConfig
           items: [
             'skill/web/vue/vue-reactive-data-object',
             'skill/web/vue/vue-reactive-data-array',
-            'skill/web/vue/vue-reactive-data-basic-type',
+            'skill/web/vue/vue-reactive-tick-nexttick',
             'skill/web/vue/pinia',
           ],
         },

@@ -69,7 +69,7 @@ const DemoState = (props) => {
 }
 ```
 
-3.2.1.2.useEffect
+### 3.2.1.2 useEffect
 
 1．使用条件：当组件init、dom render完成、操纵dom、请求数据（如componentDidMount）等；
 
@@ -172,7 +172,7 @@ useEffect(() => {
 }, [])
 ```
 
-3.2.1.3.useLayoutEffect
+### 3.2.1.3 useLayoutEffect
 
 渲染更新之前的useEffect
 
@@ -202,7 +202,7 @@ const DemoUseLayoutEffect = () => {
 }
 ```
 
-3.2.1.4.useRef
+### 3.2.1.4 useRef
 
 用来获取元素、缓存数据；
 
@@ -230,7 +230,7 @@ const currenRef = useRef(InitialData)
 currenRef.current = newValue
 ```
 
-3.2.1.5.useContext
+### 3.2.1.5 useContext
 
 用来获取父级组件传递过来的context值，这个当前值就是最近的父级组件Provider的value；
 
@@ -269,7 +269,7 @@ export default () => {
 }
 ```
 
-3.2.1.6.useReducer
+### 3.2.1.6 useReducer
 
 入参：
 
@@ -317,7 +317,7 @@ const DemoUseReducer = () => {
 
 业务中经常将 useReducer＋useContext 代替Redux
 
-3.2.1.7.useMemo
+### 3.2.1.7 useMemo
 
 用来根据useMemo的第二个参数deps（数组）判定是否满足当前的限定条件来决定是否执行第一个cb;
 
@@ -392,7 +392,7 @@ const DemoUseMemo = () => {
 }
 ```
 
-3.2.1.8.useCallback
+### 3.2.1.8 useCallback
 
 useMemo返回cb的运行结果；
 
@@ -461,9 +461,9 @@ export default function Index() {
 }
 ```
 
-3.2.2．Hooks实战
+## 3.2.2 Hooks的一些思考
 
-3.2.2.1．所有依赖都必须放在依赖数组中么？
+### 3.2.2.1 所有依赖都必须放在依赖数组中么？
 
 useEffect中，默认有个共识：useEffect中使用到外部变量，都应该放到第二个数组参数中。
 
@@ -500,7 +500,7 @@ Solution:
 
 2．只有一种情况，需要把变量放到deps数组中，那就是当该变量变化时，需要触发useEffect函数执行。而不是因为useEffect中用到了这个变量！
 
-3.2.2.2．尽量不要用useCallback
+### 3.2.2.2 尽量不要用useCallback
 
 1．useCallback大部分场景没有提升性能
 
@@ -559,7 +559,7 @@ useEffect(() => {
 }, [])
 ```
 
-3.2.2.3．useMemo建议适当使用
+### 3.2.2.3 useMemo建议适当使用
 
 在deps不变，且非简单的基础类型运算的情况下建议使用
 
@@ -579,7 +579,7 @@ const c = useMemo(() => a + b, [a, b])
 const c = a + b // 内存消耗少
 ```
 
-3.2.2.4．useState的正确使用姿势
+### 3.2.2.4 useState的正确使用姿势
 
 1．能用其他状态计算出来就不用单独声明状态。一个state必须不能通过其它state／props 直接计算出来，否则就不用定义state
 
@@ -684,7 +684,7 @@ setUserInfo(s => ({
 }))
 ```
 
-3.2.3．自定义Hooks
+## 3.2.3 自定义封装简单的Hooks
 
 注意：自定义Hooks本质上还是实现一个函数，关键在于实现逻辑
 
@@ -694,7 +694,7 @@ setUserInfo(s => ({
 const [ a[,b,c...] ]=useXXX(arg1[,arg2,...])
 ```
 
-3.2.3.1.setTitle hook
+### 3.2.3.1 setTitle hook
 
 ```javascript
 import { useEffect} from 'react'
@@ -710,7 +710,7 @@ const useTitle=(title)=>{
 export default useTitle
 ```
 
-3.2.3.2. update hook
+### 3.2.3.2 update hook
 
 ```javascript
 import { useState} from 'react'
@@ -728,7 +728,7 @@ const useUpdate=() => {
 export default useUpdate
 ```
 
-3.2.3.3. useScroll hook
+### 3.2.3.3 useScroll hook
 
 ```javascript
 import { useState, useEffect } from 'react'
@@ -769,7 +769,7 @@ const App = () => {
 }
 ```
 
-3.2.3.4. useLocalStorage hook
+### 3.2.3.4 useLocalStorage hook
 
 ```javascript
 import { useState, useEffect } from 'react'
@@ -814,7 +814,7 @@ const App = () => {
 }
 ```
 
-3.2.3.5. useDebounce hook
+### 3.2.3.5 useDebounce hook
 
 ```javascript
 import { useState, useEffect } from 'react'
@@ -862,7 +862,7 @@ const App = () => {
 }
 ```
 
-3.2.3.6. useThrottle hook
+### 3.2.3.6 useThrottle hook
 
 ```javascript
 import { useState, useEffect } from 'react'
@@ -913,7 +913,7 @@ const App = () => {
 }
 ```
 
-3.2.3.7. usePrevious hook
+### 3.2.3.7 usePrevious hook
 
 ```javascript
 import { useRef, useEffect } from 'react'
@@ -945,7 +945,7 @@ const App = () => {
 }
 ```
 
-3.2.3.8. useClickOutside hook
+### 3.2.3.8 useClickOutside hook
 
 ```javascript
 import { useEffect, useRef } from 'react'
@@ -993,7 +993,7 @@ const App = () => {
 }
 ```
 
-3.2.3.9. useHover hook
+### 3.2.3.9 useHover hook
 
 ```javascript
 import { useState, useRef, useEffect } from 'react'
@@ -1035,7 +1035,7 @@ const App = () => {
 }
 ```
 
-3.2.3.10. useWindowSize hook
+### 3.2.3.10 useWindowSize hook
 
 ```javascript
 import { useState, useEffect } from 'react'
@@ -1080,7 +1080,7 @@ const App = () => {
 }
 ```
 
-3.2.3.11. useKeyPress hook
+### 3.2.3.11 useKeyPress hook
 
 ```javascript
 import { useState, useEffect } from 'react'
@@ -1127,7 +1127,7 @@ const App = () => {
 }
 ```
 
-3.2.3.12. useMediaQuery hook
+### 3.2.3.12 useMediaQuery hook
 
 ```javascript
 import { useState, useEffect } from 'react'
@@ -1168,7 +1168,7 @@ const App = () => {
 }
 ```
 
-3.2.3.13. useOnScreen hook
+### 3.2.3.13 useOnScreen hook
 
 ```javascript
 import { useState, useEffect, useRef } from 'react'
@@ -1214,7 +1214,7 @@ const App = () => {
 }
 ```
 
-3.2.3.14. useGeolocation hook
+### 3.2.3.14 useGeolocation hook
 
 ```javascript
 import { useState, useEffect } from 'react'
@@ -1322,7 +1322,7 @@ const App = () => {
 }
 ```
 
-3.2.3.15. useLocalStorage hook
+### 3.2.3.15 useLocalStorage hook
 
 ```javascript
 import { useState, useEffect } from 'react'
@@ -1368,7 +1368,7 @@ const App = () => {
 }
 ```
 
-3.2.3.16. useSessionStorage hook
+### 3.2.3.16 useSessionStorage hook
 
 ```javascript
 import { useState, useEffect } from 'react'
@@ -1414,7 +1414,7 @@ const App = () => {
 }
 ```
 
-3.2.3.17. useCookie hook
+### 3.2.3.17 useCookie hook
 
 ```javascript
 import { useState, useEffect } from 'react'
@@ -1465,7 +1465,7 @@ const App = () => {
 }
 ```
 
-3.2.3.18. useFetch hook
+### 3.2.3.18 useFetch hook
 
 ```javascript
 import { useState, useEffect } from 'react'
@@ -1519,7 +1519,7 @@ const App = () => {
 }
 ```
 
-3.2.3.19. useScript hook
+### 3.2.3.19 useScript hook
 
 ```javascript
 import { useState, useEffect } from 'react'
@@ -1577,7 +1577,7 @@ const App = () => {
 }
 ```
 
-3.2.3.20. useEventListener hook
+### 3.2.3.20 useEventListener hook
 
 ```javascript
 import { useEffect, useRef } from 'react'
@@ -1627,7 +1627,7 @@ const App = () => {
 }
 ```
 
-3.2.3.21. useWhyDidYouUpdate hook
+### 3.2.3.21 useWhyDidYouUpdate hook
 
 ```javascript
 import { useEffect, useRef } from 'react'
@@ -1668,7 +1668,7 @@ const Demo = ({ count }) => {
 }
 ```
 
-3.2.3.22. useUpdateEffect hook
+### 3.2.3.22 useUpdateEffect hook
 
 ```javascript
 import { useEffect, useRef } from 'react'
@@ -1705,7 +1705,7 @@ const App = () => {
 }
 ```
 
-3.2.3.23. useIsFirstRender hook
+### 3.2.3.23 useIsFirstRender hook
 
 ```javascript
 import { useRef, useEffect } from 'react'
@@ -1734,7 +1734,7 @@ const App = () => {
 }
 ```
 
-3.2.3.24. useUpdateLayoutEffect hook
+### 3.2.3.24 useUpdateLayoutEffect hook
 
 ```javascript
 import { useLayoutEffect, useRef } from 'react'
@@ -1771,7 +1771,7 @@ const App = () => {
 }
 ```
 
-3.2.3.25. useIsMounted hook
+### 3.2.3.25 useIsMounted hook
 
 ```javascript
 import { useRef, useEffect } from 'react'
@@ -1811,7 +1811,7 @@ const App = () => {
 }
 ```
 
-3.2.3.26. useIsomorphicLayoutEffect hook
+### 3.2.3.26 useIsomorphicLayoutEffect hook
 
 ```javascript
 import { useEffect, useLayoutEffect } from 'react'
@@ -1832,7 +1832,7 @@ const App = () => {
 }
 ```
 
-3.2.3.27. useDeepCompareEffect hook
+### 3.2.3.27 useDeepCompareEffect hook
 
 ```javascript
 import { useEffect, useRef } from 'react'
@@ -1870,7 +1870,7 @@ const App = () => {
 }
 ```
 
-3.2.3.28. useShallowCompareEffect hook
+### 3.2.3.28 useShallowCompareEffect hook
 
 ```javascript
 import { useEffect, useRef } from 'react'
@@ -1908,7 +1908,7 @@ const App = () => {
 }
 ```
 
-3.2.3.29. useCustomCompareEffect hook
+### 3.2.3.29 useCustomCompareEffect hook
 
 ```javascript
 import { useEffect, useRef } from 'react'
@@ -1949,7 +1949,7 @@ const App = () => {
 }
 ```
 
-3.2.3.30. useAsync hook
+### 3.2.3.30 useAsync hook
 
 ```javascript
 import { useState, useCallback } from 'react'
