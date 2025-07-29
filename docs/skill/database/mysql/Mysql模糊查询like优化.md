@@ -9,7 +9,7 @@ keywords: [mysql, database]
 
 ## 1、前言
 
-在我存储题库的时候，搜题肯定要用模糊搜索题目，但一般情况下 like 模糊查询的写法为（field 已建立索引）
+软件操作有很多模糊搜索功能，但一般情况下 like 模糊查询的写法为（field 已建立索引）
 
 ```sql
 SELECT `column` FROM `table` WHERE `field` LIKE '%keyword%';

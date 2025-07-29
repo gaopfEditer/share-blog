@@ -12,7 +12,7 @@ keywords: [notion, 笔记, 知识管理]
 #### 提升认知：信息输入、知识管理、个人成长🧠
 
 <details>
-  <summary><strong>信息源🔔</strong></summary>
+  <summary><strong>信息源🔔（学习网站，个人博主平台）</strong></summary>
   <div>
     <ul>
       <li><strong>强大的知识搜索引擎</strong>：<a target="_blank" href="https://www.wolframalpha.com/">WolframAlpha</a> - 涵盖数学物理、工程技术到社会文化、日常生活，提供复杂数学运算（含解题步骤）、物理定律、化学式、股票数据等</li>
@@ -71,7 +71,7 @@ keywords: [notion, 笔记, 知识管理]
 </details>
 
 <details>
-  <summary>读书📖</summary>
+  <summary>读书📖（文章、推荐书单）</summary>
   <div>
     <ul>
       <li><strong>推荐</strong>：<a target="_blank" href="https://www.xiaohongshu.com/discovery/item/629e361a000000001d018fc8?share_from_user_hidden=true&xhsshare=WeixinSession&appuid=591f1e7e50c4b4587b9dd97d&apptime=1655054432">《工作 消费主义与新穷人》</a> - 工作伦理1.0是道德约束，工作伦理2.0是消费主义</li>
@@ -103,7 +103,7 @@ keywords: [notion, 笔记, 知识管理]
 </details>
 
 <details>
-  <summary>播客🎙️</summary>
+  <summary>播客🎙️（如小宇宙之类的小众深度平台）</summary>
   <div>
     <ul>
       <li><strong>播客</strong>：<a target="_blank" href="https://www.xiaoyuzhoufm.com/">知晓有我</a> - 从女性视角出发探讨社会现象（小宇宙App可听）</li>
@@ -121,7 +121,7 @@ keywords: [notion, 笔记, 知识管理]
 </details>
 
 <details>
-  <summary>纪录片与访谈节目🎬</summary>
+  <summary>纪录片与访谈节目🎬（思维延展）</summary>
   <div>
     <ul>
       <li><a target="_blank" href="https://36kr.com/p/1734556811279361">《秃然发生》</a> - 全国首档男性脱发纪录片（2700万+观众）</li>
@@ -152,7 +152,7 @@ keywords: [notion, 笔记, 知识管理]
 </details>
 
 <details>
-  <summary>知识管理 🧠</summary>
+  <summary>知识管理 🧠（笔记和流程管理）</summary>
   <div>
     <ul>
       <li><strong>Cubox 6.0</strong>：<a target="_blank" href="https://sspai.com/post/67903">全能网络收藏夹、语音、视频、速记</a> - 少数派推荐，强大信息收集工具</li>
@@ -169,7 +169,7 @@ keywords: [notion, 笔记, 知识管理]
 </details>
 
 <details>
-  <summary>话题 🎙️</summary>
+  <summary>话题 🎙️（自我、工作、社会话题）</summary>
   <div>
     <ul>
       <li><strong>认知提升</strong>：<a target="_blank" href="https://www.zhihu.com/question/487990120">如何从底层杀出 / 人生翻盘指南</a> - 知乎热门回答、附思维导图：<a target="_blank" href="https://scarsu.oss-cn-shanghai.aliyuncs.com/picgo/20220506111056.png">查看图解</a></li>
