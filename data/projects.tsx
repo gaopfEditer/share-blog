@@ -12,7 +12,7 @@ export const projects: Project[] = [
     title: 'xx智能巡视系统',
     description: '🦖 基于 Vue + Element Plus 实现交互复杂的智能巡视系统',
     preview: '/img/project/patrol-ui.png',
-    website: 'https://gaopf.top',
+    website: 'https://ffz.e.gaopf.top',
     source: 'https://github.com/gaopfEditer/share-blog',
     tags: ['opensource', 'design', 'favorite'],
     type: 'web',
