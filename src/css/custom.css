@@ -107,6 +107,7 @@ body {
 
 .navbar__link {
   @apply flex items-center;
+  font-weight: 600;
 }
 
 .theme-code-block {
