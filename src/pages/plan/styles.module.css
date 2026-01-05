@@ -93,3 +93,137 @@
 .svgIconFavorite {
   margin-left: 1rem;
 }
+
+/* 任务管理相关样式 */
+.actionBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.filterBar {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.formContainer {
+  margin-bottom: 2rem;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--ifm-secondary-text-color);
+}
+
+.categorySection {
+  margin-bottom: 2.5rem;
+}
+
+.categoryHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--ifm-border-color);
+}
+
+.categoryHeader h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--ifm-heading-color);
+}
+
+/* 模块类目样式 */
+.moduleSection {
+  margin-bottom: 3rem;
+  padding: 1.5rem;
+  background: var(--ifm-color-emphasis-50);
+  border-radius: 8px;
+  border: 1px solid var(--ifm-border-color);
+}
+
+.moduleHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--ifm-color-primary);
+  margin-bottom: 1.5rem;
+}
+
+.moduleTitle {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--ifm-color-primary);
+}
+
+/* 子类目样式 */
+.subCategorySection {
+  margin-bottom: 2rem;
+  margin-left: 1rem;
+  padding: 1rem;
+  background: var(--ifm-background-color);
+  border-radius: 6px;
+  border-left: 3px solid var(--ifm-color-primary-light);
+}
+
+.subCategoryHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--ifm-border-color);
+  margin-bottom: 1rem;
+}
+
+.subCategoryTitle {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--ifm-heading-color);
+}
+
+.subCategoryTaskCount {
+  font-size: 0.85rem;
+  color: var(--ifm-secondary-text-color);
+  background: var(--ifm-color-emphasis-100);
+  padding: 0.2rem 0.6rem;
+  border-radius: 10px;
+}
+
+.taskCount {
+  font-size: 0.9rem;
+  color: var(--ifm-secondary-text-color);
+  background: var(--ifm-color-emphasis-100);
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+}
+
+.taskList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .taskList {
+    grid-template-columns: 1fr;
+  }
+
+  .actionBar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filterBar {
+    justify-content: center;
+  }
+}

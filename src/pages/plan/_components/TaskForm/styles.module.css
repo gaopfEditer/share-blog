@@ -1,0 +1,107 @@
+.taskForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: var(--ifm-background-color);
+  border-radius: 8px;
+  border: 1px solid var(--ifm-border-color);
+}
+
+.formRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--ifm-heading-color);
+}
+
+.required {
+  color: var(--ifm-color-danger);
+}
+
+.input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--ifm-border-color);
+  border-radius: 4px;
+  font-size: 0.9rem;
+  background: var(--ifm-background-color);
+  color: var(--ifm-text-color);
+  transition: border-color 0.2s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--ifm-color-primary);
+  box-shadow: 0 0 0 3px var(--ifm-color-primary-lightest);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+.progressContainer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.range {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--ifm-border-color);
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--ifm-color-primary);
+  cursor: pointer;
+}
+
+.range::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--ifm-color-primary);
+  cursor: pointer;
+  border: none;
+}
+
+.progressValue {
+  min-width: 50px;
+  text-align: right;
+  font-weight: 600;
+  color: var(--ifm-color-primary);
+}
+
+.formActions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
+.submitButton,
+.cancelButton {
+  min-width: 100px;
+}
+
+.hint {
+  font-size: 0.75rem;
+  color: var(--ifm-secondary-text-color);
+  margin-top: 0.25rem;
+}
+

@@ -1,95 +1,43 @@
-.filterCheckbox {
-  justify-content: space-between;
-}
-
-.filterCheckbox,
-.checkboxList {
+.filterBar {
   display: flex;
-  align-items: center;
-}
-
-.filterCheckbox > div:first-child {
-  display: flex;
-  flex: 1 1 auto;
-  align-items: center;
-}
-
-.filterCheckbox > div > * {
-  margin-bottom: 0;
-  margin-right: 8px;
-}
-
-.checkboxList {
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 2rem 0;
   flex-wrap: wrap;
 }
 
-.checkboxList,
-.showcaseList {
-  padding: 0;
-  list-style: none;
+.moduleTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  color: var(--ifm-heading-color);
+  border-bottom: 2px solid var(--ifm-color-primary);
+  padding-bottom: 0.5rem;
 }
 
-.checkboxListItem {
-  user-select: none;
-  white-space: nowrap;
-  height: 32px;
-  font-size: 0.8rem;
-  margin-top: 0.5rem;
-  margin-right: 0.5rem;
+.categorySection {
+  margin-bottom: 3rem;
 }
 
-.checkboxListItem:last-child {
-  margin-right: 0;
+.categoryTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: var(--ifm-heading-color);
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--ifm-border-color);
 }
 
-.searchContainer {
-  margin-left: auto;
-}
+@media (max-width: 768px) {
+  .filterBar {
+    justify-content: center;
+  }
 
-.searchContainer input {
-  height: 30px;
-  border-radius: 15px;
-  padding: 10px;
-  border: 1px solid gray;
-}
+  .moduleTitle {
+    font-size: 1.5rem;
+  }
 
-.showcaseList {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
-}
-
-.showcaseFavorite {
-  padding-top: 2rem;
-  padding-bottom: 2rem;
-  background-color: var(--site-color-favorite-background);
-}
-
-.showcaseFavoriteHeader {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.showcaseFavoriteHeader > h2 {
-  margin-bottom: 0;
-}
-
-.showcaseFavoriteHeader > svg {
-  width: 30px;
-  height: 30px;
-}
-
-.svgIconFavoriteXs,
-.svgIconFavorite {
-  color: var(--site-color-svg-icon-favorite);
-}
-
-.svgIconFavoriteXs {
-  margin-left: 0.625rem;
-  font-size: 1rem;
-}
-
-.svgIconFavorite {
-  margin-left: 1rem;
+  .categoryTitle {
+    font-size: 1.25rem;
+  }
 }

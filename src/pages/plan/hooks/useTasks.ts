@@ -1,0 +1,137 @@
+import { useState, useEffect, useCallback } from 'react'
+import ExecutionEnvironment from '@docusaurus/ExecutionEnvironment'
+import type { Task } from '../types'
+
+const STORAGE_KEY = 'plan-tasks'
+
+// 从 localStorage 读取任务列表
+function loadTasksFromStorage(): Task[] {
+  if (!ExecutionEnvironment.canUseDOM) {
+    return []
+  }
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    return stored ? JSON.parse(stored) : []
+  } catch (error) {
+    console.error('Failed to load tasks from storage:', error)
+    return []
+  }
+}
+
+// 保存任务列表到 localStorage
+function saveTasksToStorage(tasks: Task[]): void {
+  if (!ExecutionEnvironment.canUseDOM) {
+    return
+  }
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks))
+  } catch (error) {
+    console.error('Failed to save tasks to storage:', error)
+  }
+}
+
+export function useTasks() {
+  const [tasks, setTasks] = useState<Task[]>([])
+
+  // 初始化时从 localStorage 加载任务
+  useEffect(() => {
+    setTasks(loadTasksFromStorage())
+  }, [])
+
+  // 添加任务
+  const addTask = useCallback((taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const newTask: Task = {
+      ...taskData,
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+    setTasks(prev => {
+      const updated = [...prev, newTask]
+      saveTasksToStorage(updated)
+      return updated
+    })
+    return newTask
+  }, [])
+
+  // 更新任务
+  const updateTask = useCallback((id: string, taskData: Partial<Task>) => {
+    setTasks(prev => {
+      const updated = prev.map(task =>
+        task.id === id
+          ? { ...task, ...taskData, updatedAt: new Date().toISOString() }
+          : task
+      )
+      saveTasksToStorage(updated)
+      return updated
+    })
+  }, [])
+
+  // 删除任务
+  const deleteTask = useCallback((id: string) => {
+    setTasks(prev => {
+      const updated = prev.filter(task => task.id !== id)
+      saveTasksToStorage(updated)
+      return updated
+    })
+  }, [])
+
+  // 按模块类别分组
+  const tasksByCategory = useCallback(() => {
+    const grouped: Record<string, Task[]> = {}
+    tasks.forEach(task => {
+      if (!grouped[task.moduleCategory]) {
+        grouped[task.moduleCategory] = []
+      }
+      grouped[task.moduleCategory].push(task)
+    })
+    return grouped
+  }, [tasks])
+
+  // 按模块类别 -> 子类目层级分组
+  const tasksByModuleAndSubCategory = useCallback(() => {
+    const grouped: Record<string, Record<string, Task[]>> = {}
+    tasks.forEach(task => {
+      if (!grouped[task.moduleCategory]) {
+        grouped[task.moduleCategory] = {}
+      }
+      // 如果没有子类目，使用 '未分类' 作为默认值
+      const subCategory = task.subCategory || '未分类'
+      if (!grouped[task.moduleCategory][subCategory]) {
+        grouped[task.moduleCategory][subCategory] = []
+      }
+      grouped[task.moduleCategory][subCategory].push(task)
+    })
+    return grouped
+  }, [tasks])
+
+  // 统计信息
+  const statistics = useCallback(() => {
+    const total = tasks.length
+    const completed = tasks.filter(t => t.status === 'completed').length
+    const inProgress = tasks.filter(t => t.status === 'in-progress').length
+    const pending = tasks.filter(t => t.status === 'pending').length
+    const avgProgress = total > 0
+      ? Math.round(tasks.reduce((sum, t) => sum + t.progress, 0) / total)
+      : 0
+
+    return {
+      total,
+      completed,
+      inProgress,
+      pending,
+      avgProgress,
+    }
+  }, [tasks])
+
+  return {
+    tasks,
+    addTask,
+    updateTask,
+    deleteTask,
+    tasksByCategory,
+    tasksByModuleAndSubCategory,
+    statistics,
+  }
+}
+

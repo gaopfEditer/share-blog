@@ -1,0 +1,191 @@
+import React, { useState, FormEvent } from 'react'
+import { cn } from '@site/src/lib/utils'
+import type { TaskFormData } from '../../types'
+import styles from './styles.module.css'
+
+interface TaskFormProps {
+  onSubmit: (data: TaskFormData) => void
+  onCancel?: () => void
+  initialData?: Partial<TaskFormData>
+  submitText?: string
+}
+
+const MODULE_CATEGORIES = [
+  { label: '信息', value: 'info' },
+  { label: '投资', value: 'invest' },
+  { label: '运营', value: 'operate' },
+  { label: '杂谈', value: 'blog' },
+  { label: '项目', value: 'project' },
+]
+
+export default function TaskForm({
+  onSubmit,
+  onCancel,
+  initialData,
+  submitText = '创建任务',
+}: TaskFormProps) {
+  const [formData, setFormData] = useState<TaskFormData>({
+    moduleCategory: initialData?.moduleCategory || '',
+    name: initialData?.name || '',
+    description: initialData?.description || '',
+    subCategory: initialData?.subCategory || '',
+    progress: initialData?.progress || 0,
+    plannedTime: initialData?.plannedTime || '',
+    actualTime: initialData?.actualTime || '',
+    status: initialData?.status || 'pending',
+  })
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    onSubmit(formData)
+    // 重置表单
+    setFormData({
+      moduleCategory: '',
+      name: '',
+      description: '',
+      subCategory: '',
+      progress: 0,
+      plannedTime: '',
+      actualTime: '',
+      status: 'pending',
+    })
+  }
+
+  const handleChange = (
+    field: keyof TaskFormData,
+    value: string | number
+  ) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className={styles.taskForm}>
+      <div className={styles.formRow}>
+        <label className={styles.label}>
+          模块类别 <span className={styles.required}>*</span>
+        </label>
+        <select
+          className={styles.input}
+          value={formData.moduleCategory}
+          onChange={e => handleChange('moduleCategory', e.target.value)}
+          required
+        >
+          <option value="">请选择模块类别</option>
+          {MODULE_CATEGORIES.map(cat => (
+            <option key={cat.value} value={cat.value}>
+              {cat.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className={styles.formRow}>
+        <label className={styles.label}>
+          任务名称 <span className={styles.required}>*</span>
+        </label>
+        <input
+          type="text"
+          className={styles.input}
+          value={formData.name}
+          onChange={e => handleChange('name', e.target.value)}
+          placeholder="请输入任务名称"
+          required
+        />
+      </div>
+
+      <div className={styles.formRow}>
+        <label className={styles.label}>描述</label>
+        <textarea
+          className={cn(styles.input, styles.textarea)}
+          value={formData.description}
+          onChange={e => handleChange('description', e.target.value)}
+          placeholder="请输入任务描述"
+          rows={3}
+        />
+      </div>
+
+      <div className={styles.formRow}>
+        <label className={styles.label}>子类目</label>
+        <input
+          type="text"
+          className={styles.input}
+          value={formData.subCategory}
+          onChange={e => handleChange('subCategory', e.target.value)}
+          placeholder="请输入子类目（可动态创建）"
+        />
+        <small className={styles.hint}>
+          子类目可以自由输入，将自动创建并挂载到当前模块类目下
+        </small>
+      </div>
+
+      <div className={styles.formRow}>
+        <label className={styles.label}>
+          完成度 <span className={styles.required}>*</span>
+        </label>
+        <div className={styles.progressContainer}>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={formData.progress}
+            onChange={e => handleChange('progress', parseInt(e.target.value))}
+            className={styles.range}
+          />
+          <span className={styles.progressValue}>{formData.progress}%</span>
+        </div>
+      </div>
+
+      <div className={styles.formRow}>
+        <label className={styles.label}>状态</label>
+        <select
+          className={styles.input}
+          value={formData.status}
+          onChange={e => handleChange('status', e.target.value)}
+        >
+          <option value="pending">待开始</option>
+          <option value="in-progress">进行中</option>
+          <option value="completed">已完成</option>
+        </select>
+      </div>
+
+      <div className={styles.formRow}>
+        <label className={styles.label}>计划时间</label>
+        <input
+          type="datetime-local"
+          className={styles.input}
+          value={formData.plannedTime}
+          onChange={e => handleChange('plannedTime', e.target.value)}
+        />
+      </div>
+
+      <div className={styles.formRow}>
+        <label className={styles.label}>实际时间</label>
+        <input
+          type="datetime-local"
+          className={styles.input}
+          value={formData.actualTime}
+          onChange={e => handleChange('actualTime', e.target.value)}
+        />
+      </div>
+
+      <div className={styles.formActions}>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            className={cn('button button--secondary', styles.cancelButton)}
+          >
+            取消
+          </button>
+        )}
+        <button
+          type="submit"
+          className={cn('button button--primary', styles.submitButton)}
+        >
+          {submitText}
+        </button>
+      </div>
+    </form>
+  )
+}
+

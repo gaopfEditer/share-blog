@@ -55,7 +55,7 @@ const config: Config = {
         { label: '计划', position: 'right', to: 'plan' },
         { label: '信息', position: 'right', to: 'info' },
         { label: '投资', position: 'right', to: 'invest' },
-        { label: '运营', position: 'right', to: 'operate' },
+        // { label: '运营', position: 'right', to: 'operate' },
         { label: '杂谈', position: 'right', to: 'blog' },
         { label: '项目', position: 'right', to: 'project' },
         { label: '技术', position: 'right', to: 'docs/skill' },
