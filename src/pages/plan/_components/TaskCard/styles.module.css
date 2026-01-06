@@ -2,6 +2,8 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  padding: 16px;
+  border: 1px solid #d9d3d3;
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
@@ -31,6 +33,13 @@
   color: var(--ifm-heading-color);
 }
 
+.badgeContainer {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
 .statusBadge {
   display: inline-block;
   padding: 0.25rem 0.75rem;
@@ -38,6 +47,17 @@
   font-size: 0.75rem;
   font-weight: 500;
   width: fit-content;
+}
+
+.subCategoryTag {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: var(--ifm-color-primary-lightest);
+  color: var(--ifm-color-primary-dark);
+  border: 1px solid var(--ifm-color-primary-light);
 }
 
 .headerRight {

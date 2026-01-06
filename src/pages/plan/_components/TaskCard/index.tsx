@@ -12,9 +12,9 @@ interface TaskCardProps {
 }
 
 const STATUS_MAP = {
-  pending: { label: '待开始', color: '#9ca3af' },
+  'pending': { label: '待开始', color: '#9ca3af' },
   'in-progress': { label: '进行中', color: '#3b82f6' },
-  completed: { label: '已完成', color: '#10b981' },
+  'completed': { label: '已完成', color: '#10b981' },
 }
 
 const MODULE_CATEGORY_MAP: Record<string, string> = {
@@ -56,12 +56,19 @@ export default function TaskCard({
       <div className={styles.cardHeader}>
         <div className={styles.headerLeft}>
           <h4 className={styles.taskName}>{task.name}</h4>
-          <span
-            className={styles.statusBadge}
-            style={{ backgroundColor: status.color + '20', color: status.color }}
-          >
-            {status.label}
-          </span>
+          <div className={styles.badgeContainer}>
+            <span
+              className={styles.statusBadge}
+              style={{ backgroundColor: status.color + '20', color: status.color }}
+            >
+              {status.label}
+            </span>
+            {task.subCategory && (
+              <span className={styles.subCategoryTag}>
+                {task.subCategory}
+              </span>
+            )}
+          </div>
         </div>
         <div className={styles.headerRight}>
           {onEdit && (
@@ -91,13 +98,6 @@ export default function TaskCard({
           </span>
         </div>
 
-        {task.subCategory && (
-          <div className={styles.metaRow}>
-            <span className={styles.metaLabel}>子类目:</span>
-            <span className={styles.metaValue}>{task.subCategory}</span>
-          </div>
-        )}
-
         {task.description && (
           <div className={styles.description}>{task.description}</div>
         )}
@@ -109,7 +109,8 @@ export default function TaskCard({
               className={styles.progressPercent}
               style={{ color: getProgressColor(task.progress) }}
             >
-              {task.progress}%
+              {task.progress}
+              %
             </span>
           </div>
           <div className={styles.progressBar}>
@@ -128,8 +129,7 @@ export default function TaskCard({
               max="100"
               value={task.progress}
               onChange={e =>
-                onUpdateProgress(task.id, parseInt(e.target.value))
-              }
+                onUpdateProgress(task.id, parseInt(e.target.value))}
               className={styles.progressSlider}
             />
           )}
@@ -153,10 +153,11 @@ export default function TaskCard({
 
       <div className={styles.cardFooter}>
         <span className={styles.createdAt}>
-          创建于 {formatDate(task.createdAt)}
+          创建于
+          {' '}
+          {formatDate(task.createdAt)}
         </span>
       </div>
     </MagicCard>
   )
 }
-

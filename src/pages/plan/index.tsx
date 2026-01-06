@@ -37,18 +37,24 @@ function PlanHeader() {
   )
 }
 
+type SortMode = 'time' | 'category'
+
 function PlanContent() {
   const {
     tasks,
     addTask,
     updateTask,
     deleteTask,
-    tasksByModuleAndSubCategory,
+    tasksByCategory,
+    tasksSortedByTime,
+    getAllSubCategories,
     statistics,
   } = useTasks()
   const [showForm, setShowForm] = useState(false)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
   const [selectedModule, setSelectedModule] = useState<string | null>(null)
+  const [sortMode, setSortMode] = useState<SortMode>('time') // 默认按时间排序
+  const [selectedSubCategory, setSelectedSubCategory] = useState<string | null>(null)
 
   const handleSubmit = (formData: TaskFormData) => {
     if (editingTask) {
@@ -87,15 +93,70 @@ function PlanContent() {
     setEditingTask(null)
   }
 
-  const groupedTasks = tasksByModuleAndSubCategory()
-  const modules = Object.keys(groupedTasks)
+  // 按时间排序的任务列表
+  const sortedTasksByTime = tasksSortedByTime()
 
-  // 过滤选中的模块
-  const filteredModules = selectedModule
-    ? {
-        [selectedModule]: groupedTasks[selectedModule] || {},
+  // 按模块分组
+  const tasksByModule = tasksByCategory()
+  const modules = Object.keys(tasksByModule)
+
+  // 获取所有子类目
+  const allSubCategories = getAllSubCategories()
+
+  // 根据排序模式和筛选条件获取任务列表
+  const getFilteredTasks = () => {
+    if (sortMode === 'time') {
+      // 时间排序模式：返回所有任务（已按时间排序）
+      return sortedTasksByTime
+    }
+    else {
+      // 类目排序模式：按模块和子类目筛选
+      let filteredTasks: Task[] = []
+
+      const modulesToShow = selectedModule
+        ? [selectedModule]
+        : modules
+
+      modulesToShow.forEach((module) => {
+        const moduleTasks = tasksByModule[module] || []
+        filteredTasks.push(...moduleTasks)
+      })
+
+      // 按子类目筛选
+      if (selectedSubCategory) {
+        filteredTasks = filteredTasks.filter(
+          task => task.subCategory === selectedSubCategory,
+        )
       }
-    : groupedTasks
+
+      return filteredTasks
+    }
+  }
+
+  // 按模块分组并应用子类目筛选
+  const getGroupedTasks = () => {
+    const filteredModules: Record<string, Task[]> = {}
+    const modulesToShow = selectedModule
+      ? [selectedModule]
+      : modules
+
+    modulesToShow.forEach((module) => {
+      let moduleTasks = tasksByModule[module] || []
+
+      // 应用子类目筛选
+      if (selectedSubCategory) {
+        moduleTasks = moduleTasks.filter(
+          task => task.subCategory === selectedSubCategory,
+        )
+      }
+
+      if (moduleTasks.length > 0) {
+        filteredModules[module] = moduleTasks
+      }
+    })
+
+    return filteredModules
+  }
 
   const renderTaskList = () => {
     if (tasks.length === 0) {
@@ -106,63 +167,79 @@ function PlanContent() {
       )
     }
 
-    return Object.entries(filteredModules).map(([module, subCategories]) => {
-      const moduleName = MODULE_CATEGORY_MAP[module] || module
-      const subCategoryEntries = Object.entries(subCategories)
+    if (sortMode === 'time') {
+      // 时间排序模式：所有任务合并显示
+      const filteredTasks = getFilteredTasks()
 
-      if (subCategoryEntries.length === 0) {
-        return null
+      if (filteredTasks.length === 0) {
+        return (
+          <div className={styles.emptyState}>
+            <p>没有符合条件的任务</p>
+          </div>
+        )
       }
 
-      // 计算该模块下的总任务数
-      const totalTasks = subCategoryEntries.reduce(
-        (sum, [, tasks]) => sum + tasks.length,
-        0,
-      )
-
       return (
-        <div key={module} className={styles.moduleSection}>
+        <div className={styles.moduleSection}>
           <div className={cn('my-4', styles.moduleHeader)}>
-            <h2 className={styles.moduleTitle}>{moduleName}</h2>
+            <h2 className={styles.moduleTitle}>全部任务</h2>
             <span className={styles.taskCount}>
-              {totalTasks}
+              {filteredTasks.length}
               {' '}
               个任务
             </span>
           </div>
-
-          {subCategoryEntries.map(([subCategory, subCategoryTasks]) => {
-            if (!subCategoryTasks || subCategoryTasks.length === 0) {
-              return null
-            }
-
-            return (
-              <div key={subCategory} className={styles.subCategorySection}>
-                <div className={cn('my-3', styles.subCategoryHeader)}>
-                  <h3 className={styles.subCategoryTitle}>{subCategory}</h3>
-                  <span className={styles.subCategoryTaskCount}>
-                    {subCategoryTasks.length}
-                    {' '}
-                    个任务
-                  </span>
-                </div>
-                <MagicContainer className={styles.taskList}>
-                  {subCategoryTasks.map(task => (
-                    <TaskCard
-                      key={task.id}
-                      task={task}
-                      onEdit={handleEdit}
-                      onDelete={handleDelete}
-                      onUpdateProgress={handleUpdateProgress}
-                    />
-                  ))}
-                </MagicContainer>
-              </div>
-            )
-          })}
+          <MagicContainer className={styles.taskList}>
+            {filteredTasks.map(task => (
+              <TaskCard
+                key={task.id}
+                task={task}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onUpdateProgress={handleUpdateProgress}
+              />
+            ))}
+          </MagicContainer>
         </div>
       )
-    })
+    }
+    else {
+      // 类目排序模式：按模块分组显示
+      const groupedTasks = getGroupedTasks()
+
+      return Object.entries(groupedTasks).map(([module, moduleTasks]) => {
+        const moduleName = MODULE_CATEGORY_MAP[module] || module
+
+        if (!moduleTasks || moduleTasks.length === 0) {
+          return null
+        }
+
+        return (
+          <div key={module} className={styles.moduleSection}>
+            <div className={cn('my-4', styles.moduleHeader)}>
+              <h2 className={styles.moduleTitle}>{moduleName}</h2>
+              <span className={styles.taskCount}>
+                {moduleTasks.length}
+                {' '}
+                个任务
+              </span>
+            </div>
+
+            <MagicContainer className={styles.taskList}>
+              {moduleTasks.map(task => (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onUpdateProgress={handleUpdateProgress}
+                />
+              ))}
+            </MagicContainer>
+          </div>
+        )
+      })
+    }
   }
 
   return (
@@ -182,35 +259,101 @@ function PlanContent() {
           >
             {showForm ? '取消创建' : '+ 创建任务'}
           </button>
-          {modules.length > 0 && (
-            <div className={styles.filterBar}>
+
+          <div className={styles.controlBar}>
+            {/* 排序模式切换 */}
+            <div className={styles.sortBar}>
+              <span className={styles.controlLabel}>排序方式：</span>
               <button
                 className={cn('button button--sm', {
-                  'button--primary': selectedModule === null,
-                  'button--secondary': selectedModule !== null,
+                  'button--primary': sortMode === 'time',
+                  'button--secondary': sortMode !== 'time',
                 })}
-                onClick={() => setSelectedModule(null)}
+                onClick={() => {
+                  setSortMode('time')
+                  setSelectedModule(null)
+                  setSelectedSubCategory(null)
+                }}
               >
-                全部
+                按时间
               </button>
-              {modules.map((module) => {
-                const moduleName = MODULE_CATEGORY_MAP[module] || module
-                return (
+              <button
+                className={cn('button button--sm', {
+                  'button--primary': sortMode === 'category',
+                  'button--secondary': sortMode !== 'category',
+                })}
+                onClick={() => {
+                  setSortMode('category')
+                  setSelectedSubCategory(null)
+                }}
+              >
+                按类目
+              </button>
+            </div>
+
+            {/* 模块筛选（仅在类目排序模式下显示） */}
+            {sortMode === 'category' && modules.length > 0 && (
+              <div className={styles.filterBar}>
+                <span className={styles.controlLabel}>模块：</span>
+                <button
+                  className={cn('button button--sm', {
+                    'button--primary': selectedModule === null,
+                    'button--secondary': selectedModule !== null,
+                  })}
+                  onClick={() => setSelectedModule(null)}
+                >
+                  全部
+                </button>
+                {modules.map((module) => {
+                  const moduleName = MODULE_CATEGORY_MAP[module] || module
+                  return (
+                    <button
+                      key={module}
+                      className={cn('button button--sm', {
+                        'button--primary': selectedModule === module,
+                        'button--secondary': selectedModule !== module,
+                      })}
+                      onClick={() =>
+                        setSelectedModule(selectedModule === module ? null : module)}
+                    >
+                      {moduleName}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+
+            {/* 子类目筛选（仅在类目排序模式下显示） */}
+            {sortMode === 'category' && allSubCategories.length > 0 && (
+              <div className={styles.filterBar}>
+                <span className={styles.controlLabel}>子类目：</span>
+                <button
+                  className={cn('button button--sm', {
+                    'button--primary': selectedSubCategory === null,
+                    'button--secondary': selectedSubCategory !== null,
+                  })}
+                  onClick={() => setSelectedSubCategory(null)}
+                >
+                  全部
+                </button>
+                {allSubCategories.map(subCategory => (
                   <button
-                    key={module}
+                    key={subCategory}
                     className={cn('button button--sm', {
-                      'button--primary': selectedModule === module,
-                      'button--secondary': selectedModule !== module,
+                      'button--primary': selectedSubCategory === subCategory,
+                      'button--secondary': selectedSubCategory !== subCategory,
                     })}
                     onClick={() =>
-                      setSelectedModule(selectedModule === module ? null : module)}
+                      setSelectedSubCategory(
+                        selectedSubCategory === subCategory ? null : subCategory,
+                      )}
                   >
-                    {moduleName}
+                    {subCategory}
                   </button>
-                )
-              })}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* 任务表单 */}

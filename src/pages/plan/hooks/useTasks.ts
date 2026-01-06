@@ -12,7 +12,8 @@ function loadTasksFromStorage(): Task[] {
   try {
     const stored = localStorage.getItem(STORAGE_KEY)
     return stored ? JSON.parse(stored) : []
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Failed to load tasks from storage:', error)
     return []
   }
@@ -25,7 +26,8 @@ function saveTasksToStorage(tasks: Task[]): void {
   }
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks))
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Failed to save tasks to storage:', error)
   }
 }
@@ -46,7 +48,7 @@ export function useTasks() {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     }
-    setTasks(prev => {
+    setTasks((prev) => {
       const updated = [...prev, newTask]
       saveTasksToStorage(updated)
       return updated
@@ -56,11 +58,11 @@ export function useTasks() {
 
   // 更新任务
   const updateTask = useCallback((id: string, taskData: Partial<Task>) => {
-    setTasks(prev => {
+    setTasks((prev) => {
       const updated = prev.map(task =>
         task.id === id
           ? { ...task, ...taskData, updatedAt: new Date().toISOString() }
-          : task
+          : task,
       )
       saveTasksToStorage(updated)
       return updated
@@ -69,7 +71,7 @@ export function useTasks() {
 
   // 删除任务
   const deleteTask = useCallback((id: string) => {
-    setTasks(prev => {
+    setTasks((prev) => {
       const updated = prev.filter(task => task.id !== id)
       saveTasksToStorage(updated)
       return updated
@@ -79,7 +81,7 @@ export function useTasks() {
   // 按模块类别分组
   const tasksByCategory = useCallback(() => {
     const grouped: Record<string, Task[]> = {}
-    tasks.forEach(task => {
+    tasks.forEach((task) => {
       if (!grouped[task.moduleCategory]) {
         grouped[task.moduleCategory] = []
       }
@@ -91,7 +93,7 @@ export function useTasks() {
   // 按模块类别 -> 子类目层级分组
   const tasksByModuleAndSubCategory = useCallback(() => {
     const grouped: Record<string, Record<string, Task[]>> = {}
-    tasks.forEach(task => {
+    tasks.forEach((task) => {
       if (!grouped[task.moduleCategory]) {
         grouped[task.moduleCategory] = {}
       }
@@ -103,6 +105,26 @@ export function useTasks() {
       grouped[task.moduleCategory][subCategory].push(task)
     })
     return grouped
+  }, [tasks])
+
+  // 按创建时间排序（最新的在前）
+  const tasksSortedByTime = useCallback(() => {
+    return [...tasks].sort((a, b) => {
+      const timeA = new Date(a.createdAt).getTime()
+      const timeB = new Date(b.createdAt).getTime()
+      return timeB - timeA // 降序，最新的在前
+    })
+  }, [tasks])
+
+  // 获取所有子类目列表
+  const getAllSubCategories = useCallback(() => {
+    const subCategories = new Set<string>()
+    tasks.forEach((task) => {
+      if (task.subCategory) {
+        subCategories.add(task.subCategory)
+      }
+    })
+    return Array.from(subCategories).sort()
   }, [tasks])
 
   // 统计信息
@@ -131,7 +153,8 @@ export function useTasks() {
     deleteTask,
     tasksByCategory,
     tasksByModuleAndSubCategory,
+    tasksSortedByTime,
+    getAllSubCategories,
     statistics,
   }
 }
-

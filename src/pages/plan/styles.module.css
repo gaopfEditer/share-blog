@@ -98,16 +98,39 @@
 .actionBar {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 1.5rem;
   gap: 1rem;
   flex-wrap: wrap;
+}
+
+.controlBar {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.sortBar {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.controlLabel {
+  font-size: 0.9rem;
+  color: var(--ifm-secondary-text-color);
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .filterBar {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .formContainer {
@@ -164,39 +187,6 @@
   color: var(--ifm-color-primary);
 }
 
-/* 子类目样式 */
-.subCategorySection {
-  margin-bottom: 2rem;
-  margin-left: 1rem;
-  padding: 1rem;
-  background: var(--ifm-background-color);
-  border-radius: 6px;
-  border-left: 3px solid var(--ifm-color-primary-light);
-}
-
-.subCategoryHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--ifm-border-color);
-  margin-bottom: 1rem;
-}
-
-.subCategoryTitle {
-  margin: 0;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--ifm-heading-color);
-}
-
-.subCategoryTaskCount {
-  font-size: 0.85rem;
-  color: var(--ifm-secondary-text-color);
-  background: var(--ifm-color-emphasis-100);
-  padding: 0.2rem 0.6rem;
-  border-radius: 10px;
-}
 
 .taskCount {
   font-size: 0.9rem;
@@ -211,6 +201,7 @@
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 1.5rem;
   margin-top: 1.5rem;
+  
 }
 
 @media (max-width: 768px) {
@@ -223,7 +214,16 @@
     align-items: stretch;
   }
 
+  .controlBar {
+    width: 100%;
+  }
+
+  .sortBar,
   .filterBar {
-    justify-content: center;
+    justify-content: flex-start;
+  }
+
+  .controlLabel {
+    min-width: 60px;
   }
 }
