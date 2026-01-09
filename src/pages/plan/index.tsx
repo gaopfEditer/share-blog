@@ -1,13 +1,16 @@
 import { translate } from '@docusaurus/Translate'
-import React, { useState } from 'react'
+import React, { useState, useMemo, useCallback } from 'react'
 import { cn } from '@site/src/lib/utils'
 import { MagicContainer } from '@site/src/components/magicui/magic-card'
 import MyLayout from '@site/src/theme/MyLayout'
 import { useTasks } from './hooks/useTasks'
+import { useDailyPlans } from './hooks/useDailyPlans'
 import TaskForm from './_components/TaskForm'
 import TaskCard from './_components/TaskCard'
+import DailyPlanCard from './_components/DailyPlanCard'
 import Dashboard from './_components/Dashboard'
-import type { Task, TaskFormData } from './types'
+import TimeStatistics from './_components/TimeStatistics'
+import type { Task, TaskFormData, PhaseTask } from './types'
 import styles from './styles.module.css'
 
 const TITLE = translate({
@@ -16,7 +19,7 @@ const TITLE = translate({
 })
 const DESCRIPTION = translate({
   id: 'theme.plan.description',
-  message: '计划页面是一个后续主题的概览，能够像禅道一样，可以对每个主题都有可以添加任务，暂时写在缓存中，后续会补充接口。',
+  message: '计划的意义：1.明确目标与方向；2.降低不确定性；3.建立反馈基准；4.激发思考深度。',
 })
 
 // 模块类目映射
@@ -50,11 +53,35 @@ function PlanContent() {
     getAllSubCategories,
     statistics,
   } = useTasks()
+  const {
+    getDailyPlans,
+    upsertRecord,
+    getStatistics: getDailyStatistics,
+  } = useDailyPlans()
   const [showForm, setShowForm] = useState(false)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
   const [selectedModule, setSelectedModule] = useState<string | null>(null)
   const [sortMode, setSortMode] = useState<SortMode>('time') // 默认按时间排序
   const [selectedSubCategory, setSelectedSubCategory] = useState<string | null>(null)
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split('T')[0],
+  )
+  const [filteredTasksByTime, setFilteredTasksByTime] = useState<PhaseTask[] | null>(null)
+
+  // 使用 useCallback 包装 setFilteredTasksByTime，避免无限循环
+  const handleFilteredTasksChange = useCallback((tasks: PhaseTask[]) => {
+    setFilteredTasksByTime(tasks)
+  }, [])
+
+  // 获取每日计划（使用 useMemo 缓存，避免不必要的重新渲染）
+  const dailyPlans = useMemo(
+    () => getDailyPlans(selectedDate),
+    [getDailyPlans, selectedDate],
+  )
+  const dailyStats = getDailyStatistics(selectedDate)
+
+  // 使用筛选后的任务或全部任务
+  const tasksToDisplay = filteredTasksByTime || (tasks as PhaseTask[])
 
   const handleSubmit = (formData: TaskFormData) => {
     if (editingTask) {
@@ -78,7 +105,7 @@ function PlanContent() {
     }
   }
 
-  const handleUpdateProgress = (id: string, progress: number) => {
+  const handleUpdateProgress = useCallback((id: string, progress: number) => {
     const status
       = progress === 100
         ? 'completed'
@@ -86,22 +113,61 @@ function PlanContent() {
           ? 'in-progress'
           : 'pending'
     updateTask(id, { progress, status })
-  }
+
+    // 如果使用了筛选后的任务，需要同步更新筛选结果
+    if (filteredTasksByTime) {
+      setFilteredTasksByTime((prev) => {
+        if (!prev) return null
+        return prev.map(task =>
+          task.id === id
+            ? { ...task, progress, status }
+            : task,
+        )
+      })
+    }
+  }, [updateTask, filteredTasksByTime])
 
   const handleCancel = () => {
     setShowForm(false)
     setEditingTask(null)
   }
 
-  // 按时间排序的任务列表
-  const sortedTasksByTime = tasksSortedByTime()
+  // 按时间排序的任务列表（基于筛选后的任务）
+  const sortedTasksByTime = useMemo(() => {
+    return [...tasksToDisplay].sort((a, b) => {
+      const timeA = new Date(a.createdAt).getTime()
+      const timeB = new Date(b.createdAt).getTime()
+      return timeB - timeA // 降序，最新的在前
+    })
+  }, [tasksToDisplay])
 
-  // 按模块分组
-  const tasksByModule = tasksByCategory()
+  // 按模块分组（基于筛选后的任务）
+  const tasksByModule = useMemo(() => {
+    const grouped: Record<string, PhaseTask[]> = {}
+    tasksToDisplay.forEach((task) => {
+      const category = task.moduleCategory
+      if (category) {
+        if (!grouped[category]) {
+          grouped[category] = []
+        }
+        grouped[category].push(task)
+      }
+    })
+    return grouped
+  }, [tasksToDisplay])
+
   const modules = Object.keys(tasksByModule)
 
-  // 获取所有子类目
-  const allSubCategories = getAllSubCategories()
+  // 获取所有子类目（基于筛选后的任务）
+  const allSubCategories = useMemo(() => {
+    const subCategories = new Set<string>()
+    tasksToDisplay.forEach((task) => {
+      if (task.subCategory) {
+        subCategories.add(task.subCategory)
+      }
+    })
+    return Array.from(subCategories).sort()
+  }, [tasksToDisplay])
 
   // 根据排序模式和筛选条件获取任务列表
   const getFilteredTasks = () => {
@@ -119,7 +185,9 @@ function PlanContent() {
 
       modulesToShow.forEach((module) => {
         const moduleTasks = tasksByModule[module] || []
-        filteredTasks.push(...moduleTasks)
+        if (moduleTasks.length > 0) {
+          filteredTasks.push(...moduleTasks)
+        }
       })
 
       // 按子类目筛选
@@ -159,10 +227,14 @@ function PlanContent() {
   }
 
   const renderTaskList = () => {
-    if (tasks.length === 0) {
+    if (tasksToDisplay.length === 0) {
       return (
         <div className={styles.emptyState}>
-          <p>还没有任务，点击上方按钮创建第一个任务吧！</p>
+          <p>
+            {filteredTasksByTime
+              ? '没有符合条件的任务'
+              : '还没有任务，点击上方按钮创建第一个任务吧！'}
+          </p>
         </div>
       )
     }
@@ -242,13 +314,46 @@ function PlanContent() {
     }
   }
 
+  const handleDailyPlanUpdate = useCallback(
+    (
+      recordId: string,
+      data: Partial<{
+        status: string
+        progress: number
+        actualDuration?: number
+        notes?: string
+      }>,
+    ) => {
+      const currentPlans = getDailyPlans(selectedDate)
+      const plan = currentPlans.find(
+        p => p.todayRecord?.id === recordId || (!recordId && !p.todayRecord),
+      )
+      if (plan?.template?.id && selectedDate) {
+        const templateId = plan.template.id
+        upsertRecord(templateId, selectedDate, {
+          ...data,
+          status: (data.status as 'pending' | 'in-progress' | 'completed') || 'pending',
+        })
+      }
+    },
+    [getDailyPlans, selectedDate, upsertRecord],
+  )
+
   return (
     <section className="margin-top--lg margin-bottom--xl">
       <div className="margin-top--lg container">
         {/* 仪表盘 */}
-        <Dashboard statistics={statistics()} />
+        {/* <Dashboard statistics={statistics()} /> */}
 
-        {/* 操作栏 */}
+        {/* 时间维度统计 */}
+        {tasks.length > 0 && (
+          <TimeStatistics
+            tasks={tasks as PhaseTask[]}
+            onFilteredTasksChange={handleFilteredTasksChange}
+          />
+        )}
+
+        {/* 阶段性计划操作栏 */}
         <div className={styles.actionBar}>
           <button
             className="button button--primary"
@@ -257,7 +362,7 @@ function PlanContent() {
               setShowForm(!showForm)
             }}
           >
-            {showForm ? '取消创建' : '+ 创建任务'}
+            {showForm ? '取消创建' : '+ 创建阶段性计划'}
           </button>
 
           <div className={styles.controlBar}>
@@ -370,6 +475,38 @@ function PlanContent() {
 
         {/* 任务列表 */}
         {renderTaskList()}
+
+        {/* 每日计划部分 */}
+        <div className={styles.dailyPlanSection}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>每日计划</h2>
+            <div className={styles.dateSelector}>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={e => setSelectedDate(e.target.value)}
+                className="button button--sm"
+              />
+            </div>
+          </div>
+          {dailyPlans.length > 0
+            ? (
+                <MagicContainer className={styles.dailyPlanList}>
+                  {dailyPlans.map(plan => (
+                    <DailyPlanCard
+                      key={plan.template.id}
+                      plan={plan}
+                      onUpdate={handleDailyPlanUpdate}
+                    />
+                  ))}
+                </MagicContainer>
+              )
+            : (
+                <div className={styles.emptyState}>
+                  <p>今天没有每日计划</p>
+                </div>
+              )}
+        </div>
       </div>
     </section>
   )

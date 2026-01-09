@@ -2,7 +2,7 @@ import { translate } from '@docusaurus/Translate'
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext'
 import { groupByProjects, projectTypeMap, projects } from '@site/data/projects'
 import { cn } from '@site/src/lib/utils'
-import ShowcaseCard from './_components/ShowcaseCard'
+import ShowcaseCard from '@site/src/components/ShowcaseCard'
 
 import ExecutionEnvironment from '@docusaurus/ExecutionEnvironment'
 
@@ -95,7 +95,7 @@ function ShowcaseCards() {
   )
 }
 
-function Showcase(): JSX.Element {
+function Showcase(): React.ReactElement {
   return (
     <MyLayout title={TITLE} description={DESCRIPTION} maxWidth={1280}>
       <main className="margin-vert--lg">

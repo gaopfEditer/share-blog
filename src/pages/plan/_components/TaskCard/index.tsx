@@ -1,6 +1,7 @@
 import React from 'react'
 import { MagicCard } from '@site/src/components/magicui/magic-card'
 import { cn } from '@site/src/lib/utils'
+import ProgressSlider from '../ProgressSlider'
 import type { Task } from '../../types'
 import styles from './styles.module.css'
 
@@ -34,6 +35,16 @@ export default function TaskCard({
   const status = STATUS_MAP[task.status]
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return '-'
+    const date = new Date(dateString)
+    return date.toLocaleDateString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    })
+  }
+
+  const formatDateTime = (dateString: string) => {
     if (!dateString) return '-'
     const date = new Date(dateString)
     return date.toLocaleString('zh-CN', {
@@ -113,39 +124,48 @@ export default function TaskCard({
               %
             </span>
           </div>
-          <div className={styles.progressBar}>
-            <div
-              className={styles.progressFill}
-              style={{
-                width: `${task.progress}%`,
-                backgroundColor: getProgressColor(task.progress),
-              }}
-            />
-          </div>
-          {onUpdateProgress && (
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={task.progress}
-              onChange={e =>
-                onUpdateProgress(task.id, parseInt(e.target.value))}
-              className={styles.progressSlider}
-            />
-          )}
+          <ProgressSlider
+            progress={task.progress}
+            onChange={
+              onUpdateProgress
+                ? progress => onUpdateProgress(task.id, progress)
+                : undefined
+            }
+            getProgressColor={getProgressColor}
+          />
         </div>
 
         <div className={styles.timeInfo}>
+          <div className={styles.timeRow}>
+            <span className={styles.timeLabel}>计划时间:</span>
+            <span className={styles.timeValue}>
+              {task.plannedStartDate && task.plannedEndDate
+                ? `${formatDate(task.plannedStartDate)} ~ ${formatDate(task.plannedEndDate)}`
+                : '-'}
+            </span>
+          </div>
+          {task.actualStartDate && (
+            <div className={styles.timeRow}>
+              <span className={styles.timeLabel}>实际开始:</span>
+              <span className={styles.timeValue}>{formatDate(task.actualStartDate)}</span>
+            </div>
+          )}
+          {task.actualEndDate && (
+            <div className={styles.timeRow}>
+              <span className={styles.timeLabel}>实际结束:</span>
+              <span className={styles.timeValue}>{formatDate(task.actualEndDate)}</span>
+            </div>
+          )}
           {task.plannedTime && (
             <div className={styles.timeRow}>
-              <span className={styles.timeLabel}>计划时间:</span>
-              <span className={styles.timeValue}>{formatDate(task.plannedTime)}</span>
+              <span className={styles.timeLabel}>计划时长:</span>
+              <span className={styles.timeValue}>{task.plannedTime}</span>
             </div>
           )}
           {task.actualTime && (
             <div className={styles.timeRow}>
-              <span className={styles.timeLabel}>实际时间:</span>
-              <span className={styles.timeValue}>{formatDate(task.actualTime)}</span>
+              <span className={styles.timeLabel}>实际时长:</span>
+              <span className={styles.timeValue}>{task.actualTime}</span>
             </div>
           )}
         </div>
@@ -155,8 +175,23 @@ export default function TaskCard({
         <span className={styles.createdAt}>
           创建于
           {' '}
-          {formatDate(task.createdAt)}
+          {formatDateTime(task.createdAt)}
         </span>
+        {task.priority && (
+          <span
+            className={styles.priorityBadge}
+            style={{
+              backgroundColor:
+                task.priority === 'high'
+                  ? '#ef4444'
+                  : task.priority === 'medium'
+                    ? '#f59e0b'
+                    : '#10b981',
+            }}
+          >
+            {task.priority === 'high' ? '高' : task.priority === 'medium' ? '中' : '低'}
+          </span>
+        )}
       </div>
     </MagicCard>
   )

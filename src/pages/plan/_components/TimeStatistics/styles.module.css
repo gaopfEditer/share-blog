@@ -1,0 +1,147 @@
+.timeStatistics {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background-color: var(--ifm-color-emphasis-100);
+  border-radius: 0.5rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--ifm-heading-color);
+}
+
+.controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.dimensionSelector {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.dateSelector {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.dateSelector select {
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  background-color: var(--ifm-background-color);
+  color: var(--ifm-font-color-base);
+  font-size: 0.875rem;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.statCard {
+  padding: 1rem;
+  background-color: var(--ifm-background-color);
+  border-radius: 0.375rem;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.statLabel {
+  font-size: 0.875rem;
+  color: var(--ifm-color-emphasis-600);
+  margin-bottom: 0.5rem;
+}
+
+.statValue {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--ifm-color-primary);
+}
+
+.statValue.completed {
+  color: #10b981;
+}
+
+.statValue.inProgress {
+  color: #3b82f6;
+}
+
+.statValue.pending {
+  color: #9ca3af;
+}
+
+.statValue.onTime {
+  color: #10b981;
+}
+
+.statValue.overdue {
+  color: #ef4444;
+}
+
+.topCategories {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--ifm-color-emphasis-300);
+}
+
+.topCategoriesTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  color: var(--ifm-heading-color);
+}
+
+.categoriesList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.categoryItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background-color: var(--ifm-background-color);
+  border-radius: 0.375rem;
+}
+
+.categoryName {
+  font-weight: 500;
+  color: var(--ifm-font-color-base);
+}
+
+.categoryCount {
+  font-weight: 600;
+  color: var(--ifm-color-primary);
+}
+
+.filteredTasksInfo {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--ifm-color-emphasis-300);
+  text-align: center;
+}
+
+.filteredTasksCount {
+  font-size: 0.9375rem;
+  color: var(--ifm-color-emphasis-700);
+  font-weight: 500;
+}
+

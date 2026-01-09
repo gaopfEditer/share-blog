@@ -30,8 +30,14 @@ export default function TaskForm({
     description: initialData?.description || '',
     subCategory: initialData?.subCategory || '',
     progress: initialData?.progress || 0,
+    plannedStartDate: initialData?.plannedStartDate || '',
+    plannedEndDate: initialData?.plannedEndDate || '',
+    actualStartDate: initialData?.actualStartDate || '',
+    actualEndDate: initialData?.actualEndDate || '',
     plannedTime: initialData?.plannedTime || '',
     actualTime: initialData?.actualTime || '',
+    priority: initialData?.priority || 'medium',
+    tags: initialData?.tags || [],
     status: initialData?.status || 'pending',
   })
 
@@ -45,8 +51,14 @@ export default function TaskForm({
       description: '',
       subCategory: '',
       progress: 0,
+      plannedStartDate: '',
+      plannedEndDate: '',
+      actualStartDate: '',
+      actualEndDate: '',
       plannedTime: '',
       actualTime: '',
+      priority: 'medium',
+      tags: [],
       status: 'pending',
     })
   }
@@ -149,23 +161,80 @@ export default function TaskForm({
       </div>
 
       <div className={styles.formRow}>
-        <label className={styles.label}>计划时间</label>
+        <label className={styles.label}>计划开始日期</label>
         <input
-          type="datetime-local"
+          type="date"
           className={styles.input}
-          value={formData.plannedTime}
-          onChange={e => handleChange('plannedTime', e.target.value)}
+          value={formData.plannedStartDate}
+          onChange={e => handleChange('plannedStartDate', e.target.value)}
+          required
         />
       </div>
 
       <div className={styles.formRow}>
-        <label className={styles.label}>实际时间</label>
+        <label className={styles.label}>计划结束日期</label>
         <input
-          type="datetime-local"
+          type="date"
           className={styles.input}
-          value={formData.actualTime}
-          onChange={e => handleChange('actualTime', e.target.value)}
+          value={formData.plannedEndDate}
+          onChange={e => handleChange('plannedEndDate', e.target.value)}
+          required
         />
+      </div>
+
+      <div className={styles.formRow}>
+        <label className={styles.label}>实际开始日期</label>
+        <input
+          type="date"
+          className={styles.input}
+          value={formData.actualStartDate || ''}
+          onChange={e => handleChange('actualStartDate', e.target.value)}
+        />
+      </div>
+
+      <div className={styles.formRow}>
+        <label className={styles.label}>实际结束日期</label>
+        <input
+          type="date"
+          className={styles.input}
+          value={formData.actualEndDate || ''}
+          onChange={e => handleChange('actualEndDate', e.target.value)}
+        />
+      </div>
+
+      <div className={styles.formRow}>
+        <label className={styles.label}>计划时间（总时长）</label>
+        <input
+          type="text"
+          className={styles.input}
+          value={formData.plannedTime}
+          onChange={e => handleChange('plannedTime', e.target.value)}
+          placeholder="如：40小时"
+        />
+      </div>
+
+      <div className={styles.formRow}>
+        <label className={styles.label}>实际时间（总时长）</label>
+        <input
+          type="text"
+          className={styles.input}
+          value={formData.actualTime || ''}
+          onChange={e => handleChange('actualTime', e.target.value)}
+          placeholder="如：45小时"
+        />
+      </div>
+
+      <div className={styles.formRow}>
+        <label className={styles.label}>优先级</label>
+        <select
+          className={styles.input}
+          value={formData.priority}
+          onChange={e => handleChange('priority', e.target.value)}
+        >
+          <option value="low">低</option>
+          <option value="medium">中</option>
+          <option value="high">高</option>
+        </select>
       </div>
 
       <div className={styles.formActions}>
