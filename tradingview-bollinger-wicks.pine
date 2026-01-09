@@ -1,0 +1,118 @@
+//@version=6
+indicator("布林带插针标记 - 多时间框架", shorttitle="BB Wicks MTF", overlay=true, max_bars_back=500)
+
+// ==================== 输入参数 ====================
+// 布林带参数
+bb_length = input.int(20, title="布林带周期", minval=1)
+bb_mult = input.float(2.0, title="布林带倍数", minval=0.1, step=0.1)
+
+// 时间框架选择
+tf_15m = input.bool(true, title="15分钟", group="时间框架")
+tf_30m = input.bool(true, title="30分钟", group="时间框架")
+tf_1h = input.bool(true, title="1小时", group="时间框架")
+tf_4h = input.bool(true, title="4小时", group="时间框架")
+
+// 插针检测参数
+wick_ratio = input.float(0.3, title="插针比例（实体/影线）", minval=0.1, maxval=1.0, step=0.1, tooltip="影线长度与实体长度的比例，值越小越严格")
+
+// 显示选项
+show_labels = input.bool(true, title="显示标签", group="显示设置")
+show_plots = input.bool(true, title="显示布林带", group="显示设置")
+label_size = input.string("small", title="标签大小", options=["tiny", "small", "normal", "large", "huge"], group="显示设置")
+
+// 颜色设置
+color_upper_wick = input.color(color.new(color.red, 0), title="上插针颜色", group="颜色设置")
+color_lower_wick = input.color(color.new(color.green, 0), title="下插针颜色", group="颜色设置")
+
+// ==================== 函数：计算布林带 ====================
+calc_bb(tf) =>
+    [high_tf, low_tf, close_tf, open_tf] = request.security(syminfo.tickerid, tf, [high, low, close, open], lookahead=barmerge.lookahead_off)
+    // 计算布林带
+    basis = ta.sma(close_tf, bb_length)
+    dev = bb_mult * ta.stdev(close_tf, bb_length)
+    upper = basis + dev
+    lower = basis - dev
+    [upper, lower, basis, high_tf, low_tf, close_tf, open_tf]
+
+// ==================== 函数：检测插针 ====================
+detect_wick(upper_band, lower_band, high_price, low_price, open_price, close_price) =>
+    body_size = math.abs(close_price - open_price)
+    upper_wick = high_price - math.max(open_price, close_price)
+    lower_wick = math.min(open_price, close_price) - low_price
+    // 上插针：上影线突破上轨，且上影线长度满足条件
+    upper_wick_condition = high_price > upper_band and upper_wick > 0 and (body_size == 0 or upper_wick / math.max(body_size, 0.0001) >= wick_ratio)
+    // 下插针：下影线突破下轨，且下影线长度满足条件
+    lower_wick_condition = low_price < lower_band and lower_wick > 0 and (body_size == 0 or lower_wick / math.max(body_size, 0.0001) >= wick_ratio)
+    [upper_wick_condition, lower_wick_condition, upper_wick, lower_wick]
+
+// ==================== 辅助函数：获取标签大小 ====================
+get_label_size() =>
+    switch label_size
+        "tiny" => size.tiny
+        "small" => size.small
+        "normal" => size.normal
+        "large" => size.large
+        "huge" => size.huge
+        => size.small
+
+// ==================== 主逻辑 ====================
+label_size_value = get_label_size()
+
+// 15分钟时间框架
+if tf_15m
+    [upper_15, lower_15, basis_15, high_15, low_15, close_15, open_15] = calc_bb("15")
+    [upper_wick_15, lower_wick_15, uw_size_15, lw_size_15] = detect_wick(upper_15, lower_15, high_15, low_15, open_15, close_15)
+    if upper_wick_15 and show_labels
+        label.new(bar_index, high_15, "15M↑", color=color_upper_wick, textcolor=color.white, style=label.style_label_down, size=label_size_value)
+    if lower_wick_15 and show_labels
+        label.new(bar_index, low_15, "15M↓", color=color_lower_wick, textcolor=color.white, style=label.style_label_up, size=label_size_value)
+
+// 30分钟时间框架
+if tf_30m
+    [upper_30, lower_30, basis_30, high_30, low_30, close_30, open_30] = calc_bb("30")
+    [upper_wick_30, lower_wick_30, uw_size_30, lw_size_30] = detect_wick(upper_30, lower_30, high_30, low_30, open_30, close_30)
+    if upper_wick_30 and show_labels
+        label.new(bar_index, high_30, "30M↑", color=color_upper_wick, textcolor=color.white, style=label.style_label_down, size=label_size_value)
+    if lower_wick_30 and show_labels
+        label.new(bar_index, low_30, "30M↓", color=color_lower_wick, textcolor=color.white, style=label.style_label_up, size=label_size_value)
+
+// 1小时时间框架
+if tf_1h
+    [upper_1h, lower_1h, basis_1h, high_1h, low_1h, close_1h, open_1h] = calc_bb("60")
+    [upper_wick_1h, lower_wick_1h, uw_size_1h, lw_size_1h] = detect_wick(upper_1h, lower_1h, high_1h, low_1h, open_1h, close_1h)
+    if upper_wick_1h and show_labels
+        label.new(bar_index, high_1h, "1H↑", color=color_upper_wick, textcolor=color.white, style=label.style_label_down, size=label_size_value)
+    if lower_wick_1h and show_labels
+        label.new(bar_index, low_1h, "1H↓", color=color_lower_wick, textcolor=color.white, style=label.style_label_up, size=label_size_value)
+
+// 4小时时间框架
+if tf_4h
+    [upper_4h, lower_4h, basis_4h, high_4h, low_4h, close_4h, open_4h] = calc_bb("240")
+    [upper_wick_4h, lower_wick_4h, uw_size_4h, lw_size_4h] = detect_wick(upper_4h, lower_4h, high_4h, low_4h, open_4h, close_4h)
+    if upper_wick_4h and show_labels
+        label.new(bar_index, high_4h, "4H↑", color=color_upper_wick, textcolor=color.white, style=label.style_label_down, size=label_size_value)
+    if lower_wick_4h and show_labels
+        label.new(bar_index, low_4h, "4H↓", color=color_lower_wick, textcolor=color.white, style=label.style_label_up, size=label_size_value)
+
+// ==================== 可选：绘制布林带（当前时间框架） ====================
+basis_current = ta.sma(close, bb_length)
+dev_current = bb_mult * ta.stdev(close, bb_length)
+upper_current = basis_current + dev_current
+lower_current = basis_current - dev_current
+plot(show_plots ? upper_current : na, "上轨", color=color.new(color.blue, 50), linewidth=1)
+plot(show_plots ? lower_current : na, "下轨", color=color.new(color.blue, 50), linewidth=1)
+plot(show_plots ? basis_current : na, "中轨", color=color.new(color.blue, 70), linewidth=1)
+
+// ==================== 实时检测当前K线的插针 ====================
+if barstate.islast
+    // 使用当前图表的数据计算布林带
+    basis_realtime = ta.sma(close, bb_length)
+    dev_realtime = bb_mult * ta.stdev(close, bb_length)
+    upper_realtime = basis_realtime + dev_realtime
+    lower_realtime = basis_realtime - dev_realtime
+    [upper_wick_realtime, lower_wick_realtime, uw_size_realtime, lw_size_realtime] = detect_wick(upper_realtime, lower_realtime, high, low, open, close)
+    // 实时标记（仅在最后一根K线）
+    if upper_wick_realtime and show_labels
+        label.new(bar_index, high, "实时↑", color=color.new(color.red, 20), textcolor=color.white, style=label.style_label_down, size=size.normal)
+    if lower_wick_realtime and show_labels
+        label.new(bar_index, low, "实时↓", color=color.new(color.green, 20), textcolor=color.white, style=label.style_label_up, size=size.normal)
