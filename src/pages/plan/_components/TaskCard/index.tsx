@@ -1,8 +1,9 @@
-import React from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { MagicCard } from '@site/src/components/magicui/magic-card'
 import { cn } from '@site/src/lib/utils'
 import ProgressSlider from '../ProgressSlider'
-import type { Task } from '../../types'
+import SubTaskEditor from '../SubTaskEditor'
+import type { Task, SubTask } from '../../types'
 import styles from './styles.module.css'
 
 interface TaskCardProps {
@@ -10,6 +11,7 @@ interface TaskCardProps {
   onEdit?: (task: Task) => void
   onDelete?: (id: string) => void
   onUpdateProgress?: (id: string, progress: number) => void
+  onUpdateSubTasks?: (id: string, subTasks: SubTask[]) => void
 }
 
 const STATUS_MAP = {
@@ -31,8 +33,59 @@ export default function TaskCard({
   onEdit,
   onDelete,
   onUpdateProgress,
+  onUpdateSubTasks,
 }: TaskCardProps) {
   const status = STATUS_MAP[task.status]
+  const [showSubTaskEditor, setShowSubTaskEditor] = useState(false)
+  const [showSubTaskTooltip, setShowSubTaskTooltip] = useState(false)
+  const cardRef = useRef<HTMLDivElement>(null)
+  const tooltipRef = useRef<HTMLDivElement>(null)
+
+  // 处理双击事件
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setShowSubTaskEditor(true)
+  }
+
+  // 处理悬浮显示子任务
+  useEffect(() => {
+    const handleMouseEnter = () => {
+      if (task.subTasks && task.subTasks.length > 0) {
+        setShowSubTaskTooltip(true)
+      }
+    }
+
+    const handleMouseLeave = () => {
+      setShowSubTaskTooltip(false)
+    }
+
+    const card = cardRef.current
+    if (card) {
+      card.addEventListener('mouseenter', handleMouseEnter)
+      card.addEventListener('mouseleave', handleMouseLeave)
+      return () => {
+        card.removeEventListener('mouseenter', handleMouseEnter)
+        card.removeEventListener('mouseleave', handleMouseLeave)
+      }
+    }
+  }, [task.subTasks])
+
+  // 定位悬浮提示框
+  useEffect(() => {
+    if (showSubTaskTooltip && cardRef.current && tooltipRef.current) {
+      const cardRect = cardRef.current.getBoundingClientRect()
+      const tooltip = tooltipRef.current
+      tooltip.style.top = `${cardRect.bottom + 8}px`
+      tooltip.style.left = `${cardRect.left}px`
+    }
+  }, [showSubTaskTooltip])
+
+  const handleSaveSubTasks = (subTasks: SubTask[]) => {
+    if (onUpdateSubTasks) {
+      onUpdateSubTasks(task.id, subTasks)
+    }
+    setShowSubTaskEditor(false)
+  }
 
   const formatDate = (dateString: string) => {
     if (!dateString) return '-'
@@ -63,8 +116,14 @@ export default function TaskCard({
   }
 
   return (
-    <MagicCard className={cn('card', styles.taskCard)}>
-      <div className={styles.cardHeader}>
+    <>
+      <div
+        ref={cardRef}
+        onDoubleClick={handleDoubleClick}
+        style={{ cursor: 'pointer' }}
+      >
+        <MagicCard className={cn('card', styles.taskCard)}>
+        <div className={styles.cardHeader}>
         <div className={styles.headerLeft}>
           <h4 className={styles.taskName}>{task.name}</h4>
           <div className={styles.badgeContainer}>
@@ -111,6 +170,14 @@ export default function TaskCard({
 
         {task.description && (
           <div className={styles.description}>{task.description}</div>
+        )}
+
+        {task.subTasks && task.subTasks.length > 0 && (
+          <div className={styles.subTaskIndicator}>
+            <span className={styles.subTaskCount}>
+              {task.subTasks.filter(st => st.completed).length} / {task.subTasks.length} 步骤已完成
+            </span>
+          </div>
         )}
 
         <div className={styles.progressSection}>
@@ -193,6 +260,41 @@ export default function TaskCard({
           </span>
         )}
       </div>
-    </MagicCard>
+        </MagicCard>
+      </div>
+
+      {/* 悬浮显示子任务 */}
+      {showSubTaskTooltip && task.subTasks && task.subTasks.length > 0 && (
+        <div ref={tooltipRef} className={styles.subTaskTooltip}>
+          <div className={styles.tooltipHeader}>任务细则</div>
+          <div className={styles.tooltipContent}>
+            {task.subTasks.map((subTask, index) => (
+              <div key={subTask.id} className={styles.tooltipItem}>
+                <span className={styles.tooltipCheckbox}>
+                  {subTask.completed ? '✓' : '○'}
+                </span>
+                <span
+                  className={cn(
+                    styles.tooltipText,
+                    subTask.completed && styles.completed,
+                  )}
+                >
+                  {index + 1}. {subTask.content}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 子任务编辑弹窗 */}
+      {showSubTaskEditor && (
+        <SubTaskEditor
+          subTasks={task.subTasks || []}
+          onSave={handleSaveSubTasks}
+          onCancel={() => setShowSubTaskEditor(false)}
+        />
+      )}
+    </>
   )
 }

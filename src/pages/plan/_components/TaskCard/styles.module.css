@@ -156,10 +156,95 @@
   margin-top: auto;
   padding-top: 0.75rem;
   border-top: 1px solid var(--ifm-border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .createdAt {
   font-size: 0.75rem;
   color: var(--ifm-secondary-text-color);
+}
+
+.priorityBadge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: white;
+  margin-left: 0.75rem;
+}
+
+.subTaskIndicator {
+  padding: 0.5rem 0.75rem;
+  background: var(--ifm-color-emphasis-100);
+  border-radius: 4px;
+  margin-top: 0.5rem;
+}
+
+.subTaskCount {
+  font-size: 0.85rem;
+  color: var(--ifm-color-primary);
+  font-weight: 500;
+}
+
+.subTaskTooltip {
+  position: fixed;
+  background: white;
+  border: 1px solid var(--ifm-border-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 1rem;
+  z-index: 1000;
+  min-width: 300px;
+  max-width: 500px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.tooltipHeader {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--ifm-border-color);
+  color: var(--ifm-heading-color);
+}
+
+.tooltipContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tooltipItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.tooltipCheckbox {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ifm-color-primary);
+  font-weight: 600;
+}
+
+.tooltipText {
+  flex: 1;
+  color: var(--ifm-text-color);
+}
+
+.tooltipText.completed {
+  text-decoration: line-through;
+  color: var(--ifm-secondary-text-color);
+  opacity: 0.7;
 }
 

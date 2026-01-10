@@ -127,6 +127,22 @@ function PlanContent() {
     }
   }, [updateTask, filteredTasksByTime])
 
+  const handleUpdateSubTasks = useCallback((id: string, subTasks: any[]) => {
+    updateTask(id, { subTasks })
+
+    // 如果使用了筛选后的任务，需要同步更新筛选结果
+    if (filteredTasksByTime) {
+      setFilteredTasksByTime((prev) => {
+        if (!prev) return null
+        return prev.map(task =>
+          task.id === id
+            ? { ...task, subTasks }
+            : task,
+        )
+      })
+    }
+  }, [updateTask, filteredTasksByTime])
+
   const handleCancel = () => {
     setShowForm(false)
     setEditingTask(null)
@@ -269,6 +285,7 @@ function PlanContent() {
                 onEdit={handleEdit}
                 onDelete={handleDelete}
                 onUpdateProgress={handleUpdateProgress}
+                onUpdateSubTasks={handleUpdateSubTasks}
               />
             ))}
           </MagicContainer>
@@ -305,6 +322,7 @@ function PlanContent() {
                   onEdit={handleEdit}
                   onDelete={handleDelete}
                   onUpdateProgress={handleUpdateProgress}
+                  onUpdateSubTasks={handleUpdateSubTasks}
                 />
               ))}
             </MagicContainer>

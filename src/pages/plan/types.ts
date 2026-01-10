@@ -52,6 +52,16 @@ export interface DailyPlan {
  * 阶段性计划 - 现有的计划系统，新建的是阶段性计划
  * 阶段性计划是项目性的、有明确起止时间的任务
  */
+/**
+ * 任务细则 - 任务的执行步骤
+ */
+export interface SubTask {
+  id: string // 细则ID
+  content: string // 细则内容
+  completed: boolean // 是否完成
+  order: number // 排序顺序
+}
+
 export interface PhaseTask {
   id: string
   moduleCategory: string // 模块类别
@@ -68,6 +78,7 @@ export interface PhaseTask {
   actualTime?: string // 实际时间（总时长，如 "45小时"）
   priority: 'low' | 'medium' | 'high' // 优先级
   tags?: string[] // 标签
+  subTasks?: SubTask[] // 任务细则（执行步骤）
   createdAt: string // 创建时间
   updatedAt: string // 更新时间
 }
