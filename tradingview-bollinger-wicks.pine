@@ -6,11 +6,31 @@ indicator("布林带插针标记 - 多时间框架", shorttitle="BB Wicks MTF", 
 bb_length = input.int(20, title="布林带周期", minval=1)
 bb_mult = input.float(2.0, title="布林带倍数", minval=0.1, step=0.1)
 
-// 时间框架选择
-tf_15m = input.bool(true, title="15分钟", group="时间框架")
-tf_30m = input.bool(true, title="30分钟", group="时间框架")
-tf_1h = input.bool(true, title="1小时", group="时间框架")
-tf_4h = input.bool(true, title="4小时", group="时间框架")
+// ==================== 时间框架配置（可扩展）====================
+// 配置说明：
+//   - timeframes_code: 存储时间框架代码（TradingView格式）
+//   - timeframes_name: 存储显示名称（对应位置）
+// 时间框架代码说明：
+//   "15" = 15分钟, "30" = 30分钟, "60" = 1小时
+//   "240" = 4小时, "1D" = 1天, "1W" = 1周
+// 要添加新时间框架，在两个数组中对应位置添加即可
+var timeframes_code = array.new<string>()
+var timeframes_name = array.new<string>()
+if barstate.isfirst
+    // 默认配置：15分钟、1小时、4小时
+    array.push(timeframes_code, "15")
+    array.push(timeframes_name, "15M")
+    array.push(timeframes_code, "60")
+    array.push(timeframes_name, "1H")
+    array.push(timeframes_code, "240")
+    array.push(timeframes_name, "4H")
+    // 要添加新时间框架，取消下面的注释并修改：
+    // array.push(timeframes_code, "30")
+    // array.push(timeframes_name, "30M")  // 30分钟
+    // array.push(timeframes_code, "1D")
+    // array.push(timeframes_name, "1D")   // 1天
+    // array.push(timeframes_code, "1W")
+    // array.push(timeframes_name, "1W")   // 1周
 
 // 插针检测参数
 wick_ratio = input.float(0.3, title="插针比例（实体/影线）", minval=0.1, maxval=1.0, step=0.1, tooltip="影线长度与实体长度的比例，值越小越严格")
@@ -19,6 +39,14 @@ wick_ratio = input.float(0.3, title="插针比例（实体/影线）", minval=0.
 show_labels = input.bool(true, title="显示标签", group="显示设置")
 show_plots = input.bool(true, title="显示布林带", group="显示设置")
 label_size = input.string("small", title="标签大小", options=["tiny", "small", "normal", "large", "huge"], group="显示设置")
+merge_signals = input.bool(false, title="合并信号", tooltip="将同一根K线的多个时间框架信号合并成一个标签（显示所有时间框架名称）", group="显示设置")
+min_bar_gap = input.int(3, title="最小K线间隔", minval=0, tooltip="相邻标签之间的最小K线数量，避免重叠", group="显示设置")
+priority_mode = input.bool(false, title="优先级模式", tooltip="开启后只显示最高优先级时间框架的信号", group="显示设置")
+
+// 警报设置
+enable_alert = input.bool(true, title="启用警报", tooltip="启用后可在TradingView中设置警报，通过webhook调用API", group="警报设置")
+alert_on_realtime = input.bool(true, title="实时K线警报", tooltip="在当前时间框架检测到插针时触发警报", group="警报设置")
+alert_on_mtf = input.bool(false, title="多时间框架警报", tooltip="在其他时间框架检测到插针时触发警报", group="警报设置")
 
 // 颜色设置
 color_upper_wick = input.color(color.new(color.red, 0), title="上插针颜色", group="颜色设置")
@@ -55,44 +83,150 @@ get_label_size() =>
         "huge" => size.huge
         => size.small
 
+// ==================== 变量：记录上次标签位置 ====================
+var int last_upper_label_bar = na
+var int last_lower_label_bar = na
+
+// ==================== 变量：警报条件 ====================
+upper_wick_alert = false
+lower_wick_alert = false
+upper_alert_message = ""
+lower_alert_message = ""
+
 // ==================== 主逻辑 ====================
 label_size_value = get_label_size()
 
-// 15分钟时间框架
-if tf_15m
-    [upper_15, lower_15, basis_15, high_15, low_15, close_15, open_15] = calc_bb("15")
-    [upper_wick_15, lower_wick_15, uw_size_15, lw_size_15] = detect_wick(upper_15, lower_15, high_15, low_15, open_15, close_15)
-    if upper_wick_15 and show_labels
-        label.new(bar_index, high_15, "15M↑", color=color_upper_wick, textcolor=color.white, style=label.style_label_down, size=label_size_value)
-    if lower_wick_15 and show_labels
-        label.new(bar_index, low_15, "15M↓", color=color_lower_wick, textcolor=color.white, style=label.style_label_up, size=label_size_value)
+// 存储各时间框架的上插针检测结果
+upper_tfs = array.new<string>()
+upper_prices_list = array.new<float>()
 
-// 30分钟时间框架
-if tf_30m
-    [upper_30, lower_30, basis_30, high_30, low_30, close_30, open_30] = calc_bb("30")
-    [upper_wick_30, lower_wick_30, uw_size_30, lw_size_30] = detect_wick(upper_30, lower_30, high_30, low_30, open_30, close_30)
-    if upper_wick_30 and show_labels
-        label.new(bar_index, high_30, "30M↑", color=color_upper_wick, textcolor=color.white, style=label.style_label_down, size=label_size_value)
-    if lower_wick_30 and show_labels
-        label.new(bar_index, low_30, "30M↓", color=color_lower_wick, textcolor=color.white, style=label.style_label_up, size=label_size_value)
+// 存储各时间框架的下插针检测结果
+lower_tfs = array.new<string>()
+lower_prices_list = array.new<float>()
 
-// 1小时时间框架
-if tf_1h
-    [upper_1h, lower_1h, basis_1h, high_1h, low_1h, close_1h, open_1h] = calc_bb("60")
-    [upper_wick_1h, lower_wick_1h, uw_size_1h, lw_size_1h] = detect_wick(upper_1h, lower_1h, high_1h, low_1h, open_1h, close_1h)
-    if upper_wick_1h and show_labels
-        label.new(bar_index, high_1h, "1H↑", color=color_upper_wick, textcolor=color.white, style=label.style_label_down, size=label_size_value)
-    if lower_wick_1h and show_labels
-        label.new(bar_index, low_1h, "1H↓", color=color_lower_wick, textcolor=color.white, style=label.style_label_up, size=label_size_value)
+// 循环处理所有配置的时间框架
+for i = 0 to array.size(timeframes_code) - 1
+    tf_code = array.get(timeframes_code, i)
+    tf_name = array.get(timeframes_name, i)
+    
+    [upper_tf, lower_tf, basis_tf, high_tf, low_tf, close_tf, open_tf] = calc_bb(tf_code)
+    [upper_wick_tf, lower_wick_tf, uw_size_tf, lw_size_tf] = detect_wick(upper_tf, lower_tf, high_tf, low_tf, open_tf, close_tf)
+    
+    if upper_wick_tf
+        array.push(upper_tfs, tf_name)
+        array.push(upper_prices_list, high_tf)
+        // 设置多时间框架警报
+        if enable_alert and alert_on_mtf
+            upper_wick_alert := true
+            if upper_alert_message == ""
+                upper_alert_message := tf_name + "@" + str.tostring(high_tf)
+            else
+                upper_alert_message := upper_alert_message + "+" + tf_name + "@" + str.tostring(high_tf)
+    
+    if lower_wick_tf
+        array.push(lower_tfs, tf_name)
+        array.push(lower_prices_list, low_tf)
+        // 设置多时间框架警报
+        if enable_alert and alert_on_mtf
+            lower_wick_alert := true
+            if lower_alert_message == ""
+                lower_alert_message := tf_name + "@" + str.tostring(low_tf)
+            else
+                lower_alert_message := lower_alert_message + "+" + tf_name + "@" + str.tostring(low_tf)
 
-// 4小时时间框架
-if tf_4h
-    [upper_4h, lower_4h, basis_4h, high_4h, low_4h, close_4h, open_4h] = calc_bb("240")
-    [upper_wick_4h, lower_wick_4h, uw_size_4h, lw_size_4h] = detect_wick(upper_4h, lower_4h, high_4h, low_4h, open_4h, close_4h)
-    if upper_wick_4h and show_labels
-        label.new(bar_index, high_4h, "4H↑", color=color_upper_wick, textcolor=color.white, style=label.style_label_down, size=label_size_value)
-    if lower_wick_4h and show_labels
-        label.new(bar_index, low_4h, "4H↓", color=color_lower_wick, textcolor=color.white, style=label.style_label_up, size=label_size_value)
+// ==================== 优先级处理函数 ====================
+// 优先级顺序：周 > 天 > 4小时 > 1小时 > 30分钟 > 15分钟
+get_priority_tf(tf_array) =>
+    result = ""
+    priority_order = array.new<string>()
+    array.push(priority_order, "1W")
+    array.push(priority_order, "1D")
+    array.push(priority_order, "4H")
+    array.push(priority_order, "1H")
+    array.push(priority_order, "30M")
+    array.push(priority_order, "15M")
+    
+    for i = 0 to array.size(priority_order) - 1
+        priority = array.get(priority_order, i)
+        for j = 0 to array.size(tf_array) - 1
+            if array.get(tf_array, j) == priority
+                result := priority
+                break
+        if result != ""
+            break
+    result
+
+// ==================== 显示标签 ====================
+if show_labels
+    // 检查间隔
+    can_show_upper = na(last_upper_label_bar) or (bar_index - last_upper_label_bar) >= min_bar_gap
+    can_show_lower = na(last_lower_label_bar) or (bar_index - last_lower_label_bar) >= min_bar_gap
+    
+    // 上插针
+    if array.size(upper_tfs) > 0 and can_show_upper
+        if priority_mode
+            // 优先级模式：只显示最高优先级
+            priority_tf = get_priority_tf(upper_tfs)
+            if priority_tf != ""
+                label_text = priority_tf + "↑"
+                label_price = array.max(upper_prices_list)
+                label.new(bar_index, label_price, label_text, color=color_upper_wick, textcolor=color.white, style=label.style_label_down, size=label_size_value)
+                last_upper_label_bar := bar_index
+        else if merge_signals
+            // 合并模式：显示所有时间框架名称组合
+            tf_count = array.size(upper_tfs)
+            if tf_count > 0
+                // 组合所有时间框架名称
+                label_text = ""
+                for j = 0 to array.size(upper_tfs) - 1
+                    if j > 0
+                        label_text := label_text + "+"
+                    label_text := label_text + array.get(upper_tfs, j)
+                label_text := label_text + "↑"
+                label_price = array.max(upper_prices_list)
+                label.new(bar_index, label_price, label_text, color=color_upper_wick, textcolor=color.white, style=label.style_label_down, size=label_size_value)
+                last_upper_label_bar := bar_index
+        else
+            // 分离模式：每个时间框架单独显示
+            for i = 0 to array.size(upper_tfs) - 1
+                tf_name = array.get(upper_tfs, i)
+                label_text = tf_name + "↑"
+                label_price = array.get(upper_prices_list, i)
+                label.new(bar_index, label_price, label_text, color=color_upper_wick, textcolor=color.white, style=label.style_label_down, size=label_size_value)
+            last_upper_label_bar := bar_index
+    
+    // 下插针
+    if array.size(lower_tfs) > 0 and can_show_lower
+        if priority_mode
+            // 优先级模式：只显示最高优先级
+            priority_tf = get_priority_tf(lower_tfs)
+            if priority_tf != ""
+                label_text = priority_tf + "↓"
+                label_price = array.min(lower_prices_list)
+                label.new(bar_index, label_price, label_text, color=color_lower_wick, textcolor=color.white, style=label.style_label_up, size=label_size_value)
+                last_lower_label_bar := bar_index
+        else if merge_signals
+            // 合并模式：显示所有时间框架名称组合
+            tf_count = array.size(lower_tfs)
+            if tf_count > 0
+                // 组合所有时间框架名称
+                label_text = ""
+                for j = 0 to array.size(lower_tfs) - 1
+                    if j > 0
+                        label_text := label_text + "+"
+                    label_text := label_text + array.get(lower_tfs, j)
+                label_text := label_text + "↓"
+                label_price = array.min(lower_prices_list)
+                label.new(bar_index, label_price, label_text, color=color_lower_wick, textcolor=color.white, style=label.style_label_up, size=label_size_value)
+                last_lower_label_bar := bar_index
+        else
+            // 分离模式：每个时间框架单独显示
+            for i = 0 to array.size(lower_tfs) - 1
+                tf_name = array.get(lower_tfs, i)
+                label_text = tf_name + "↓"
+                label_price = array.get(lower_prices_list, i)
+                label.new(bar_index, label_price, label_text, color=color_lower_wick, textcolor=color.white, style=label.style_label_up, size=label_size_value)
+            last_lower_label_bar := bar_index
 
 // ==================== 可选：绘制布林带（当前时间框架） ====================
 basis_current = ta.sma(close, bb_length)
@@ -116,3 +250,22 @@ if barstate.islast
         label.new(bar_index, high, "实时↑", color=color.new(color.red, 20), textcolor=color.white, style=label.style_label_down, size=size.normal)
     if lower_wick_realtime and show_labels
         label.new(bar_index, low, "实时↓", color=color.new(color.green, 20), textcolor=color.white, style=label.style_label_up, size=size.normal)
+    
+    // 设置实时警报
+    if enable_alert and alert_on_realtime
+        if upper_wick_realtime
+            upper_wick_alert := true
+            upper_alert_message := "实时@" + str.tostring(high) + " 价格:" + str.tostring(close)
+        if lower_wick_realtime
+            lower_wick_alert := true
+            lower_alert_message := "实时@" + str.tostring(low) + " 价格:" + str.tostring(close)
+
+// ==================== 警报条件定义 ====================
+// 创建用于警报的plot（隐藏显示）
+plot_upper_alert = plot(upper_wick_alert ? 1 : 0, title="上插针警报", display=display.none)
+plot_lower_alert = plot(lower_wick_alert ? 1 : 0, title="下插针警报", display=display.none)
+
+// 上插针警报条件
+alertcondition(upper_wick_alert, title="上插针预警", message="{{ticker}} 上插针 | {{time}} | 价格:{{close}} | " + upper_alert_message)
+// 下插针警报条件
+alertcondition(lower_wick_alert, title="下插针预警", message="{{ticker}} 下插针 | {{time}} | 价格:{{close}} | " + lower_alert_message)
