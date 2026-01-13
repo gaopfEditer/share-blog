@@ -72,3 +72,6 @@ const ShowcaseCard = memo(({ project }: { project: Project }) => {
 
 export default ShowcaseCard
 
+
+
+
