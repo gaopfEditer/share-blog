@@ -18,7 +18,7 @@ importers:
         specifier: 3.7.0
         version: 3.7.0(@docusaurus/plugin-content-docs@3.7.0(@mdx-js/react@3.1.1(@types/react@19.2.7)(react@19.2.3))(eslint@9.18.0(jiti@1.21.7))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.7.3))(@mdx-js/react@3.1.1(@types/react@19.2.7)(react@19.2.3))(eslint@9.18.0(jiti@1.21.7))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.7.3)
       '@docusaurus/plugin-vercel-analytics':
-        specifier: ^3.7.0
+        specifier: 3.7.0
         version: 3.7.0(@mdx-js/react@3.1.1(@types/react@19.2.7)(react@19.2.3))(eslint@9.18.0(jiti@1.21.7))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.7.3)
       '@docusaurus/preset-classic':
         specifier: 3.7.0
