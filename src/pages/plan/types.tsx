@@ -266,3 +266,35 @@ export type Task = PhaseTask
  * 保留此类型以保持向后兼容
  */
 export type TaskFormData = PhaseTaskFormData
+
+// ==================== 页面组件 ====================
+import React from 'react'
+import { translate } from '@docusaurus/Translate'
+import MyLayout from '@site/src/theme/MyLayout'
+
+const TITLE = translate({
+  id: 'theme.plan.types.title',
+  message: '类型定义',
+})
+
+const DESCRIPTION = translate({
+  id: 'theme.plan.types.description',
+  message: '计划系统的 TypeScript 类型定义',
+})
+
+export default function TypesPage(): React.ReactElement {
+  return (
+    <MyLayout title={TITLE} description={DESCRIPTION} maxWidth={1280}>
+      <main className="margin-vert--lg">
+        <section className="text-center">
+          <h2>{TITLE}</h2>
+          <p>{DESCRIPTION}</p>
+          <p className="margin-top--md">
+            此页面包含计划系统的所有 TypeScript 类型定义。
+            这些类型定义用于类型检查和代码提示。
+          </p>
+        </section>
+      </main>
+    </MyLayout>
+  )
+}
