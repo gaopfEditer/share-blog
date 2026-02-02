@@ -53,7 +53,7 @@ rsi_oversold = input.int(30, title="超卖阈值", minval=0, maxval=50, group="R
 
 // RSI 背离设置
 enable_rsi_divergence = input.bool(true, title="启用RSI背离预警", tooltip="检测价格与RSI的背离信号", group="RSI背离设置")
-divergence_lookback = input.int(20, title="背离检测周期", minval=5, maxval=100, tooltip="用于检测极值点的K线数量", group="RSI背离设置")
+divergence_lookback = input.int(9, title="历史K线周期", minval=5, maxval=50, tooltip="用于计算平均K线长度的历史周期", group="RSI背离设置")
 
 // 颜色设置
 color_upper_wick = input.color(color.new(color.red, 0), title="上插针颜色", group="颜色设置")
@@ -166,61 +166,56 @@ dev_current = bb_mult * ta.stdev(close, bb_length)
 upper_current = basis_current + dev_current
 lower_current = basis_current - dev_current
 
-// ==================== RSI 背离检测 ====================
+// ==================== RSI 背离检测（实时）====================
 // 初始化背离警报
 rsi_bearish_divergence_alert := false
 rsi_bullish_divergence_alert := false
 
-if enable_rsi_divergence
-    // 使用 pivot 点检测极值
-    pivot_left = divergence_lookback
-    pivot_right = divergence_lookback
+if enable_rsi_divergence and not na(rsi_value)
+    // 计算历史9根K线的平均长度（实体长度：|close - open|）
+    avg_candle_length = 0.0
+    for i = 1 to divergence_lookback
+        candle_length = math.abs(close[i] - open[i])
+        avg_candle_length := avg_candle_length + candle_length
+    avg_candle_length := avg_candle_length / divergence_lookback
     
-    // 检测价格和RSI的 pivot 点
-    price_pivot_high = ta.pivothigh(high, pivot_left, pivot_right)
-    price_pivot_low = ta.pivotlow(low, pivot_left, pivot_right)
-    rsi_pivot_high = ta.pivothigh(rsi_value, pivot_left, pivot_right)
-    rsi_pivot_low = ta.pivotlow(rsi_value, pivot_left, pivot_right)
+    // 当前K线的长度
+    current_candle_length = math.abs(close - open)
     
-    // 当检测到新的价格 pivot 高点时
-    if not na(price_pivot_high)
-        current_price_high = price_pivot_high
-        current_rsi_high = rsi_value[pivot_right]
-        
-        // 如果有之前的高点，进行比较
-        if not na(prev_price_high) and not na(prev_rsi_high)
-            price_new_high = current_price_high > prev_price_high
-            rsi_not_new_high = current_rsi_high < prev_rsi_high
-            
-            // 看跌背离：价格创新高，但RSI未创新高
-            if price_new_high and rsi_not_new_high
-                rsi_bearish_divergence_alert := true
-                if show_labels
-                    label.new(bar_index - pivot_right, current_price_high, "看跌背离", color=color.new(color.orange, 0), textcolor=color.white, style=label.style_label_down, size=label_size_value)
-        
-        // 更新之前的高点
-        prev_price_high := current_price_high
-        prev_rsi_high := current_rsi_high
+    // 价格变化阈值：平均长度的一半
+    price_threshold = avg_candle_length / 2.0
     
-    // 当检测到新的价格 pivot 低点时
-    if not na(price_pivot_low)
-        current_price_low = price_pivot_low
-        current_rsi_low = rsi_value[pivot_right]
+    // 查找左侧历史最高价和对应的RSI（不包括当前K线）
+    highest_price = ta.highest(high[1], divergence_lookback)
+    highest_price_idx = ta.highestbars(high[1], divergence_lookback)
+    highest_rsi = highest_price_idx >= 0 ? rsi_value[1 + highest_price_idx] : na
+    
+    // 查找左侧历史最低价和对应的RSI（不包括当前K线）
+    lowest_price = ta.lowest(low[1], divergence_lookback)
+    lowest_price_idx = ta.lowestbars(low[1], divergence_lookback)
+    lowest_rsi = lowest_price_idx >= 0 ? rsi_value[1 + lowest_price_idx] : na
+    
+    // 实时检测看跌背离：价格创新高但RSI未创新高
+    if not na(highest_price) and not na(highest_rsi)
+        price_new_high = high > highest_price
+        rsi_not_new_high = rsi_value < highest_rsi
         
-        // 如果有之前的低点，进行比较
-        if not na(prev_price_low) and not na(prev_rsi_low)
-            price_new_low = current_price_low < prev_price_low
-            rsi_not_new_low = current_rsi_low > prev_rsi_low
-            
-            // 看涨背离：价格创新低，但RSI未创新低
-            if price_new_low and rsi_not_new_low
-                rsi_bullish_divergence_alert := true
-                if show_labels
-                    label.new(bar_index - pivot_right, current_price_low, "看涨背离", color=color.new(color.aqua, 0), textcolor=color.white, style=label.style_label_up, size=label_size_value)
+        // 条件：价格创新高 + RSI未创新高 + 当前K线长度 > 平均长度的一半
+        if price_new_high and rsi_not_new_high and current_candle_length > price_threshold
+            rsi_bearish_divergence_alert := true
+            if show_labels
+                label.new(bar_index, high, "看跌背离11", color=color.new(color.orange, 0), textcolor=color.white, style=label.style_label_down, size=label_size_value)
+    
+    // 实时检测看涨背离：价格创新低但RSI未创新低
+    if not na(lowest_price) and not na(lowest_rsi)
+        price_new_low = low < lowest_price
+        rsi_not_new_low = rsi_value > lowest_rsi
         
-        // 更新之前的低点
-        prev_price_low := current_price_low
-        prev_rsi_low := current_rsi_low
+        // 条件：价格创新低 + RSI未创新低 + 当前K线长度 > 平均长度的一半
+        if price_new_low and rsi_not_new_low and current_candle_length > price_threshold
+            rsi_bullish_divergence_alert := true
+            if show_labels
+                label.new(bar_index, low, "看涨背离11", color=color.new(color.aqua, 0), textcolor=color.white, style=label.style_label_up, size=label_size_value)
 
 // ==================== 绘制布林带（当前时间框架） ====================
 plot(show_plots ? upper_current : na, "上轨", color=color.new(color.blue, 50), linewidth=1)
