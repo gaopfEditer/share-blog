@@ -55,6 +55,13 @@ rsi_oversold = input.int(30, title="超卖阈值", minval=0, maxval=50, group="R
 enable_rsi_divergence = input.bool(true, title="启用RSI背离预警", tooltip="检测价格与RSI的背离信号", group="RSI背离设置")
 divergence_lookback = input.int(9, title="历史K线周期", minval=5, maxval=50, tooltip="用于计算平均K线长度的历史周期", group="RSI背离设置")
 
+// 插针走平检测设置
+enable_wick_flat = input.bool(true, title="启用插针走平预警", tooltip="检测上下轨附近插针走平信号", group="插针走平设置")
+wick_flat_lookback = input.int(50, title="检测周期", minval=20, maxval=200, tooltip="检测走平信号的历史K线数量", group="插针走平设置")
+wick_flat_count = input.int(3, title="最小插针数量", minval=3, maxval=10, tooltip="触发走平信号所需的最少插针数量", group="插针走平设置")
+wick_flat_price_tolerance = input.float(0.02, title="收盘价相近阈值", minval=0.01, maxval=0.1, step=0.01, tooltip="收盘价差异百分比，值越小越严格", group="插针走平设置")
+band_distance_threshold = input.float(0.15, title="轨距阈值", minval=0.05, maxval=0.5, step=0.05, tooltip="插针距离上下轨的距离阈值（15%表示在轨距的15%范围内）", group="插针走平设置")
+
 // 颜色设置
 color_upper_wick = input.color(color.new(color.red, 0), title="上插针颜色", group="颜色设置")
 color_lower_wick = input.color(color.new(color.green, 0), title="下插针颜色", group="颜色设置")
@@ -90,28 +97,28 @@ get_label_size() =>
         "huge" => size.huge
         => size.small
 
-// ==================== 变量：警报条件 ====================
-upper_wick_alert = false
-lower_wick_alert = false
-upper_alert_message = ""
-lower_alert_message = ""
+// ==================== 变量：警报条件（合并后）====================
+wick_alert = false  // 合并的上插针和下插针警报
+rsi_alert = false  // 合并的RSI超买超卖警报
+rsi_divergence_alert = false  // 合并的RSI背离警报
+wick_flat_alert = false  // 插针走平警报
 
-// RSI 预警变量
-rsi_overbought_alert = false
-rsi_oversold_alert = false
+// 警报消息
+wick_alert_message = ""
+rsi_alert_message = ""
+rsi_divergence_alert_message = ""
+wick_flat_alert_message = ""
 
-// RSI 背离预警变量
-rsi_bearish_divergence_alert = false  // 看跌背离：价格创新高，RSI未创新高
-rsi_bullish_divergence_alert = false  // 看涨背离：价格创新低，RSI未创新低
-
-// RSI 背离检测：存储之前的 pivot 点
-var float prev_price_high = na
-var float prev_price_low = na
-var float prev_rsi_high = na
-var float prev_rsi_low = na
+// 插针历史数据存储（用于走平检测）
+// 存储结构：每个元素是一个数组 [bar_index, close_price, is_upper_wick, upper_band, lower_band]
+var array<array<float>> wick_history = array.new<array<float>>()
 
 // ==================== 主逻辑 ====================
 label_size_value = get_label_size()
+
+// 初始化警报变量
+wick_alert := false
+wick_alert_message := ""
 
 // 循环处理所有配置的时间框架 - 忠实记录每个插针，不合并不忽略
 for i = 0 to array.size(timeframes_code) - 1
@@ -121,44 +128,71 @@ for i = 0 to array.size(timeframes_code) - 1
     [upper_tf, lower_tf, basis_tf, high_tf, low_tf, close_tf, open_tf] = calc_bb(tf_code)
     [upper_wick_tf, lower_wick_tf, uw_size_tf, lw_size_tf] = detect_wick(upper_tf, lower_tf, high_tf, low_tf, open_tf, close_tf)
     
-    // 上插针：直接显示和记录，不合并
+    // 上插针：直接显示和记录
     if upper_wick_tf
         if show_labels
             label.new(bar_index, high_tf, tf_name + "↑", color=color_upper_wick, textcolor=color.white, style=label.style_label_down, size=label_size_value)
-        // 设置多时间框架警报
+        // 合并警报：上插针和下插针合并
         if enable_alert and alert_on_mtf
-            upper_wick_alert := true
-            if upper_alert_message == ""
-                upper_alert_message := tf_name + "@" + str.tostring(high_tf)
+            wick_alert := true
+            if wick_alert_message == ""
+                wick_alert_message := "上插针:" + tf_name + "@" + str.tostring(high_tf)
             else
-                upper_alert_message := upper_alert_message + "," + tf_name + "@" + str.tostring(high_tf)
+                wick_alert_message := wick_alert_message + ",上插针:" + tf_name + "@" + str.tostring(high_tf)
+        // 记录插针历史（用于走平检测）
+        if enable_wick_flat
+            wick_data = array.new<float>()
+            array.push(wick_data, bar_index)
+            array.push(wick_data, close_tf)
+            array.push(wick_data, 1.0)  // 1表示上插针
+            array.push(wick_data, upper_tf)
+            array.push(wick_data, lower_tf)
+            array.push(wick_data, high_tf)
+            array.push(wick_data, low_tf)
+            array.push(wick_history, wick_data)
     
-    // 下插针：直接显示和记录，不合并
+    // 下插针：直接显示和记录
     if lower_wick_tf
         if show_labels
             label.new(bar_index, low_tf, tf_name + "↓", color=color_lower_wick, textcolor=color.white, style=label.style_label_up, size=label_size_value)
-        // 设置多时间框架警报
+        // 合并警报：上插针和下插针合并
         if enable_alert and alert_on_mtf
-            lower_wick_alert := true
-            if lower_alert_message == ""
-                lower_alert_message := tf_name + "@" + str.tostring(low_tf)
+            wick_alert := true
+            if wick_alert_message == ""
+                wick_alert_message := "下插针:" + tf_name + "@" + str.tostring(low_tf)
             else
-                lower_alert_message := lower_alert_message + "," + tf_name + "@" + str.tostring(low_tf)
+                wick_alert_message := wick_alert_message + ",下插针:" + tf_name + "@" + str.tostring(low_tf)
+        // 记录插针历史（用于走平检测）
+        if enable_wick_flat
+            wick_data = array.new<float>()
+            array.push(wick_data, bar_index)
+            array.push(wick_data, close_tf)
+            array.push(wick_data, 0.0)  // 0表示下插针
+            array.push(wick_data, upper_tf)
+            array.push(wick_data, lower_tf)
+            array.push(wick_data, high_tf)
+            array.push(wick_data, low_tf)
+            array.push(wick_history, wick_data)
 
 
-// ==================== RSI 计算和预警 ====================
+// ==================== RSI 计算和预警（合并）====================
 rsi_value = ta.rsi(close, rsi_length)
 
-// 检测 RSI 超买超卖条件
+// 初始化RSI警报
+rsi_alert := false
+rsi_alert_message := ""
+
+// 检测 RSI 超买超卖条件（合并）
 if enable_rsi_alert
-    // 超买：从 <= 阈值变为 > 阈值时触发
-    rsi_overbought_alert := rsi_value > rsi_overbought and rsi_value[1] <= rsi_overbought
+    rsi_overbought_trigger = rsi_value > rsi_overbought and rsi_value[1] <= rsi_overbought
+    rsi_oversold_trigger = rsi_value < rsi_oversold and rsi_value[1] >= rsi_oversold
     
-    // 超卖：从 >= 阈值变为 < 阈值时触发
-    rsi_oversold_alert := rsi_value < rsi_oversold and rsi_value[1] >= rsi_oversold
-else
-    rsi_overbought_alert := false
-    rsi_oversold_alert := false
+    if rsi_overbought_trigger
+        rsi_alert := true
+        rsi_alert_message := "RSI超买:" + str.tostring(rsi_value, "#.##")
+    else if rsi_oversold_trigger
+        rsi_alert := true
+        rsi_alert_message := "RSI超卖:" + str.tostring(rsi_value, "#.##")
 
 // ==================== 可选：绘制布林带（当前时间框架） ====================
 basis_current = ta.sma(close, bb_length)
@@ -166,10 +200,10 @@ dev_current = bb_mult * ta.stdev(close, bb_length)
 upper_current = basis_current + dev_current
 lower_current = basis_current - dev_current
 
-// ==================== RSI 背离检测（实时）====================
+// ==================== RSI 背离检测（实时，合并）====================
 // 初始化背离警报
-rsi_bearish_divergence_alert := false
-rsi_bullish_divergence_alert := false
+rsi_divergence_alert := false
+rsi_divergence_alert_message := ""
 
 if enable_rsi_divergence and not na(rsi_value)
     // 计算历史9根K线的平均长度（实体长度：|close - open|）
@@ -196,31 +230,162 @@ if enable_rsi_divergence and not na(rsi_value)
     lowest_rsi = lowest_price_idx >= 0 ? rsi_value[1 + lowest_price_idx] : na
     
     // 实时检测看跌背离：价格创新高但RSI未创新高
+    bearish_divergence = false
     if not na(highest_price) and not na(highest_rsi)
         price_new_high = high > highest_price
         rsi_not_new_high = rsi_value < highest_rsi
         
         // 条件：价格创新高 + RSI未创新高 + 当前K线长度 > 平均长度的一半
         if price_new_high and rsi_not_new_high and current_candle_length > price_threshold
-            rsi_bearish_divergence_alert := true
+            bearish_divergence := true
+            rsi_divergence_alert := true
+            rsi_divergence_alert_message := "看跌背离"
             if show_labels
-                label.new(bar_index, high, "看跌背离11", color=color.new(color.orange, 0), textcolor=color.white, style=label.style_label_down, size=label_size_value)
+                label.new(bar_index, high, "看跌背离", color=color.new(color.orange, 0), textcolor=color.white, style=label.style_label_down, size=label_size_value)
     
     // 实时检测看涨背离：价格创新低但RSI未创新低
+    bullish_divergence = false
     if not na(lowest_price) and not na(lowest_rsi)
         price_new_low = low < lowest_price
         rsi_not_new_low = rsi_value > lowest_rsi
         
         // 条件：价格创新低 + RSI未创新低 + 当前K线长度 > 平均长度的一半
         if price_new_low and rsi_not_new_low and current_candle_length > price_threshold
-            rsi_bullish_divergence_alert := true
+            bullish_divergence := true
+            rsi_divergence_alert := true
+            if rsi_divergence_alert_message == ""
+                rsi_divergence_alert_message := "看涨背离"
+            else
+                rsi_divergence_alert_message := rsi_divergence_alert_message + ",看涨背离"
             if show_labels
-                label.new(bar_index, low, "看涨背离11", color=color.new(color.aqua, 0), textcolor=color.white, style=label.style_label_up, size=label_size_value)
+                label.new(bar_index, low, "看涨背离", color=color.new(color.aqua, 0), textcolor=color.white, style=label.style_label_up, size=label_size_value)
 
 // ==================== 绘制布林带（当前时间框架） ====================
 plot(show_plots ? upper_current : na, "上轨", color=color.new(color.blue, 50), linewidth=1)
 plot(show_plots ? lower_current : na, "下轨", color=color.new(color.blue, 50), linewidth=1)
 plot(show_plots ? basis_current : na, "中轨", color=color.new(color.blue, 70), linewidth=1)
+
+// ==================== 插针走平检测 ====================
+// 初始化走平警报
+wick_flat_alert := false
+wick_flat_alert_message := ""
+
+// 清理过期的插针历史（只保留最近的lookback周期）
+while array.size(wick_history) > wick_flat_lookback
+    // 移除最旧的记录
+    array.shift(wick_history)
+
+if enable_wick_flat and array.size(wick_history) >= wick_flat_count
+    // 计算当前布林带轨距
+    band_distance = upper_current - lower_current
+    upper_threshold = band_distance * band_distance_threshold
+    lower_threshold = band_distance * band_distance_threshold
+    
+    // 收集上轨附近的上插针和下轨附近的下插针（只检查最近的lookback周期内）
+    upper_wick_list = array.new<float>()
+    lower_wick_list = array.new<float>()
+    
+    for j = 0 to array.size(wick_history) - 1
+        wick_data = array.get(wick_history, j)
+        if array.size(wick_data) >= 7
+            wick_bar_idx = array.get(wick_data, 0)
+            wick_close = array.get(wick_data, 1)
+            is_upper = array.get(wick_data, 2) == 1.0
+            wick_upper_band = array.get(wick_data, 3)
+            wick_lower_band = array.get(wick_data, 4)
+            wick_high = array.get(wick_data, 5)
+            wick_low = array.get(wick_data, 6)
+            
+            // 只检查最近的lookback周期内的插针
+            if bar_index - wick_bar_idx <= wick_flat_lookback
+                // 计算该插针时的轨距
+                wick_band_distance = wick_upper_band - wick_lower_band
+                wick_upper_threshold = wick_band_distance * band_distance_threshold
+                wick_lower_threshold = wick_band_distance * band_distance_threshold
+                
+                // 上插针：检查是否在上轨15%范围内
+                if is_upper
+                    distance_from_upper = wick_high - wick_upper_band
+                    if distance_from_upper >= 0 and distance_from_upper <= wick_upper_threshold
+                        wick_info = array.new<float>()
+                        array.push(wick_info, wick_bar_idx)
+                        array.push(wick_info, wick_close)
+                        array.push(upper_wick_list, wick_info)
+                
+                // 下插针：检查是否在下轨15%范围内
+                if not is_upper
+                    distance_from_lower = wick_lower_band - wick_low
+                    if distance_from_lower >= 0 and distance_from_lower <= wick_lower_threshold
+                        wick_info = array.new<float>()
+                        array.push(wick_info, wick_bar_idx)
+                        array.push(wick_info, wick_close)
+                        array.push(lower_wick_list, wick_info)
+    
+    // 检测上插针走平
+    upper_flat_detected = false
+    if array.size(upper_wick_list) >= wick_flat_count
+        // 计算收盘价的平均值和标准差
+        close_sum = 0.0
+        for k = 0 to array.size(upper_wick_list) - 1
+            wick_info = array.get(upper_wick_list, k)
+            if array.size(wick_info) >= 2
+                close_sum := close_sum + array.get(wick_info, 1)
+        avg_close = close_sum / array.size(upper_wick_list)
+        
+        // 检查所有收盘价是否在阈值范围内
+        all_close = true
+        for k = 0 to array.size(upper_wick_list) - 1
+            wick_info = array.get(upper_wick_list, k)
+            if array.size(wick_info) >= 2
+                wick_close_price = array.get(wick_info, 1)
+                price_diff_pct = math.abs(wick_close_price - avg_close) / math.max(avg_close, 0.0001)
+                if price_diff_pct > wick_flat_price_tolerance
+                    all_close := false
+                    break
+        
+        if all_close
+            upper_flat_detected := true
+    
+    // 检测下插针走平
+    lower_flat_detected = false
+    if array.size(lower_wick_list) >= wick_flat_count
+        // 计算收盘价的平均值和标准差
+        close_sum = 0.0
+        for k = 0 to array.size(lower_wick_list) - 1
+            wick_info = array.get(lower_wick_list, k)
+            if array.size(wick_info) >= 2
+                close_sum := close_sum + array.get(wick_info, 1)
+        avg_close = close_sum / array.size(lower_wick_list)
+        
+        // 检查所有收盘价是否在阈值范围内
+        all_close = true
+        for k = 0 to array.size(lower_wick_list) - 1
+            wick_info = array.get(lower_wick_list, k)
+            if array.size(wick_info) >= 2
+                wick_close_price = array.get(wick_info, 1)
+                price_diff_pct = math.abs(wick_close_price - avg_close) / math.max(avg_close, 0.0001)
+                if price_diff_pct > wick_flat_price_tolerance
+                    all_close := false
+                    break
+        
+        if all_close
+            lower_flat_detected := true
+    
+    // 合并走平信号（上插针走平和下插针走平合并）
+    if upper_flat_detected or lower_flat_detected
+        wick_flat_alert := true
+        if upper_flat_detected and lower_flat_detected
+            wick_flat_alert_message := "上插针走平(" + str.tostring(array.size(upper_wick_list)) + "个),下插针走平(" + str.tostring(array.size(lower_wick_list)) + "个)"
+        else if upper_flat_detected
+            wick_flat_alert_message := "上插针走平(" + str.tostring(array.size(upper_wick_list)) + "个)"
+        else
+            wick_flat_alert_message := "下插针走平(" + str.tostring(array.size(lower_wick_list)) + "个)"
+        
+        if show_labels
+            if upper_flat_detected
+                label.new(bar_index, upper_current, "上插针走平", color=color.new(color.purple, 0), textcolor=color.white, style=label.style_label_down, size=label_size_value)
+            if lower_flat_detected
+                label.new(bar_index, lower_current, "下插针走平", color=color.new(color.purple, 0), textcolor=color.white, style=label.style_label_up, size=label_size_value)
 
 // ==================== 实时检测当前K线的插针 ====================
 if barstate.islast
@@ -236,33 +401,29 @@ if barstate.islast
     if lower_wick_realtime and show_labels
         label.new(bar_index, low, "实时↓", color=color.new(color.green, 20), textcolor=color.white, style=label.style_label_up, size=size.normal)
     
-    // 设置实时警报
+    // 设置实时警报（合并上插针和下插针）
     if enable_alert and alert_on_realtime
-        if upper_wick_realtime
-            upper_wick_alert := true
-            upper_alert_message := "实时@" + str.tostring(high) + " 价格:" + str.tostring(close)
-        if lower_wick_realtime
-            lower_wick_alert := true
-            lower_alert_message := "实时@" + str.tostring(low) + " 价格:" + str.tostring(close)
+        if upper_wick_realtime or lower_wick_realtime
+            wick_alert := true
+            if upper_wick_realtime and lower_wick_realtime
+                wick_alert_message := "实时上插针@" + str.tostring(high) + ",下插针@" + str.tostring(low) + " 价格:" + str.tostring(close)
+            else if upper_wick_realtime
+                wick_alert_message := "实时上插针@" + str.tostring(high) + " 价格:" + str.tostring(close)
+            else
+                wick_alert_message := "实时下插针@" + str.tostring(low) + " 价格:" + str.tostring(close)
 
-// ==================== 警报条件定义 ====================
+// ==================== 警报条件定义（合并后）====================
 // 创建用于警报的plot（隐藏显示）
-plot_upper_alert = plot(upper_wick_alert ? 1 : 0, title="上插针警报", display=display.none)
-plot_lower_alert = plot(lower_wick_alert ? 1 : 0, title="下插针警报", display=display.none)
-plot_rsi_overbought_alert = plot(rsi_overbought_alert ? 1 : 0, title="RSI超买警报", display=display.none)
-plot_rsi_oversold_alert = plot(rsi_oversold_alert ? 1 : 0, title="RSI超卖警报", display=display.none)
-plot_rsi_bearish_divergence_alert = plot(rsi_bearish_divergence_alert ? 1 : 0, title="RSI看跌背离警报", display=display.none)
-plot_rsi_bullish_divergence_alert = plot(rsi_bullish_divergence_alert ? 1 : 0, title="RSI看涨背离警报", display=display.none)
+plot_wick_alert = plot(wick_alert ? 1 : 0, title="插针警报", display=display.none)
+plot_rsi_alert = plot(rsi_alert ? 1 : 0, title="RSI警报", display=display.none)
+plot_rsi_divergence_alert = plot(rsi_divergence_alert ? 1 : 0, title="RSI背离警报", display=display.none)
+plot_wick_flat_alert = plot(wick_flat_alert ? 1 : 0, title="插针走平警报", display=display.none)
 
-// 上插针警报条件 - 只能使用 TradingView 模板变量，不能使用字符串连接
-alertcondition(upper_wick_alert, title="上插针预警", message="{{ticker}} | upper_wick_alert | {{time}} | {{close}} | {{high}} | {{low}} ; 上插针")
-// 下插针警报条件 - 只能使用 TradingView 模板变量，不能使用字符串连接
-alertcondition(lower_wick_alert, title="下插针预警", message="{{ticker}} | lower_wick_alert | {{time}} | {{close}} | {{high}} | {{low}} ; 下插针")
-// RSI 超买警报条件
-alertcondition(rsi_overbought_alert, title="RSI超买预警", message="{{ticker}} | rsi_overbought_alert | {{time}} | {{close}} | {{high}} | {{low}} ; RSI超买")
-// RSI 超卖警报条件
-alertcondition(rsi_oversold_alert, title="RSI超卖预警", message="{{ticker}} | rsi_oversold_alert | {{time}} | {{close}} | {{high}} | {{low}} ; RSI超卖")
-// RSI 看跌背离警报条件
-alertcondition(rsi_bearish_divergence_alert, title="RSI看跌背离预警", message="{{ticker}} | rsi_bearish_divergence_alert | {{time}} | {{close}} | {{high}} | {{low}} ; RSI看跌背离")
-// RSI 看涨背离警报条件
-alertcondition(rsi_bullish_divergence_alert, title="RSI看涨背离预警", message="{{ticker}} | rsi_bullish_divergence_alert | {{time}} | {{close}} | {{high}} | {{low}} ; RSI看涨背离")
+// 插针警报条件（合并上插针和下插针）- 只能使用 TradingView 模板变量，不能使用字符串连接
+alertcondition(wick_alert, title="插针预警", message="{{ticker}} | wick_alert | {{time}} | {{close}} | {{high}} | {{low}} ; 插针")
+// RSI 警报条件（合并超买和超卖）
+alertcondition(rsi_alert, title="RSI预警", message="{{ticker}} | rsi_alert | {{time}} | {{close}} | {{high}} | {{low}} ; RSI")
+// RSI 背离警报条件（合并看跌和看涨背离）
+alertcondition(rsi_divergence_alert, title="RSI背离预警", message="{{ticker}} | rsi_divergence_alert | {{time}} | {{close}} | {{high}} | {{low}} ; RSI背离")
+// 插针走平警报条件（合并上插针走平和下插针走平）
+alertcondition(wick_flat_alert, title="插针走平预警", message="{{ticker}} | wick_flat_alert | {{time}} | {{close}} | {{high}} | {{low}} ; 插针走平")
