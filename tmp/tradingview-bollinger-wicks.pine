@@ -1,0 +1,165 @@
+//@version=6
+indicator("布林带插针标记 - 多时间框架", shorttitle="BB Wicks MTF", overlay=true, max_bars_back=500)
+
+// ==================== 输入参数 ====================
+// 布林带参数
+bb_length = input.int(20, title="布林带周期", minval=1)
+bb_mult = input.float(2.0, title="布林带倍数", minval=0.1, step=0.1)
+
+// ==================== 时间框架配置（可扩展）====================
+// 配置说明：
+//   - timeframes_code: 存储时间框架代码（TradingView格式）
+//   - timeframes_name: 存储显示名称（对应位置）
+// 时间框架代码说明：
+//   "15" = 15分钟, "30" = 30分钟, "60" = 1小时
+//   "240" = 4小时, "1D" = 1天, "1W" = 1周
+// 要添加新时间框架，在两个数组中对应位置添加即可
+var timeframes_code = array.new<string>()
+var timeframes_name = array.new<string>()
+if barstate.isfirst
+    // 默认配置：15分钟、1小时、4小时
+    array.push(timeframes_code, "15")
+    array.push(timeframes_name, "15M")
+    array.push(timeframes_code, "60")
+    array.push(timeframes_name, "1H")
+    array.push(timeframes_code, "240")
+    array.push(timeframes_name, "4H")
+    // 要添加新时间框架，取消下面的注释并修改：
+    // array.push(timeframes_code, "30")
+    // array.push(timeframes_name, "30M")  // 30分钟
+    // array.push(timeframes_code, "1D")
+    // array.push(timeframes_name, "1D")   // 1天
+    // array.push(timeframes_code, "1W")
+    // array.push(timeframes_name, "1W")   // 1周
+
+// 插针检测参数
+wick_ratio = input.float(0.3, title="插针比例（实体/影线）", minval=0.1, maxval=1.0, step=0.1, tooltip="影线长度与实体长度的比例，值越小越严格")
+
+// 显示选项
+show_labels = input.bool(true, title="显示标签", group="显示设置")
+show_plots = input.bool(true, title="显示布林带", group="显示设置")
+label_size = input.string("small", title="标签大小", options=["tiny", "small", "normal", "large", "huge"], group="显示设置")
+
+// 警报设置
+enable_alert = input.bool(true, title="启用警报", tooltip="启用后可在TradingView中设置警报，通过webhook调用API", group="警报设置")
+alert_on_realtime = input.bool(true, title="实时K线警报", tooltip="在当前时间框架检测到插针时触发警报", group="警报设置")
+alert_on_mtf = input.bool(false, title="多时间框架警报", tooltip="在其他时间框架检测到插针时触发警报", group="警报设置")
+
+// 颜色设置
+color_upper_wick = input.color(color.new(color.red, 0), title="上插针颜色", group="颜色设置")
+color_lower_wick = input.color(color.new(color.green, 0), title="下插针颜色", group="颜色设置")
+
+// ==================== 函数：计算布林带 ====================
+calc_bb(tf) =>
+    [high_tf, low_tf, close_tf, open_tf] = request.security(syminfo.tickerid, tf, [high, low, close, open], lookahead=barmerge.lookahead_off)
+    // 计算布林带
+    basis = ta.sma(close_tf, bb_length)
+    dev = bb_mult * ta.stdev(close_tf, bb_length)
+    upper = basis + dev
+    lower = basis - dev
+    [upper, lower, basis, high_tf, low_tf, close_tf, open_tf]
+
+// ==================== 函数：检测插针 ====================
+detect_wick(upper_band, lower_band, high_price, low_price, open_price, close_price) =>
+    body_size = math.abs(close_price - open_price)
+    upper_wick = high_price - math.max(open_price, close_price)
+    lower_wick = math.min(open_price, close_price) - low_price
+    // 上插针：上影线突破上轨，且上影线长度满足条件
+    upper_wick_condition = high_price > upper_band and upper_wick > 0 and (body_size == 0 or upper_wick / math.max(body_size, 0.0001) >= wick_ratio)
+    // 下插针：下影线突破下轨，且下影线长度满足条件
+    lower_wick_condition = low_price < lower_band and lower_wick > 0 and (body_size == 0 or lower_wick / math.max(body_size, 0.0001) >= wick_ratio)
+    [upper_wick_condition, lower_wick_condition, upper_wick, lower_wick]
+
+// ==================== 辅助函数：获取标签大小 ====================
+get_label_size() =>
+    switch label_size
+        "tiny" => size.tiny
+        "small" => size.small
+        "normal" => size.normal
+        "large" => size.large
+        "huge" => size.huge
+        => size.small
+
+// ==================== 变量：警报条件 ====================
+upper_wick_alert = false
+lower_wick_alert = false
+upper_alert_message = ""
+lower_alert_message = ""
+
+// ==================== 主逻辑 ====================
+label_size_value = get_label_size()
+
+// 循环处理所有配置的时间框架 - 忠实记录每个插针，不合并不忽略
+for i = 0 to array.size(timeframes_code) - 1
+    tf_code = array.get(timeframes_code, i)
+    tf_name = array.get(timeframes_name, i)
+    
+    [upper_tf, lower_tf, basis_tf, high_tf, low_tf, close_tf, open_tf] = calc_bb(tf_code)
+    [upper_wick_tf, lower_wick_tf, uw_size_tf, lw_size_tf] = detect_wick(upper_tf, lower_tf, high_tf, low_tf, open_tf, close_tf)
+    
+    // 上插针：直接显示和记录，不合并
+    if upper_wick_tf
+        if show_labels
+            label.new(bar_index, high_tf, tf_name + "↑", color=color_upper_wick, textcolor=color.white, style=label.style_label_down, size=label_size_value)
+        // 设置多时间框架警报
+        if enable_alert and alert_on_mtf
+            upper_wick_alert := true
+            if upper_alert_message == ""
+                upper_alert_message := tf_name + "@" + str.tostring(high_tf)
+            else
+                upper_alert_message := upper_alert_message + "," + tf_name + "@" + str.tostring(high_tf)
+    
+    // 下插针：直接显示和记录，不合并
+    if lower_wick_tf
+        if show_labels
+            label.new(bar_index, low_tf, tf_name + "↓", color=color_lower_wick, textcolor=color.white, style=label.style_label_up, size=label_size_value)
+        // 设置多时间框架警报
+        if enable_alert and alert_on_mtf
+            lower_wick_alert := true
+            if lower_alert_message == ""
+                lower_alert_message := tf_name + "@" + str.tostring(low_tf)
+            else
+                lower_alert_message := lower_alert_message + "," + tf_name + "@" + str.tostring(low_tf)
+
+
+// ==================== 可选：绘制布林带（当前时间框架） ====================
+basis_current = ta.sma(close, bb_length)
+dev_current = bb_mult * ta.stdev(close, bb_length)
+upper_current = basis_current + dev_current
+lower_current = basis_current - dev_current
+plot(show_plots ? upper_current : na, "上轨", color=color.new(color.blue, 50), linewidth=1)
+plot(show_plots ? lower_current : na, "下轨", color=color.new(color.blue, 50), linewidth=1)
+plot(show_plots ? basis_current : na, "中轨", color=color.new(color.blue, 70), linewidth=1)
+
+// ==================== 实时检测当前K线的插针 ====================
+if barstate.islast
+    // 使用当前图表的数据计算布林带
+    basis_realtime = ta.sma(close, bb_length)
+    dev_realtime = bb_mult * ta.stdev(close, bb_length)
+    upper_realtime = basis_realtime + dev_realtime
+    lower_realtime = basis_realtime - dev_realtime
+    [upper_wick_realtime, lower_wick_realtime, uw_size_realtime, lw_size_realtime] = detect_wick(upper_realtime, lower_realtime, high, low, open, close)
+    // 实时标记（仅在最后一根K线）
+    if upper_wick_realtime and show_labels
+        label.new(bar_index, high, "实时↑", color=color.new(color.red, 20), textcolor=color.white, style=label.style_label_down, size=size.normal)
+    if lower_wick_realtime and show_labels
+        label.new(bar_index, low, "实时↓", color=color.new(color.green, 20), textcolor=color.white, style=label.style_label_up, size=size.normal)
+    
+    // 设置实时警报
+    if enable_alert and alert_on_realtime
+        if upper_wick_realtime
+            upper_wick_alert := true
+            upper_alert_message := "实时@" + str.tostring(high) + " 价格:" + str.tostring(close)
+        if lower_wick_realtime
+            lower_wick_alert := true
+            lower_alert_message := "实时@" + str.tostring(low) + " 价格:" + str.tostring(close)
+
+// ==================== 警报条件定义 ====================
+// 创建用于警报的plot（隐藏显示）
+plot_upper_alert = plot(upper_wick_alert ? 1 : 0, title="上插针警报", display=display.none)
+plot_lower_alert = plot(lower_wick_alert ? 1 : 0, title="下插针警报", display=display.none)
+
+// 上插针警报条件 - 只能使用 TradingView 模板变量，不能使用字符串连接
+alertcondition(upper_wick_alert, title="上插针预警", message="{{ticker}} 上插针 | 时间:{{time}} | 价格:{{close}} | 最高:{{high}} | 最低:{{low}}")
+// 下插针警报条件 - 只能使用 TradingView 模板变量，不能使用字符串连接
+alertcondition(lower_wick_alert, title="下插针预警", message="{{ticker}} 下插针 | 时间:{{time}} | 价格:{{close}} | 最高:{{high}} | 最低:{{low}}")

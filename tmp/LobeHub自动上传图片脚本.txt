@@ -1,0 +1,295 @@
+// ============================================
+// LobeHub 自动上传图片并生成描述脚本
+// ============================================
+// 功能：打开LobeHub，上传快速访问中的随机图片，让AI描述并畅想
+// 使用方法：运行脚本前，确保LobeHub已安装，快速访问中有图片
+
+// ============================================
+// 配置参数
+// ============================================
+
+// LobeHub程序路径（请根据实际安装路径修改）
+Dim LobeHub路径
+LobeHub路径 = "E:\gaopf\software\lobehub\LobeHub.exe"
+
+// 图片文件夹路径
+Dim 图片文件夹路径
+图片文件夹路径 = "C:\Users\eason\Pictures"
+
+// 上传按钮坐标
+Dim 上传按钮X, 上传按钮Y
+上传按钮X = 569
+上传按钮Y = 942
+
+// 上传图片选项坐标
+Dim 上传图片选项X, 上传图片选项Y
+上传图片选项X = 569
+上传图片选项Y = 760
+
+// 输入框坐标
+Dim 输入框X, 输入框Y
+输入框X = 461
+输入框Y = 865
+
+// 等待时间（毫秒）
+Dim 等待时间
+等待时间 = 2000
+
+// ============================================
+// 主程序
+// ============================================
+
+Call 主程序()
+
+Sub 主程序()
+    TracePrint "========== LobeHub 自动上传图片脚本开始 =========="
+    
+    // 步骤1：打开LobeHub软件
+    Call 打开LobeHub()
+    
+    // 等待软件启动
+    Delay 等待时间
+    
+    // 步骤2：找到并点击上传按钮
+    Call 找到并点击上传按钮()
+    
+    // 步骤3：上传随机图片
+    Call 上传随机图片()
+    
+    // 步骤4：找到输入框并输入提示词
+    Call 找到输入框并输入提示词()
+    
+    TracePrint "========== 脚本执行完成 =========="
+End Sub
+
+// ============================================
+// 步骤1：打开LobeHub软件
+// ============================================
+
+Sub 打开LobeHub()
+    TracePrint "正在查找并激活LobeHub窗口..."
+    
+    Dim 窗口句柄
+    窗口句柄 = 0
+    
+    // 方法1：通过窗口标题查找（尝试多种可能的标题）
+    窗口句柄 = Plugin.Window.Search("LobeHub")
+    If 窗口句柄 = 0 Then
+        窗口句柄 = Plugin.Window.Search("Lobe")
+    End If
+    If 窗口句柄 = 0 Then
+        窗口句柄 = Plugin.Window.Search("Lobe Hub")
+    End If
+    If 窗口句柄 = 0 Then
+        窗口句柄 = Plugin.Window.Search("LobeChat")
+    End If
+    If 窗口句柄 = 0 Then
+        窗口句柄 = Plugin.Window.Search("Lobe Chat")
+    End If
+    
+    // 方法2：通过部分标题匹配查找（使用SearchEx）
+    If 窗口句柄 = 0 Then
+        窗口句柄 = Plugin.Window.SearchEx("Lobe", 0)
+    End If
+    
+    // 如果找到了窗口，直接激活
+    If 窗口句柄 > 0 Then
+        Call Plugin.Window.Active(窗口句柄)
+        Call Plugin.Window.Top(窗口句柄, 0)
+        TracePrint "LobeHub窗口已找到并激活（句柄：" & 窗口句柄 & "）"
+        Delay 500
+    Else
+        // 如果找不到窗口，尝试启动程序
+        TracePrint "未找到已打开的窗口，尝试启动程序..."
+        If Plugin.File.IsFileExist(LobeHub路径) Then
+            RunApp LobeHub路径
+            Delay 等待时间 * 2
+            
+            // 启动后再次查找窗口
+            窗口句柄 = Plugin.Window.Search("LobeHub")
+            If 窗口句柄 = 0 Then
+                窗口句柄 = Plugin.Window.Search("Lobe")
+            End If
+            If 窗口句柄 = 0 Then
+                窗口句柄 = Plugin.Window.SearchEx("Lobe", 0)
+            End If
+            
+            If 窗口句柄 > 0 Then
+                Call Plugin.Window.Active(窗口句柄)
+                TracePrint "程序已启动，窗口已激活"
+            Else
+                TracePrint "程序已启动，但未找到窗口，请手动切换到LobeHub窗口"
+                Delay 等待时间 * 2
+            End If
+        Else
+            TracePrint "警告：LobeHub程序路径不存在"
+            TracePrint "当前路径：" & LobeHub路径
+            TracePrint "请手动打开LobeHub窗口，脚本将在3秒后继续..."
+            Delay 等待时间 * 3
+        End If
+    End If
+    
+    // 最后确保窗口在前台（如果已经是LobeHub，这个操作不会影响）
+    Delay 300
+End Sub
+
+// ============================================
+// 步骤2：找到并点击上传按钮
+// ============================================
+
+Sub 找到并点击上传按钮()
+    TracePrint "正在点击上传按钮..."
+    TracePrint "上传按钮坐标：" & 上传按钮X & "," & 上传按钮Y
+    
+    // 等待界面加载完成
+    Delay 等待时间
+    
+    // 直接移动到上传按钮坐标并点击
+    MoveTo 上传按钮X, 上传按钮Y
+    Delay 500
+    LeftClick 1
+    TracePrint "已点击上传按钮"
+    Delay 等待时间
+End Sub
+
+// ============================================
+// 步骤3：上传随机图片
+// ============================================
+
+Sub 上传随机图片()
+    TracePrint "正在上传随机图片..."
+    
+    // 等待options菜单打开
+    Delay 等待时间
+    
+    // 点击"上传图片"选项（坐标：569, 760）
+    TracePrint "点击上传图片选项，坐标：" & 上传图片选项X & "," & 上传图片选项Y
+    MoveTo 上传图片选项X, 上传图片选项Y
+    Delay 500
+    LeftClick 1
+    TracePrint "已点击上传图片选项"
+    
+    // 等待文件对话框打开
+    Delay 等待时间
+    
+    // 导航到图片文件夹
+    // 按Alt+D跳转到地址栏
+    KeyDown "Alt", 1
+    KeyPress "D", 1
+    KeyUp "Alt", 1
+    Delay 500
+    
+    // 输入图片文件夹路径
+    SayString 图片文件夹路径
+    Delay 500
+    KeyPress "Enter", 1
+    Delay 等待时间
+    
+    // 随机选择图片文件
+    // 获取屏幕尺寸，计算文件对话框中心位置
+    Dim 屏幕宽度, 屏幕高度
+    屏幕宽度 = GetScreenX()
+    屏幕高度 = GetScreenY()
+    
+    // 文件对话框通常在屏幕中心，文件列表区域也在对话框中心
+    Dim 对话框中心X, 对话框中心Y
+    对话框中心X = 屏幕宽度 / 2
+    对话框中心Y = 屏幕高度 / 2
+    
+    TracePrint "点击文件对话框中心位置：" & 对话框中心X & "," & 对话框中心Y
+    MoveTo 对话框中心X, 对话框中心Y
+    Delay 500
+    LeftClick 1
+    Delay 500
+    TracePrint "已点击文件列表区域"
+    
+    // 点击后，使用方向键选择文件
+    // 随机选择文件（随机按1-20次下方向键，根据图片数量调整）
+    Dim 随机次数, 随机方向
+    随机次数 = Int(Rnd() * 20) + 1
+    随机方向 = Int(Rnd() * 2)  // 0=向下, 1=向上
+    
+    TracePrint "随机选择文件，移动 " & 随机次数 & " 次，方向：" & IIf(随机方向 = 0, "向下", "向上")
+    
+    Dim j
+    For j = 1 To 随机次数
+        If 随机方向 = 0 Then
+            KeyPress "Down", 1
+        Else
+            KeyPress "Up", 1
+        End If
+        Delay 200
+    Next
+    
+    // 确认选择（按Enter或点击打开）
+    Delay 500
+    KeyPress "Enter", 1
+    Delay 等待时间
+    
+    TracePrint "图片上传完成，等待图片加载..."
+    // 等待图片上传和加载完成
+    Delay 等待时间 * 2
+End Sub
+
+// ============================================
+// 步骤4：发送消息（选择图片后直接按回车）
+// ============================================
+
+Sub 找到输入框并输入提示词()
+    TracePrint "图片已上传，正在输入提示词..."
+    
+    // 等待图片加载完成
+    Delay 等待时间
+    
+    // 点击输入框（坐标：461, 865）
+    TracePrint "点击输入框，坐标：" & 输入框X & "," & 输入框Y
+    MoveTo 输入框X, 输入框Y
+    Delay 500
+    LeftClick 1
+    Delay 500
+    TracePrint "已点击输入框"
+    
+    // 输入提示词
+    Dim 提示词
+    提示词 = "请解析图片"
+    
+    TracePrint "正在输入提示词：" & 提示词
+    SayString 提示词
+    Delay 1000
+    
+    // 发送消息（按Enter确认）
+    KeyPress "Enter", 1
+    Delay 500
+    
+    TracePrint "提示词已发送，等待AI生成回复..."
+End Sub
+
+
+
+// ============================================
+// 使用说明和注意事项
+// ============================================
+// 1. 坐标设置：
+//    - 上传按钮坐标：569, 942
+//    - 上传图片选项坐标：569, 760
+// 2. 图片文件夹路径：C:\Users\eason\Pictures
+// 3. 脚本流程：
+//    - 点击上传按钮(569, 942)
+//    - 点击上传图片选项(569, 760)
+//    - 选择随机图片并上传
+//    - 点击输入框(461, 865)
+//    - 输入"请解析图片"
+//    - 按回车发送
+// 4. 如果窗口位置改变，需要重新获取坐标并修改脚本
+
+// ============================================
+// 热键控制
+// ============================================
+
+Rem 启动
+    Call 主程序()
+    Goto 启动
+
+Rem 停止
+    EndScript
+
