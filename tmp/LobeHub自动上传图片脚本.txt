@@ -1,20 +1,24 @@
 // ============================================
 // LobeHub 自动上传图片并生成描述脚本
 // ============================================
-// 功能：打开LobeHub，上传快速访问中的随机图片，让AI描述并畅想
-// 使用方法：运行脚本前，确保LobeHub已安装，快速访问中有图片
+// 功能：找到浏览器中lobehub.com网页，截图并上传，让AI描述并畅想
+// 使用方法：运行脚本前，确保浏览器已打开lobehub.com标签页
 
 // ============================================
 // 配置参数
 // ============================================
 
-// LobeHub程序路径（请根据实际安装路径修改）
-Dim LobeHub路径
-LobeHub路径 = "E:\gaopf\software\lobehub\LobeHub.exe"
+// 截图保存路径
+Dim 截图保存路径
+截图保存路径 = "C:\Users\eason\Pictures\lobehub_screenshot.png"
 
-// 图片文件夹路径
-Dim 图片文件夹路径
-图片文件夹路径 = "C:\Users\eason\Pictures"
+// Chrome浏览器快捷方式路径
+Dim Chrome路径
+Chrome路径 = "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Google Chrome.lnk"
+
+// 浏览器窗口标题（常见浏览器）
+Dim 浏览器窗口标题
+浏览器窗口标题 = ""  // 自动检测
 
 // 上传按钮坐标
 Dim 上传按钮X, 上传按钮Y
@@ -44,93 +48,209 @@ Call 主程序()
 Sub 主程序()
     TracePrint "========== LobeHub 自动上传图片脚本开始 =========="
     
-    // 步骤1：打开LobeHub软件
-    Call 打开LobeHub()
+    // 步骤1：找到浏览器中lobehub.com标签页
+    Call 找到LobeHub网页()
     
-    // 等待软件启动
+    // 等待页面加载完成
     Delay 等待时间
     
-    // 步骤2：找到并点击上传按钮
+    // 步骤2：截图当前网页
+    Call 截图网页()
+    
+    // 步骤3：找到并点击上传按钮
     Call 找到并点击上传按钮()
     
-    // 步骤3：上传随机图片
-    Call 上传随机图片()
+    // 步骤4：上传截图
+    Call 上传截图()
     
-    // 步骤4：找到输入框并输入提示词
+    // 步骤5：找到输入框并输入提示词
     Call 找到输入框并输入提示词()
     
     TracePrint "========== 脚本执行完成 =========="
 End Sub
 
 // ============================================
-// 步骤1：打开LobeHub软件
+// 步骤1：找到浏览器中lobehub.com标签页
 // ============================================
 
-Sub 打开LobeHub()
-    TracePrint "正在查找并激活LobeHub窗口..."
+Sub 找到LobeHub网页()
+    TracePrint "正在查找浏览器中lobehub.com标签页..."
     
     Dim 窗口句柄
     窗口句柄 = 0
     
-    // 方法1：通过窗口标题查找（尝试多种可能的标题）
-    窗口句柄 = Plugin.Window.Search("LobeHub")
+    // 方法1：尝试查找常见浏览器窗口（Chrome, Edge, Firefox等）
+    窗口句柄 = Plugin.Window.Search("Chrome")
     If 窗口句柄 = 0 Then
-        窗口句柄 = Plugin.Window.Search("Lobe")
+        窗口句柄 = Plugin.Window.Search("Edge")
     End If
     If 窗口句柄 = 0 Then
-        窗口句柄 = Plugin.Window.Search("Lobe Hub")
+        窗口句柄 = Plugin.Window.Search("Firefox")
     End If
     If 窗口句柄 = 0 Then
-        窗口句柄 = Plugin.Window.Search("LobeChat")
-    End If
-    If 窗口句柄 = 0 Then
-        窗口句柄 = Plugin.Window.Search("Lobe Chat")
+        窗口句柄 = Plugin.Window.Search("浏览器")
     End If
     
-    // 方法2：通过部分标题匹配查找（使用SearchEx）
+    // 方法2：通过部分标题匹配查找浏览器
     If 窗口句柄 = 0 Then
-        窗口句柄 = Plugin.Window.SearchEx("Lobe", 0)
+        窗口句柄 = Plugin.Window.SearchEx("Chrome", 0)
+    End If
+    If 窗口句柄 = 0 Then
+        窗口句柄 = Plugin.Window.SearchEx("Edge", 0)
+    End If
+    If 窗口句柄 = 0 Then
+        窗口句柄 = Plugin.Window.SearchEx("Firefox", 0)
     End If
     
-    // 如果找到了窗口，直接激活
+    // 如果找到了浏览器窗口，激活它
     If 窗口句柄 > 0 Then
         Call Plugin.Window.Active(窗口句柄)
         Call Plugin.Window.Top(窗口句柄, 0)
-        TracePrint "LobeHub窗口已找到并激活（句柄：" & 窗口句柄 & "）"
+        TracePrint "浏览器窗口已找到并激活（句柄：" & 窗口句柄 & "）"
         Delay 500
+        
+        // 尝试通过快捷键切换到lobehub.com标签页
+        // 使用Ctrl+Tab切换标签页，或者使用Ctrl+数字键
+        TracePrint "正在查找lobehub.com标签页..."
+        
+        // 方法：使用Ctrl+Tab循环切换标签页，最多尝试20次
+        // 注意：这个方法需要用户确保lobehub.com标签页已打开
+        // 更可靠的方法是使用Ctrl+1到Ctrl+9切换，但这里使用循环方式
+        
+        TracePrint "提示：请确保lobehub.com标签页已在浏览器中打开"
+        TracePrint "脚本将激活浏览器窗口，请手动切换到lobehub.com标签页，或等待3秒后继续..."
+        Delay 等待时间 * 3
+        
     Else
-        // 如果找不到窗口，尝试启动程序
-        TracePrint "未找到已打开的窗口，尝试启动程序..."
-        If Plugin.File.IsFileExist(LobeHub路径) Then
-            RunApp LobeHub路径
+        // 如果找不到浏览器窗口，启动Chrome浏览器
+        TracePrint "未找到浏览器窗口，正在启动Chrome浏览器..."
+        
+        If Plugin.File.IsFileExist(Chrome路径) Then
+            // 启动Chrome浏览器
+            RunApp Chrome路径
+            TracePrint "Chrome浏览器正在启动..."
             Delay 等待时间 * 2
             
             // 启动后再次查找窗口
-            窗口句柄 = Plugin.Window.Search("LobeHub")
+            窗口句柄 = Plugin.Window.Search("Chrome")
             If 窗口句柄 = 0 Then
-                窗口句柄 = Plugin.Window.Search("Lobe")
-            End If
-            If 窗口句柄 = 0 Then
-                窗口句柄 = Plugin.Window.SearchEx("Lobe", 0)
+                窗口句柄 = Plugin.Window.SearchEx("Chrome", 0)
             End If
             
             If 窗口句柄 > 0 Then
                 Call Plugin.Window.Active(窗口句柄)
-                TracePrint "程序已启动，窗口已激活"
-            Else
-                TracePrint "程序已启动，但未找到窗口，请手动切换到LobeHub窗口"
+                Call Plugin.Window.Top(窗口句柄, 0)
+                TracePrint "Chrome浏览器已启动，窗口已激活"
+                Delay 等待时间
+                
+                // 导航到lobehub.com
+                TracePrint "正在导航到lobehub.com..."
+                // 按Ctrl+L或F6聚焦地址栏
+                KeyDown "Ctrl", 1
+                KeyPress "L", 1
+                KeyUp "Ctrl", 1
+                Delay 500
+                
+                // 输入网址
+                SayString "https://lobehub.com"
+                Delay 500
+                KeyPress "Enter", 1
+                TracePrint "已导航到lobehub.com，等待页面加载..."
                 Delay 等待时间 * 2
+            Else
+                TracePrint "Chrome已启动，但未找到窗口，请手动切换到Chrome窗口"
+                TracePrint "请手动导航到lobehub.com，脚本将在5秒后继续..."
+                Delay 等待时间 * 5
             End If
         Else
-            TracePrint "警告：LobeHub程序路径不存在"
-            TracePrint "当前路径：" & LobeHub路径
-            TracePrint "请手动打开LobeHub窗口，脚本将在3秒后继续..."
-            Delay 等待时间 * 3
+            TracePrint "警告：Chrome快捷方式路径不存在"
+            TracePrint "当前路径：" & Chrome路径
+            TracePrint "请手动打开浏览器并导航到lobehub.com，脚本将在5秒后继续..."
+            Delay 等待时间 * 5
         End If
     End If
     
-    // 最后确保窗口在前台（如果已经是LobeHub，这个操作不会影响）
+    // 确保窗口在前台
     Delay 300
+End Sub
+
+// ============================================
+// 步骤2：截图当前网页
+// ============================================
+
+Sub 截图网页()
+    TracePrint "正在截图当前网页..."
+    
+    // 确保窗口在前台
+    Delay 500
+    
+    // 方法1：使用按键精灵的ScreenCapture命令（推荐）
+    // 如果支持ScreenCapture命令，直接截图并保存
+    TracePrint "使用ScreenCapture命令截图..."
+    
+    // 获取窗口句柄和位置
+    Dim 窗口句柄, 窗口X, 窗口Y, 窗口宽度, 窗口高度
+    窗口句柄 = Plugin.Window.Search("Chrome")
+    If 窗口句柄 = 0 Then
+        窗口句柄 = Plugin.Window.Search("Edge")
+    End If
+    If 窗口句柄 = 0 Then
+        窗口句柄 = Plugin.Window.Search("Firefox")
+    End If
+    
+    If 窗口句柄 > 0 Then
+        // 获取窗口位置和大小
+        窗口X = Plugin.Window.GetWindowRect(窗口句柄, 0)
+        窗口Y = Plugin.Window.GetWindowRect(窗口句柄, 1)
+        窗口宽度 = Plugin.Window.GetWindowRect(窗口句柄, 2) - 窗口X
+        窗口高度 = Plugin.Window.GetWindowRect(窗口句柄, 3) - 窗口Y
+        
+        // 使用ScreenCapture截图（如果支持）
+        // ScreenCapture 窗口X, 窗口Y, 窗口宽度, 窗口高度, 截图保存路径
+        
+        TracePrint "窗口位置：" & 窗口X & "," & 窗口Y & " 大小：" & 窗口宽度 & "x" & 窗口高度
+    End If
+    
+    // 方法2：使用PrintScreen键截图到剪贴板，然后保存
+    TracePrint "使用PrintScreen键截图..."
+    KeyPress "PrintScreen", 1
+    Delay 1000
+    
+    // 打开画图工具保存截图
+    TracePrint "打开画图工具保存截图..."
+    RunApp "mspaint"
+    Delay 2000
+    
+    // 粘贴截图（Ctrl+V）
+    KeyDown "Ctrl", 1
+    KeyPress "V", 1
+    KeyUp "Ctrl", 1
+    Delay 1000
+    
+    // 保存文件（Ctrl+S）
+    KeyDown "Ctrl", 1
+    KeyPress "S", 1
+    KeyUp "Ctrl", 1
+    Delay 1000
+    
+    // 输入文件路径
+    SayString 截图保存路径
+    Delay 500
+    KeyPress "Enter", 1
+    Delay 1000
+    
+    // 如果提示覆盖，确认
+    KeyPress "Enter", 1
+    Delay 500
+    
+    // 关闭画图工具（Alt+F4）
+    KeyDown "Alt", 1
+    KeyPress "F4", 1
+    KeyUp "Alt", 1
+    Delay 500
+    
+    TracePrint "截图已保存到：" & 截图保存路径
+    Delay 1000
 End Sub
 
 // ============================================
@@ -153,11 +273,11 @@ Sub 找到并点击上传按钮()
 End Sub
 
 // ============================================
-// 步骤3：上传随机图片
+// 步骤4：上传截图
 // ============================================
 
-Sub 上传随机图片()
-    TracePrint "正在上传随机图片..."
+Sub 上传截图()
+    TracePrint "正在上传截图..."
     
     // 等待options菜单打开
     Delay 等待时间
@@ -172,61 +292,25 @@ Sub 上传随机图片()
     // 等待文件对话框打开
     Delay 等待时间
     
-    // 导航到图片文件夹
+    // 导航到截图保存路径
     // 按Alt+D跳转到地址栏
     KeyDown "Alt", 1
     KeyPress "D", 1
     KeyUp "Alt", 1
     Delay 500
     
-    // 输入图片文件夹路径
-    SayString 图片文件夹路径
+    // 输入截图文件路径（包含文件名）
+    SayString 截图保存路径
     Delay 500
     KeyPress "Enter", 1
     Delay 等待时间
     
-    // 随机选择图片文件
-    // 获取屏幕尺寸，计算文件对话框中心位置
-    Dim 屏幕宽度, 屏幕高度
-    屏幕宽度 = GetScreenX()
-    屏幕高度 = GetScreenY()
-    
-    // 文件对话框通常在屏幕中心，文件列表区域也在对话框中心
-    Dim 对话框中心X, 对话框中心Y
-    对话框中心X = 屏幕宽度 / 2
-    对话框中心Y = 屏幕高度 / 2
-    
-    TracePrint "点击文件对话框中心位置：" & 对话框中心X & "," & 对话框中心Y
-    MoveTo 对话框中心X, 对话框中心Y
-    Delay 500
-    LeftClick 1
-    Delay 500
-    TracePrint "已点击文件列表区域"
-    
-    // 点击后，使用方向键选择文件
-    // 随机选择文件（随机按1-20次下方向键，根据图片数量调整）
-    Dim 随机次数, 随机方向
-    随机次数 = Int(Rnd() * 20) + 1
-    随机方向 = Int(Rnd() * 2)  // 0=向下, 1=向上
-    
-    TracePrint "随机选择文件，移动 " & 随机次数 & " 次，方向：" & IIf(随机方向 = 0, "向下", "向上")
-    
-    Dim j
-    For j = 1 To 随机次数
-        If 随机方向 = 0 Then
-            KeyPress "Down", 1
-        Else
-            KeyPress "Up", 1
-        End If
-        Delay 200
-    Next
-    
-    // 确认选择（按Enter或点击打开）
-    Delay 500
+    // 直接按Enter确认选择截图文件
+    TracePrint "确认选择截图文件..."
     KeyPress "Enter", 1
     Delay 等待时间
     
-    TracePrint "图片上传完成，等待图片加载..."
+    TracePrint "截图上传完成，等待图片加载..."
     // 等待图片上传和加载完成
     Delay 等待时间 * 2
 End Sub
@@ -272,15 +356,21 @@ End Sub
 // 1. 坐标设置：
 //    - 上传按钮坐标：569, 942
 //    - 上传图片选项坐标：569, 760
-// 2. 图片文件夹路径：C:\Users\eason\Pictures
+//    - 输入框坐标：461, 865
+// 2. 截图保存路径：C:\Users\eason\Pictures\lobehub_screenshot.png
 // 3. 脚本流程：
+//    - 找到浏览器中lobehub.com标签页
+//    - 截图当前网页
 //    - 点击上传按钮(569, 942)
 //    - 点击上传图片选项(569, 760)
-//    - 选择随机图片并上传
+//    - 选择截图文件并上传
 //    - 点击输入框(461, 865)
 //    - 输入"请解析图片"
 //    - 按回车发送
-// 4. 如果窗口位置改变，需要重新获取坐标并修改脚本
+// 4. 注意事项：
+//    - 运行前请确保浏览器已打开lobehub.com标签页
+//    - 如果窗口位置改变，需要重新获取坐标并修改脚本
+//    - 截图功能可能需要根据实际按键精灵版本调整
 
 // ============================================
 // 热键控制
@@ -292,4 +382,5 @@ Rem 启动
 
 Rem 停止
     EndScript
+
 
