@@ -1,5 +1,5 @@
 //@version=6
-indicator("布林带插针标记 - 多时间框架", shorttitle="BB Wicks MTF", overlay=true, max_bars_back=500)
+indicator("布林带插针标记 - 多时间框架", shorttitle="BB-Wicks", overlay=true, max_bars_back=500)
 
 // ==================== 输入参数 ====================
 // 布林带参数
@@ -55,12 +55,15 @@ rsi_oversold = input.int(30, title="超卖阈值", minval=0, maxval=50, group="R
 enable_rsi_divergence = input.bool(true, title="启用RSI背离预警", tooltip="检测价格与RSI的背离信号", group="RSI背离设置")
 divergence_lookback = input.int(9, title="历史K线周期", minval=5, maxval=50, tooltip="用于计算平均K线长度的历史周期", group="RSI背离设置")
 
-// 插针走平检测设置
-enable_wick_flat = input.bool(true, title="启用插针走平预警", tooltip="检测上下轨附近插针走平信号", group="插针走平设置")
-wick_flat_lookback = input.int(50, title="检测周期", minval=20, maxval=200, tooltip="检测走平信号的历史K线数量", group="插针走平设置")
-wick_flat_count = input.int(3, title="最小插针数量", minval=3, maxval=10, tooltip="触发走平信号所需的最少插针数量", group="插针走平设置")
-wick_flat_price_tolerance = input.float(0.02, title="收盘价相近阈值", minval=0.01, maxval=0.1, step=0.01, tooltip="收盘价差异百分比，值越小越严格", group="插针走平设置")
-band_distance_threshold = input.float(0.15, title="轨距阈值", minval=0.05, maxval=0.5, step=0.05, tooltip="插针距离上下轨的距离阈值（15%表示在轨距的15%范围内）", group="插针走平设置")
+// 连续插针检测设置
+enable_continuous_wick = input.bool(true, title="启用连续插针预警", tooltip="检测上下轨附近连续插针信号", group="连续插针设置")
+continuous_wick_count = input.int(2, title="插针数量", minval=2, maxval=5, tooltip="触发信号所需的连续插针数量", group="连续插针设置")
+
+// 单边启动/结束检测设置
+enable_trend_signal = input.bool(true, title="启用单边信号", tooltip="检测单边启动和结束信号", group="单边信号设置")
+trend_lookback = input.int(10, title="检测周期", minval=5, maxval=50, tooltip="检测连续下跌的K线数量", group="单边信号设置")
+trend_start_threshold = input.float(5.0, title="启动阈值（%）", minval=1.0, maxval=20.0, step=0.5, tooltip="连续下跌超过此百分比视为单边启动", group="单边信号设置")
+trend_end_threshold = input.float(3.0, title="结束阈值（%）", minval=1.0, maxval=20.0, step=0.5, tooltip="价格回踩超过此百分比视为单边结束", group="单边信号设置")
 
 // 颜色设置
 color_upper_wick = input.color(color.new(color.red, 0), title="上插针颜色", group="颜色设置")
@@ -101,17 +104,26 @@ get_label_size() =>
 wick_alert = false  // 合并的上插针和下插针警报
 rsi_alert = false  // 合并的RSI超买超卖警报
 rsi_divergence_alert = false  // 合并的RSI背离警报
-wick_flat_alert = false  // 插针走平警报
+continuous_wick_alert = false  // 连续插针警报
+trend_signal_alert = false  // 单边信号警报
 
 // 警报消息
 wick_alert_message = ""
 rsi_alert_message = ""
 rsi_divergence_alert_message = ""
-wick_flat_alert_message = ""
+continuous_wick_alert_message = ""
+trend_signal_alert_message = ""
 
-// 插针历史数据存储（用于走平检测）
-// 存储结构：每个元素是一个数组 [bar_index, close_price, is_upper_wick, upper_band, lower_band]
-var array<array<float>> wick_history = array.new<array<float>>()
+// 单边信号状态
+var bool trend_started = false  // 是否处于单边启动状态
+var float trend_start_price = na  // 单边启动时的价格
+
+// 连续插针计数（用于检测连续插针信号）
+var int continuous_upper_wick_counter = 0  // 连续上插针计数（上下轨附近）
+var int continuous_lower_wick_counter = 0  // 连续下插针计数（上下轨附近）
+// 非上下轨附近连续插针检测（用于存储历史插针位置，允许跳过最多2根K线）
+var array<int> non_zone_upper_wick_bars = array.new<int>()  // 非上轨附近的上插针K线索引
+var array<int> non_zone_lower_wick_bars = array.new<int>()  // 非下轨附近的下插针K线索引
 
 // ==================== 主逻辑 ====================
 label_size_value = get_label_size()
@@ -139,17 +151,6 @@ for i = 0 to array.size(timeframes_code) - 1
                 wick_alert_message := "上插针:" + tf_name + "@" + str.tostring(high_tf)
             else
                 wick_alert_message := wick_alert_message + ",上插针:" + tf_name + "@" + str.tostring(high_tf)
-        // 记录插针历史（用于走平检测）
-        if enable_wick_flat
-            wick_data = array.new<float>()
-            array.push(wick_data, bar_index)
-            array.push(wick_data, close_tf)
-            array.push(wick_data, 1.0)  // 1表示上插针
-            array.push(wick_data, upper_tf)
-            array.push(wick_data, lower_tf)
-            array.push(wick_data, high_tf)
-            array.push(wick_data, low_tf)
-            array.push(wick_history, wick_data)
     
     // 下插针：直接显示和记录
     if lower_wick_tf
@@ -162,17 +163,6 @@ for i = 0 to array.size(timeframes_code) - 1
                 wick_alert_message := "下插针:" + tf_name + "@" + str.tostring(low_tf)
             else
                 wick_alert_message := wick_alert_message + ",下插针:" + tf_name + "@" + str.tostring(low_tf)
-        // 记录插针历史（用于走平检测）
-        if enable_wick_flat
-            wick_data = array.new<float>()
-            array.push(wick_data, bar_index)
-            array.push(wick_data, close_tf)
-            array.push(wick_data, 0.0)  // 0表示下插针
-            array.push(wick_data, upper_tf)
-            array.push(wick_data, lower_tf)
-            array.push(wick_data, high_tf)
-            array.push(wick_data, low_tf)
-            array.push(wick_history, wick_data)
 
 
 // ==================== RSI 计算和预警（合并）====================
@@ -220,14 +210,35 @@ if enable_rsi_divergence and not na(rsi_value)
     price_threshold = avg_candle_length / 2.0
     
     // 查找左侧历史最高价和对应的RSI（不包括当前K线）
+    // 至少相隔3根K线，所以需要检查索引
+    min_distance = 3  // 至少相隔3根K线
     highest_price = ta.highest(high[1], divergence_lookback)
     highest_price_idx = ta.highestbars(high[1], divergence_lookback)
-    highest_rsi = highest_price_idx >= 0 ? rsi_value[1 + highest_price_idx] : na
+    // highest_price_idx 是负数，表示距离 high[1] 的偏移量
+    // 例如：highest_price_idx = -1 表示在 high[2]，距离当前K线2根（不满足）
+    //      highest_price_idx = -2 表示在 high[3]，距离当前K线3根（满足）
+    //      highest_price_idx = -3 表示在 high[4]，距离当前K线4根（满足）
+    // 需要确保至少相隔3根K线，即 highest_price_idx <= -min_distance
+    // 计算实际索引：如果 highest_price_idx = -2，实际位置是 high[1-2] = high[-1]，但这是无效的
+    // 正确理解：highest_price_idx = -2 表示在 high[1+(-2)] = high[-1]，但应该理解为 high[3]
+    // 实际上：highest_price_idx = -2 时，最高价在 high[3]，对应的RSI是 rsi_value[3]
+    // 所以：actual_idx = 1 + highest_price_idx + 1 = 2 + highest_price_idx
+    // 但更简单：如果 highest_price_idx = -2，那么实际K线位置是 1 + (-2) + 1 = 0，不对
+    // 重新理解：highest_price_idx 是相对于 high[1] 的偏移，所以实际位置是 1 + highest_price_idx
+    // 如果 highest_price_idx = -2，实际位置是 1 + (-2) = -1，这是无效的
+    // 实际上 ta.highestbars 返回的索引：-1 表示在 high[2]，-2 表示在 high[3]
+    // 所以实际K线位置是 1 + abs(highest_price_idx) = 1 + 2 = 3
+    // 对应的RSI是 rsi_value[3]
+    actual_highest_bar = 1 + math.abs(highest_price_idx)
+    highest_rsi = (highest_price_idx <= -min_distance and actual_highest_bar <= divergence_lookback) ? rsi_value[actual_highest_bar] : na
     
     // 查找左侧历史最低价和对应的RSI（不包括当前K线）
     lowest_price = ta.lowest(low[1], divergence_lookback)
     lowest_price_idx = ta.lowestbars(low[1], divergence_lookback)
-    lowest_rsi = lowest_price_idx >= 0 ? rsi_value[1 + lowest_price_idx] : na
+    // lowest_price_idx 是负数，表示距离 low[1] 的偏移量
+    // 需要确保至少相隔3根K线，即 lowest_price_idx <= -min_distance
+    actual_lowest_bar = 1 + math.abs(lowest_price_idx)
+    lowest_rsi = (lowest_price_idx <= -min_distance and actual_lowest_bar <= divergence_lookback) ? rsi_value[actual_lowest_bar] : na
     
     // 实时检测看跌背离：价格创新高但RSI未创新高
     bearish_divergence = false
@@ -235,7 +246,7 @@ if enable_rsi_divergence and not na(rsi_value)
         price_new_high = high > highest_price
         rsi_not_new_high = rsi_value < highest_rsi
         
-        // 条件：价格创新高 + RSI未创新高 + 当前K线长度 > 平均长度的一半
+        // 条件：价格创新高 + RSI未创新高 + 当前K线长度 > 平均长度的一半 + 至少相隔3根K线
         if price_new_high and rsi_not_new_high and current_candle_length > price_threshold
             bearish_divergence := true
             rsi_divergence_alert := true
@@ -249,7 +260,7 @@ if enable_rsi_divergence and not na(rsi_value)
         price_new_low = low < lowest_price
         rsi_not_new_low = rsi_value > lowest_rsi
         
-        // 条件：价格创新低 + RSI未创新低 + 当前K线长度 > 平均长度的一半
+        // 条件：价格创新低 + RSI未创新低 + 当前K线长度 > 平均长度的一半 + 至少相隔3根K线
         if price_new_low and rsi_not_new_low and current_candle_length > price_threshold
             bullish_divergence := true
             rsi_divergence_alert := true
@@ -265,127 +276,213 @@ plot(show_plots ? upper_current : na, "上轨", color=color.new(color.blue, 50),
 plot(show_plots ? lower_current : na, "下轨", color=color.new(color.blue, 50), linewidth=1)
 plot(show_plots ? basis_current : na, "中轨", color=color.new(color.blue, 70), linewidth=1)
 
-// ==================== 插针走平检测 ====================
-// 初始化走平警报
-wick_flat_alert := false
-wick_flat_alert_message := ""
+// ==================== 连续插针检测（上下轨附近）====================
+// 初始化连续插针警报
+continuous_wick_alert := false
+continuous_wick_alert_message := ""
 
-// 清理过期的插针历史（只保留最近的lookback周期）
-while array.size(wick_history) > wick_flat_lookback
-    // 移除最旧的记录
-    array.shift(wick_history)
-
-if enable_wick_flat and array.size(wick_history) >= wick_flat_count
-    // 计算当前布林带轨距
-    band_distance = upper_current - lower_current
-    upper_threshold = band_distance * band_distance_threshold
-    lower_threshold = band_distance * band_distance_threshold
+if enable_continuous_wick
+    // 使用当前时间框架的数据
+    body_size = math.abs(close - open)
     
-    // 收集上轨附近的上插针和下轨附近的下插针（只检查最近的lookback周期内）
-    upper_wick_list = array.new<float>()
-    lower_wick_list = array.new<float>()
+    // 检测当前K线是否有插针（使用detect_wick函数）
+    [upper_wick_current, lower_wick_current, uw_size_current, lw_size_current] = detect_wick(upper_current, lower_current, high, low, open, close)
     
-    for j = 0 to array.size(wick_history) - 1
-        wick_data = array.get(wick_history, j)
-        if array.size(wick_data) >= 7
-            wick_bar_idx = array.get(wick_data, 0)
-            wick_close = array.get(wick_data, 1)
-            is_upper = array.get(wick_data, 2) == 1.0
-            wick_upper_band = array.get(wick_data, 3)
-            wick_lower_band = array.get(wick_data, 4)
-            wick_high = array.get(wick_data, 5)
-            wick_low = array.get(wick_data, 6)
+    // ========== 上轨附近连续插针检测 ==========
+    // 计算中轨到上轨的距离
+    mid_to_upper = upper_current - basis_current
+    // 85%位置：中轨 + 85% * (上轨 - 中轨)
+    upper_zone_threshold = basis_current + mid_to_upper * 0.85
+    
+    // 检查当前K线是否在上轨附近（85%以上）
+    is_in_upper_zone = high >= upper_zone_threshold
+    
+    // 计算上影线大小
+    upper_wick_size = high - math.max(open, close)
+    
+    // 检测有效上插针：在上轨附近且插针大于实体
+    valid_upper_wick = is_in_upper_zone and upper_wick_size > body_size and upper_wick_size > 0
+    
+    // 连续上插针计数逻辑（上下轨附近：2次即可报警）
+    if valid_upper_wick
+        // 检测到有效上插针，增加计数
+        continuous_upper_wick_counter := continuous_upper_wick_counter + 1
+        
+        // 如果达到指定数量，触发信号
+        if continuous_upper_wick_counter == continuous_wick_count
+            continuous_wick_alert := true
+            if continuous_wick_alert_message == ""
+                continuous_wick_alert_message := "连续上插针(" + str.tostring(continuous_upper_wick_counter) + "次)"
+            else
+                continuous_wick_alert_message := continuous_wick_alert_message + ",连续上插针(" + str.tostring(continuous_upper_wick_counter) + "次)"
+            if show_labels
+                label.new(bar_index, high, "连续上插针", color=color.new(color.purple, 0), textcolor=color.white, style=label.style_label_down, size=label_size_value)
+    else
+        // 没有检测到上插针，清空计数
+        continuous_upper_wick_counter := 0
+    
+    // ========== 非上轨附近连续插针检测（允许跳过最多2根K线，需要3根以上插针）==========
+    // 检测非上轨附近的上插针：突破上轨但不在85%区域
+    non_zone_upper_wick = upper_wick_current and not is_in_upper_zone
+    if non_zone_upper_wick
+        // 记录当前K线索引
+        array.push(non_zone_upper_wick_bars, bar_index)
+        // 只保留最近20根K线的记录（避免数组过大）
+        if array.size(non_zone_upper_wick_bars) > 20
+            array.shift(non_zone_upper_wick_bars)
+        
+        // 检查是否有连续插针（允许跳过最多2根K线，需要至少3根插针）
+        if array.size(non_zone_upper_wick_bars) >= 3
+            // 从最新的插针开始向前检查
+            recent_count = 1  // 当前K线已经有插针
+            last_wick_bar = bar_index
+            gap_allowed = 2  // 允许跳过的K线数量
             
-            // 只检查最近的lookback周期内的插针
-            if bar_index - wick_bar_idx <= wick_flat_lookback
-                // 计算该插针时的轨距
-                wick_band_distance = wick_upper_band - wick_lower_band
-                wick_upper_threshold = wick_band_distance * band_distance_threshold
-                wick_lower_threshold = wick_band_distance * band_distance_threshold
-                
-                // 上插针：检查是否在上轨15%范围内
-                if is_upper
-                    distance_from_upper = wick_high - wick_upper_band
-                    if distance_from_upper >= 0 and distance_from_upper <= wick_upper_threshold
-                        wick_info = array.new<float>()
-                        array.push(wick_info, wick_bar_idx)
-                        array.push(wick_info, wick_close)
-                        array.push(upper_wick_list, wick_info)
-                
-                // 下插针：检查是否在下轨15%范围内
-                if not is_upper
-                    distance_from_lower = wick_lower_band - wick_low
-                    if distance_from_lower >= 0 and distance_from_lower <= wick_lower_threshold
-                        wick_info = array.new<float>()
-                        array.push(wick_info, wick_bar_idx)
-                        array.push(wick_info, wick_close)
-                        array.push(lower_wick_list, wick_info)
-    
-    // 检测上插针走平
-    upper_flat_detected = false
-    if array.size(upper_wick_list) >= wick_flat_count
-        // 计算收盘价的平均值和标准差
-        close_sum = 0.0
-        for k = 0 to array.size(upper_wick_list) - 1
-            wick_info = array.get(upper_wick_list, k)
-            if array.size(wick_info) >= 2
-                close_sum := close_sum + array.get(wick_info, 1)
-        avg_close = close_sum / array.size(upper_wick_list)
-        
-        // 检查所有收盘价是否在阈值范围内
-        all_close = true
-        for k = 0 to array.size(upper_wick_list) - 1
-            wick_info = array.get(upper_wick_list, k)
-            if array.size(wick_info) >= 2
-                wick_close_price = array.get(wick_info, 1)
-                price_diff_pct = math.abs(wick_close_price - avg_close) / math.max(avg_close, 0.0001)
-                if price_diff_pct > wick_flat_price_tolerance
-                    all_close := false
+            // 检查最近的插针序列（从倒数第二个开始向前检查）
+            for i = array.size(non_zone_upper_wick_bars) - 2 to 0
+                wick_bar = array.get(non_zone_upper_wick_bars, i)
+                // 检查与前一个插针的间隔
+                gap = last_wick_bar - wick_bar - 1
+                if gap <= gap_allowed
+                    recent_count := recent_count + 1
+                    last_wick_bar := wick_bar
+                else
+                    // 间隔太大，停止检查
                     break
-        
-        if all_close
-            upper_flat_detected := true
+            
+            // 如果找到至少3根连续插针（允许跳过最多2根K线），触发信号
+            if recent_count >= 3
+                continuous_wick_alert := true
+                if continuous_wick_alert_message == ""
+                    continuous_wick_alert_message := "非上轨连续上插针(" + str.tostring(recent_count) + "次)"
+                else
+                    continuous_wick_alert_message := continuous_wick_alert_message + ",非上轨连续上插针(" + str.tostring(recent_count) + "次)"
+                if show_labels
+                    label.new(bar_index, high, "非上轨连续上插针", color=color.new(color.purple, 0), textcolor=color.white, style=label.style_label_down, size=label_size_value)
     
-    // 检测下插针走平
-    lower_flat_detected = false
-    if array.size(lower_wick_list) >= wick_flat_count
-        // 计算收盘价的平均值和标准差
-        close_sum = 0.0
-        for k = 0 to array.size(lower_wick_list) - 1
-            wick_info = array.get(lower_wick_list, k)
-            if array.size(wick_info) >= 2
-                close_sum := close_sum + array.get(wick_info, 1)
-        avg_close = close_sum / array.size(lower_wick_list)
+    // ========== 下轨附近连续插针检测 ==========
+    // 计算中轨到下轨的距离
+    mid_to_lower = basis_current - lower_current
+    // 15%位置：下轨 + 15% * (中轨 - 下轨) = 下轨 + 0.15 * (中轨 - 下轨)
+    lower_zone_threshold = lower_current + mid_to_lower * 0.15
+    
+    // 检查当前K线是否在下轨附近（15%以内）
+    is_in_lower_zone = low <= lower_zone_threshold
+    
+    // 计算下影线大小
+    lower_wick_size = math.min(open, close) - low
+    
+    // 检测有效下插针：在下轨附近且插针大于实体
+    valid_lower_wick = is_in_lower_zone and lower_wick_size > body_size and lower_wick_size > 0
+    
+    // 连续下插针计数逻辑（上下轨附近：2次即可报警）
+    if valid_lower_wick
+        // 检测到有效下插针，增加计数
+        continuous_lower_wick_counter := continuous_lower_wick_counter + 1
         
-        // 检查所有收盘价是否在阈值范围内
-        all_close = true
-        for k = 0 to array.size(lower_wick_list) - 1
-            wick_info = array.get(lower_wick_list, k)
-            if array.size(wick_info) >= 2
-                wick_close_price = array.get(wick_info, 1)
-                price_diff_pct = math.abs(wick_close_price - avg_close) / math.max(avg_close, 0.0001)
-                if price_diff_pct > wick_flat_price_tolerance
-                    all_close := false
+        // 如果达到指定数量，触发信号
+        if continuous_lower_wick_counter == continuous_wick_count
+            continuous_wick_alert := true
+            if continuous_wick_alert_message == ""
+                continuous_wick_alert_message := "连续下插针(" + str.tostring(continuous_lower_wick_counter) + "次)"
+            else
+                continuous_wick_alert_message := continuous_wick_alert_message + ",连续下插针(" + str.tostring(continuous_lower_wick_counter) + "次)"
+            if show_labels
+                label.new(bar_index, low, "连续下插针", color=color.new(color.purple, 0), textcolor=color.white, style=label.style_label_up, size=label_size_value)
+    else
+        // 没有检测到下插针，清空计数
+        continuous_lower_wick_counter := 0
+    
+    // ========== 非下轨附近连续插针检测（允许跳过最多2根K线，需要3根以上插针）==========
+    // 检测非下轨附近的下插针：突破下轨但不在15%区域
+    non_zone_lower_wick = lower_wick_current and not is_in_lower_zone
+    if non_zone_lower_wick
+        // 记录当前K线索引
+        array.push(non_zone_lower_wick_bars, bar_index)
+        // 只保留最近20根K线的记录（避免数组过大）
+        if array.size(non_zone_lower_wick_bars) > 20
+            array.shift(non_zone_lower_wick_bars)
+        
+        // 检查是否有连续插针（允许跳过最多2根K线，需要至少3根插针）
+        if array.size(non_zone_lower_wick_bars) >= 3
+            // 从最新的插针开始向前检查
+            recent_count = 1  // 当前K线已经有插针
+            last_wick_bar = bar_index
+            gap_allowed = 2  // 允许跳过的K线数量
+            
+            // 检查最近的插针序列（从倒数第二个开始向前检查）
+            for i = array.size(non_zone_lower_wick_bars) - 2 to 0
+                wick_bar = array.get(non_zone_lower_wick_bars, i)
+                // 检查与前一个插针的间隔
+                gap = last_wick_bar - wick_bar - 1
+                if gap <= gap_allowed
+                    recent_count := recent_count + 1
+                    last_wick_bar := wick_bar
+                else
+                    // 间隔太大，停止检查
                     break
+            
+            // 如果找到至少3根连续插针（允许跳过最多2根K线），触发信号
+            if recent_count >= 3
+                continuous_wick_alert := true
+                if continuous_wick_alert_message == ""
+                    continuous_wick_alert_message := "非下轨连续下插针(" + str.tostring(recent_count) + "次)"
+                else
+                    continuous_wick_alert_message := continuous_wick_alert_message + ",非下轨连续下插针(" + str.tostring(recent_count) + "次)"
+                if show_labels
+                    label.new(bar_index, low, "非下轨连续下插针", color=color.new(color.purple, 0), textcolor=color.white, style=label.style_label_up, size=label_size_value)
+
+// ==================== 单边启动/结束信号检测 ====================
+// 初始化单边信号警报
+trend_signal_alert := false
+trend_signal_alert_message := ""
+
+if enable_trend_signal
+    // 检查最近N根K线整体跌幅
+    if bar_index >= trend_lookback
+        // 获取N根K线前的收盘价
+        start_close = close[trend_lookback]
+        current_close = close
         
-        if all_close
-            lower_flat_detected := true
-    
-    // 合并走平信号（上插针走平和下插针走平合并）
-    if upper_flat_detected or lower_flat_detected
-        wick_flat_alert := true
-        if upper_flat_detected and lower_flat_detected
-            wick_flat_alert_message := "上插针走平(" + str.tostring(array.size(upper_wick_list)) + "个),下插针走平(" + str.tostring(array.size(lower_wick_list)) + "个)"
-        else if upper_flat_detected
-            wick_flat_alert_message := "上插针走平(" + str.tostring(array.size(upper_wick_list)) + "个)"
-        else
-            wick_flat_alert_message := "下插针走平(" + str.tostring(array.size(lower_wick_list)) + "个)"
+        // 计算价格变化百分比（相对于起始价格）
+        price_change_pct = (start_close - current_close) / start_close * 100
         
-        if show_labels
-            if upper_flat_detected
-                label.new(bar_index, upper_current, "上插针走平", color=color.new(color.purple, 0), textcolor=color.white, style=label.style_label_down, size=label_size_value)
-            if lower_flat_detected
-                label.new(bar_index, lower_current, "下插针走平", color=color.new(color.purple, 0), textcolor=color.white, style=label.style_label_up, size=label_size_value)
+        // 单边启动检测：整体跌幅超过启动阈值（不需要每根都连续下跌）
+        if price_change_pct >= trend_start_threshold
+            if not trend_started
+                // 触发单边启动信号
+                trend_started := true
+                trend_start_price := current_close
+                trend_signal_alert := true
+                trend_signal_alert_message := "单边启动(" + str.tostring(price_change_pct, "#.##") + "%)"
+                if show_labels
+                    label.new(bar_index, low, "单边启动", color=color.new(color.red, 0), textcolor=color.white, style=label.style_label_up, size=label_size_value)
+            else
+                // 如果已经处于单边启动状态，但价格继续下跌超过启动阈值，清空重新计数
+                // 计算从上次启动价格到当前价格的变化
+                if not na(trend_start_price)
+                    restart_change_pct = (trend_start_price - current_close) / trend_start_price * 100
+                    if restart_change_pct >= trend_start_threshold
+                        // 清空状态，重新开始
+                        trend_start_price := current_close
+                        trend_signal_alert := true
+                        trend_signal_alert_message := "单边重启(" + str.tostring(restart_change_pct, "#.##") + "%)"
+                        if show_labels
+                            label.new(bar_index, low, "单边重启", color=color.new(color.red, 0), textcolor=color.white, style=label.style_label_up, size=label_size_value)
+        
+        // 单边结束检测：如果处于单边启动状态，检查价格回踩
+        if trend_started and not na(trend_start_price)
+            // 计算从启动价格到当前价格的回踩百分比
+            pullback_pct = (current_close - trend_start_price) / trend_start_price * 100
+            
+            // 如果回踩超过结束阈值，触发单边结束信号
+            if pullback_pct >= trend_end_threshold
+                trend_started := false
+                trend_start_price := na
+                trend_signal_alert := true
+                trend_signal_alert_message := "单边结束(" + str.tostring(pullback_pct, "#.##") + "%)"
+                if show_labels
+                    label.new(bar_index, high, "单边结束", color=color.new(color.green, 0), textcolor=color.white, style=label.style_label_down, size=label_size_value)
 
 // ==================== 实时检测当前K线的插针 ====================
 if barstate.islast
@@ -417,7 +514,8 @@ if barstate.islast
 plot_wick_alert = plot(wick_alert ? 1 : 0, title="插针警报", display=display.none)
 plot_rsi_alert = plot(rsi_alert ? 1 : 0, title="RSI警报", display=display.none)
 plot_rsi_divergence_alert = plot(rsi_divergence_alert ? 1 : 0, title="RSI背离警报", display=display.none)
-plot_wick_flat_alert = plot(wick_flat_alert ? 1 : 0, title="插针走平警报", display=display.none)
+plot_continuous_wick_alert = plot(continuous_wick_alert ? 1 : 0, title="连续插针警报", display=display.none)
+plot_trend_signal_alert = plot(trend_signal_alert ? 1 : 0, title="单边信号警报", display=display.none)
 
 // 插针警报条件（合并上插针和下插针）- 只能使用 TradingView 模板变量，不能使用字符串连接
 alertcondition(wick_alert, title="插针预警", message="{{ticker}} | wick_alert | {{time}} | {{close}} | {{high}} | {{low}} ; 插针")
@@ -425,5 +523,7 @@ alertcondition(wick_alert, title="插针预警", message="{{ticker}} | wick_aler
 alertcondition(rsi_alert, title="RSI预警", message="{{ticker}} | rsi_alert | {{time}} | {{close}} | {{high}} | {{low}} ; RSI")
 // RSI 背离警报条件（合并看跌和看涨背离）
 alertcondition(rsi_divergence_alert, title="RSI背离预警", message="{{ticker}} | rsi_divergence_alert | {{time}} | {{close}} | {{high}} | {{low}} ; RSI背离")
-// 插针走平警报条件（合并上插针走平和下插针走平）
-alertcondition(wick_flat_alert, title="插针走平预警", message="{{ticker}} | wick_flat_alert | {{time}} | {{close}} | {{high}} | {{low}} ; 插针走平")
+// 连续插针警报条件
+alertcondition(continuous_wick_alert, title="连续插针预警", message="{{ticker}} | continuous_wick_alert | {{time}} | {{close}} | {{high}} | {{low}} ; 连续插针")
+// 单边信号警报条件
+alertcondition(trend_signal_alert, title="单边信号预警", message="{{ticker}} | trend_signal_alert | {{time}} | {{close}} | {{high}} | {{low}} ; 单边信号")

@@ -45,6 +45,12 @@ enable_alert = input.bool(true, title="启用警报", tooltip="启用后可在Tr
 alert_on_realtime = input.bool(true, title="实时K线警报", tooltip="在当前时间框架检测到插针时触发警报", group="警报设置")
 alert_on_mtf = input.bool(false, title="多时间框架警报", tooltip="在其他时间框架检测到插针时触发警报", group="警报设置")
 
+// 柱体边沿走平检测设置
+enable_wick_flat = input.bool(true, title="启用边沿走平预警", tooltip="检测上下轨附近柱体边沿走平信号", group="边沿走平设置")
+wick_flat_count = input.int(4, title="连续K线数量", minval=3, maxval=10, tooltip="触发走平信号所需的连续K线数量", group="边沿走平设置")
+wick_flat_price_tolerance = input.float(5.0, title="价格相近阈值（美元）", minval=0.1, maxval=50.0, step=0.1, tooltip="边沿价格差异的绝对值（美元），0-5刀视为走平。注意：需要根据币种价格调整，高价币种可能需要更大的值", group="边沿走平设置")
+band_distance_threshold = input.float(0.15, title="轨距阈值", minval=0.05, maxval=0.5, step=0.05, tooltip="K线距离上下轨的距离阈值（15%表示在轨距的15%范围内）", group="边沿走平设置")
+
 // 颜色设置
 color_upper_wick = input.color(color.new(color.red, 0), title="上插针颜色", group="颜色设置")
 color_lower_wick = input.color(color.new(color.green, 0), title="下插针颜色", group="颜色设置")
@@ -85,6 +91,34 @@ upper_wick_alert = false
 lower_wick_alert = false
 upper_alert_message = ""
 lower_alert_message = ""
+wick_flat_alert = false  // 插针走平警报
+wick_flat_alert_message = ""
+
+// 插针历史数据存储（用于走平检测）
+// 使用多个独立数组存储，相同索引位置的元素组成一条完整记录
+// 存储结构：[bar_index, close_price, open_price, is_upper_wick, upper_band, lower_band, high, low]
+var array<float> wick_bar_index = array.new<float>()
+var array<float> wick_close = array.new<float>()
+var array<float> wick_open = array.new<float>()
+var array<float> wick_is_upper = array.new<float>()
+var array<float> wick_upper_band = array.new<float>()
+var array<float> wick_lower_band = array.new<float>()
+var array<float> wick_high = array.new<float>()
+var array<float> wick_low = array.new<float>()
+
+// 插针走平信号计数（用于控制显示频率）
+var int wick_flat_upper_count = 0  // 上轨普通走平连续计数
+var int wick_flat_lower_count = 0  // 下轨普通走平连续计数
+var int wick_golden_flat_upper_count = 0  // 上轨黄金走平连续计数
+var int wick_golden_flat_lower_count = 0  // 下轨黄金走平连续计数
+var bool wick_flat_upper_last = false  // 上次是否检测到上轨普通走平
+var bool wick_flat_lower_last = false  // 上次是否检测到下轨普通走平
+var bool wick_golden_flat_upper_last = false  // 上次是否检测到上轨黄金走平
+var bool wick_golden_flat_lower_last = false  // 上次是否检测到下轨黄金走平
+var int wick_flat_upper_miss_count = 0  // 上轨普通走平连续未检测次数
+var int wick_flat_lower_miss_count = 0  // 下轨普通走平连续未检测次数
+var int wick_golden_flat_upper_miss_count = 0  // 上轨黄金走平连续未检测次数
+var int wick_golden_flat_lower_miss_count = 0  // 下轨黄金走平连续未检测次数
 
 // ==================== 主逻辑 ====================
 label_size_value = get_label_size()
@@ -108,6 +142,16 @@ for i = 0 to array.size(timeframes_code) - 1
                 upper_alert_message := tf_name + "@" + str.tostring(high_tf)
             else
                 upper_alert_message := upper_alert_message + "," + tf_name + "@" + str.tostring(high_tf)
+        // 记录插针历史（用于走平检测）
+        if enable_wick_flat
+            array.push(wick_bar_index, bar_index)
+            array.push(wick_close, close_tf)
+            array.push(wick_open, open_tf)
+            array.push(wick_is_upper, 1.0)  // 1表示上插针
+            array.push(wick_upper_band, upper_tf)
+            array.push(wick_lower_band, lower_tf)
+            array.push(wick_high, high_tf)
+            array.push(wick_low, low_tf)
     
     // 下插针：直接显示和记录，不合并
     if lower_wick_tf
@@ -120,6 +164,16 @@ for i = 0 to array.size(timeframes_code) - 1
                 lower_alert_message := tf_name + "@" + str.tostring(low_tf)
             else
                 lower_alert_message := lower_alert_message + "," + tf_name + "@" + str.tostring(low_tf)
+        // 记录插针历史（用于走平检测）
+        if enable_wick_flat
+            array.push(wick_bar_index, bar_index)
+            array.push(wick_close, close_tf)
+            array.push(wick_open, open_tf)
+            array.push(wick_is_upper, 0.0)  // 0表示下插针
+            array.push(wick_upper_band, upper_tf)
+            array.push(wick_lower_band, lower_tf)
+            array.push(wick_high, high_tf)
+            array.push(wick_low, low_tf)
 
 
 // ==================== 可选：绘制布林带（当前时间框架） ====================
@@ -130,6 +184,259 @@ lower_current = basis_current - dev_current
 plot(show_plots ? upper_current : na, "上轨", color=color.new(color.blue, 50), linewidth=1)
 plot(show_plots ? lower_current : na, "下轨", color=color.new(color.blue, 50), linewidth=1)
 plot(show_plots ? basis_current : na, "中轨", color=color.new(color.blue, 70), linewidth=1)
+
+// ==================== 柱体边沿走平检测 ====================
+// 初始化走平警报
+wick_flat_alert := false
+wick_flat_alert_message := ""
+
+// 检查当前交易品种是否为ETH
+is_eth = str.contains(syminfo.ticker, "ETH") or str.contains(syminfo.ticker, "eth")
+
+if enable_wick_flat and is_eth
+    // 计算当前布林带轨距
+    band_distance = upper_current - lower_current
+    upper_threshold = band_distance * band_distance_threshold
+    lower_threshold = band_distance * band_distance_threshold
+    
+    // 检查最近N根连续K线的柱体边沿是否走平
+    // 上轨走平：检查柱体上边沿（阳线=收盘价，阴线=开盘价）
+    // 下轨走平：检查柱体下边沿（阳线=开盘价，阴线=收盘价）
+    
+    // 收集最近N根连续K线的柱体边沿价格
+    // 普通走平：所有K线的边沿价格
+    upper_edge_list_all = array.new<float>()
+    lower_edge_list_all = array.new<float>()
+    // 黄金走平：在轨附近的K线边沿价格
+    upper_edge_list_golden = array.new<float>()
+    lower_edge_list_golden = array.new<float>()
+    
+    // 检查最近N根连续K线（包括当前K线）
+    for i = 0 to wick_flat_count - 1
+        if bar_index >= i
+            // 获取历史K线的数据
+            hist_close = close[i]
+            hist_open = open[i]
+            hist_high = high[i]
+            hist_low = low[i]
+            
+            // 计算该K线时的布林带（使用历史数据）
+            hist_basis = ta.sma(close[i], bb_length)
+            hist_dev = bb_mult * ta.stdev(close[i], bb_length)
+            hist_upper = hist_basis + hist_dev
+            hist_lower = hist_basis - hist_dev
+            hist_band_distance = hist_upper - hist_lower
+            hist_upper_threshold = hist_band_distance * band_distance_threshold
+            hist_lower_threshold = hist_band_distance * band_distance_threshold
+            
+            // 判断K线是阳线还是阴线
+            is_bullish = hist_close >= hist_open
+            
+            // 计算柱体边沿价格（用于普通走平检测）
+            upper_edge_price = is_bullish ? hist_close : hist_open
+            lower_edge_price = is_bullish ? hist_open : hist_close
+            
+            // 普通走平：存储所有K线的边沿价格
+            array.push(upper_edge_list_all, upper_edge_price)
+            array.push(lower_edge_list_all, lower_edge_price)
+            
+            // 检查是否在上轨附近（15%范围内）- 用于黄金走平
+            distance_from_upper = hist_high - hist_upper
+            if distance_from_upper >= -hist_upper_threshold and distance_from_upper <= hist_upper_threshold
+                // 黄金走平：存储柱体上边沿
+                array.push(upper_edge_list_golden, upper_edge_price)
+            
+            // 检查是否在下轨附近（15%范围内）- 用于黄金走平
+            distance_from_lower = hist_lower - hist_low
+            if distance_from_lower >= -hist_lower_threshold and distance_from_lower <= hist_lower_threshold
+                // 黄金走平：存储柱体下边沿
+                array.push(lower_edge_list_golden, lower_edge_price)
+    
+    // 检测上轨走平（检查连续N根K线的柱体上边沿是否走平）
+    upper_flat_detected = false  // 普通走平
+    upper_golden_flat_detected = false  // 黄金走平
+    
+    // 普通走平检测：检查所有K线的边沿价格
+    if array.size(upper_edge_list_all) >= wick_flat_count
+        max_edge = array.get(upper_edge_list_all, 0)
+        min_edge = array.get(upper_edge_list_all, 0)
+        for k = 0 to array.size(upper_edge_list_all) - 1
+            edge_price = array.get(upper_edge_list_all, k)
+            max_edge := math.max(max_edge, edge_price)
+            min_edge := math.min(min_edge, edge_price)
+        price_diff = max_edge - min_edge
+        if price_diff <= wick_flat_price_tolerance
+            upper_flat_detected := true
+    
+    // 黄金走平检测：检查在轨附近的K线边沿价格
+    if array.size(upper_edge_list_golden) >= wick_flat_count
+        max_edge = array.get(upper_edge_list_golden, 0)
+        min_edge = array.get(upper_edge_list_golden, 0)
+        for k = 0 to array.size(upper_edge_list_golden) - 1
+            edge_price = array.get(upper_edge_list_golden, k)
+            max_edge := math.max(max_edge, edge_price)
+            min_edge := math.min(min_edge, edge_price)
+        price_diff = max_edge - min_edge
+        if price_diff <= wick_flat_price_tolerance
+            upper_golden_flat_detected := true
+    
+    // 检测下轨走平（检查连续N根K线的柱体下边沿是否走平）
+    lower_flat_detected = false  // 普通走平
+    lower_golden_flat_detected = false  // 黄金走平
+    
+    // 普通走平检测：检查所有K线的边沿价格
+    if array.size(lower_edge_list_all) >= wick_flat_count
+        max_edge = array.get(lower_edge_list_all, 0)
+        min_edge = array.get(lower_edge_list_all, 0)
+        for k = 0 to array.size(lower_edge_list_all) - 1
+            edge_price = array.get(lower_edge_list_all, k)
+            max_edge := math.max(max_edge, edge_price)
+            min_edge := math.min(min_edge, edge_price)
+        price_diff = max_edge - min_edge
+        if price_diff <= wick_flat_price_tolerance
+            lower_flat_detected := true
+    
+    // 黄金走平检测：检查在轨附近的K线边沿价格
+    if array.size(lower_edge_list_golden) >= wick_flat_count
+        max_edge = array.get(lower_edge_list_golden, 0)
+        min_edge = array.get(lower_edge_list_golden, 0)
+        for k = 0 to array.size(lower_edge_list_golden) - 1
+            edge_price = array.get(lower_edge_list_golden, k)
+            max_edge := math.max(max_edge, edge_price)
+            min_edge := math.min(min_edge, edge_price)
+        price_diff = max_edge - min_edge
+        if price_diff <= wick_flat_price_tolerance
+            lower_golden_flat_detected := true
+    
+    // 上轨普通走平计数逻辑
+    if upper_flat_detected
+        if wick_flat_upper_last
+            wick_flat_upper_count := wick_flat_upper_count + 1
+        else
+            wick_flat_upper_count := 1
+        wick_flat_upper_last := true
+        wick_flat_upper_miss_count := 0
+    else
+        if wick_flat_upper_last
+            wick_flat_upper_miss_count := wick_flat_upper_miss_count + 1
+            if wick_flat_upper_miss_count >= 2
+                wick_flat_upper_count := 0
+                wick_flat_upper_miss_count := 0
+        else
+            wick_flat_upper_miss_count := wick_flat_upper_miss_count + 1
+            if wick_flat_upper_miss_count >= 2
+                wick_flat_upper_count := 0
+                wick_flat_upper_miss_count := 0
+        wick_flat_upper_last := false
+    
+    // 上轨黄金走平计数逻辑
+    if upper_golden_flat_detected
+        if wick_golden_flat_upper_last
+            wick_golden_flat_upper_count := wick_golden_flat_upper_count + 1
+        else
+            wick_golden_flat_upper_count := 1
+        wick_golden_flat_upper_last := true
+        wick_golden_flat_upper_miss_count := 0
+    else
+        if wick_golden_flat_upper_last
+            wick_golden_flat_upper_miss_count := wick_golden_flat_upper_miss_count + 1
+            if wick_golden_flat_upper_miss_count >= 2
+                wick_golden_flat_upper_count := 0
+                wick_golden_flat_upper_miss_count := 0
+        else
+            wick_golden_flat_upper_miss_count := wick_golden_flat_upper_miss_count + 1
+            if wick_golden_flat_upper_miss_count >= 2
+                wick_golden_flat_upper_count := 0
+                wick_golden_flat_upper_miss_count := 0
+        wick_golden_flat_upper_last := false
+    
+    // 下轨普通走平计数逻辑
+    if lower_flat_detected
+        if wick_flat_lower_last
+            wick_flat_lower_count := wick_flat_lower_count + 1
+        else
+            wick_flat_lower_count := 1
+        wick_flat_lower_last := true
+        wick_flat_lower_miss_count := 0
+    else
+        if wick_flat_lower_last
+            wick_flat_lower_miss_count := wick_flat_lower_miss_count + 1
+            if wick_flat_lower_miss_count >= 2
+                wick_flat_lower_count := 0
+                wick_flat_lower_miss_count := 0
+        else
+            wick_flat_lower_miss_count := wick_flat_lower_miss_count + 1
+            if wick_flat_lower_miss_count >= 2
+                wick_flat_lower_count := 0
+                wick_flat_lower_miss_count := 0
+        wick_flat_lower_last := false
+    
+    // 下轨黄金走平计数逻辑
+    if lower_golden_flat_detected
+        if wick_golden_flat_lower_last
+            wick_golden_flat_lower_count := wick_golden_flat_lower_count + 1
+        else
+            wick_golden_flat_lower_count := 1
+        wick_golden_flat_lower_last := true
+        wick_golden_flat_lower_miss_count := 0
+    else
+        if wick_golden_flat_lower_last
+            wick_golden_flat_lower_miss_count := wick_golden_flat_lower_miss_count + 1
+            if wick_golden_flat_lower_miss_count >= 2
+                wick_golden_flat_lower_count := 0
+                wick_golden_flat_lower_miss_count := 0
+        else
+            wick_golden_flat_lower_miss_count := wick_golden_flat_lower_miss_count + 1
+            if wick_golden_flat_lower_miss_count >= 2
+                wick_golden_flat_lower_count := 0
+                wick_golden_flat_lower_miss_count := 0
+        wick_golden_flat_lower_last := false
+    
+    // 只有当连续检测到3次走平信号时才显示和报警（每3次显示一次，显示后重置计数）
+    upper_flat_should_show = wick_flat_upper_count > 0 and wick_flat_upper_count % 3 == 0
+    lower_flat_should_show = wick_flat_lower_count > 0 and wick_flat_lower_count % 3 == 0
+    upper_golden_flat_should_show = wick_golden_flat_upper_count > 0 and wick_golden_flat_upper_count % 3 == 0
+    lower_golden_flat_should_show = wick_golden_flat_lower_count > 0 and wick_golden_flat_lower_count % 3 == 0
+    
+    // 合并走平信号（优先显示黄金走平）
+    if upper_golden_flat_should_show or lower_golden_flat_should_show or upper_flat_should_show or lower_flat_should_show
+        wick_flat_alert := true
+        message_parts = array.new<string>()
+        if upper_golden_flat_should_show
+            array.push(message_parts, "上轨黄金走平(" + str.tostring(array.size(upper_edge_list_golden)) + "个)")
+        else if upper_flat_should_show
+            array.push(message_parts, "上轨走平(" + str.tostring(array.size(upper_edge_list_all)) + "个)")
+        if lower_golden_flat_should_show
+            array.push(message_parts, "下轨黄金走平(" + str.tostring(array.size(lower_edge_list_golden)) + "个)")
+        else if lower_flat_should_show
+            array.push(message_parts, "下轨走平(" + str.tostring(array.size(lower_edge_list_all)) + "个)")
+        
+        wick_flat_alert_message := ""
+        for j = 0 to array.size(message_parts) - 1
+            if wick_flat_alert_message == ""
+                wick_flat_alert_message := array.get(message_parts, j)
+            else
+                wick_flat_alert_message := wick_flat_alert_message + "," + array.get(message_parts, j)
+        
+        if show_labels
+            if upper_golden_flat_should_show
+                label.new(bar_index, upper_current, "上轨黄金走平", color=color.new(color.yellow, 0), textcolor=color.black, style=label.style_label_down, size=label_size_value)
+            else if upper_flat_should_show
+                label.new(bar_index, upper_current, "上轨走平", color=color.new(color.purple, 0), textcolor=color.white, style=label.style_label_down, size=label_size_value)
+            if lower_golden_flat_should_show
+                label.new(bar_index, lower_current, "下轨黄金走平", color=color.new(color.yellow, 0), textcolor=color.black, style=label.style_label_up, size=label_size_value)
+            else if lower_flat_should_show
+                label.new(bar_index, lower_current, "下轨走平", color=color.new(color.purple, 0), textcolor=color.white, style=label.style_label_up, size=label_size_value)
+        
+        // 显示后重置计数，实现真正的"三次显示一次"
+        if upper_golden_flat_should_show
+            wick_golden_flat_upper_count := 0
+        if upper_flat_should_show
+            wick_flat_upper_count := 0
+        if lower_golden_flat_should_show
+            wick_golden_flat_lower_count := 0
+        if lower_flat_should_show
+            wick_flat_lower_count := 0
 
 // ==================== 实时检测当前K线的插针 ====================
 if barstate.islast
@@ -158,8 +465,11 @@ if barstate.islast
 // 创建用于警报的plot（隐藏显示）
 plot_upper_alert = plot(upper_wick_alert ? 1 : 0, title="上插针警报", display=display.none)
 plot_lower_alert = plot(lower_wick_alert ? 1 : 0, title="下插针警报", display=display.none)
+plot_wick_flat_alert = plot(wick_flat_alert ? 1 : 0, title="插针走平警报", display=display.none)
 
 // 上插针警报条件 - 只能使用 TradingView 模板变量，不能使用字符串连接
 alertcondition(upper_wick_alert, title="上插针预警", message="{{ticker}} 上插针 | 时间:{{time}} | 价格:{{close}} | 最高:{{high}} | 最低:{{low}}")
 // 下插针警报条件 - 只能使用 TradingView 模板变量，不能使用字符串连接
 alertcondition(lower_wick_alert, title="下插针预警", message="{{ticker}} 下插针 | 时间:{{time}} | 价格:{{close}} | 最高:{{high}} | 最低:{{low}}")
+// 插针走平警报条件（合并上插针走平和下插针走平）
+alertcondition(wick_flat_alert, title="插针走平预警", message="{{ticker}} | wick_flat_alert | {{time}} | {{close}} | {{high}} | {{low}} ; 插针走平")
