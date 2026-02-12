@@ -135,16 +135,14 @@ export default function SubTaskEditor({
                     type="checkbox"
                     checked={subTask.completed}
                     onChange={e =>
-                      handleUpdate(subTask.id, { completed: e.target.checked })
-                    }
+                      handleUpdate(subTask.id, { completed: e.target.checked })}
                     className={styles.checkbox}
                   />
                   <input
                     type="text"
                     value={subTask.content}
                     onChange={e =>
-                      handleUpdate(subTask.id, { content: e.target.value })
-                    }
+                      handleUpdate(subTask.id, { content: e.target.value })}
                     placeholder={`步骤 ${index + 1}`}
                     className={styles.input}
                   />
@@ -185,4 +183,3 @@ export default function SubTaskEditor({
     </div>
   )
 }
-

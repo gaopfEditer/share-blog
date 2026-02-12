@@ -29,7 +29,7 @@ export default function Comment(): JSX.Element {
   }
 
   giscus.theme = useColorMode().colorMode === 'dark' ? giscus.darkTheme : giscus.theme
-  
+
   // 处理语言代码映射
   giscus.lang = i18n.currentLocale
 

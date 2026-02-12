@@ -65,7 +65,7 @@ export default function TaskForm({
 
   const handleChange = (
     field: keyof TaskFormData,
-    value: string | number
+    value: string | number,
   ) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
@@ -74,7 +74,9 @@ export default function TaskForm({
     <form onSubmit={handleSubmit} className={styles.taskForm}>
       <div className={styles.formRow}>
         <label className={styles.label}>
-          模块类别 <span className={styles.required}>*</span>
+          模块类别
+          {' '}
+          <span className={styles.required}>*</span>
         </label>
         <select
           className={styles.input}
@@ -93,7 +95,9 @@ export default function TaskForm({
 
       <div className={styles.formRow}>
         <label className={styles.label}>
-          任务名称 <span className={styles.required}>*</span>
+          任务名称
+          {' '}
+          <span className={styles.required}>*</span>
         </label>
         <input
           type="text"
@@ -132,7 +136,9 @@ export default function TaskForm({
 
       <div className={styles.formRow}>
         <label className={styles.label}>
-          完成度 <span className={styles.required}>*</span>
+          完成度
+          {' '}
+          <span className={styles.required}>*</span>
         </label>
         <div className={styles.progressContainer}>
           <input
@@ -143,7 +149,10 @@ export default function TaskForm({
             onChange={e => handleChange('progress', parseInt(e.target.value))}
             className={styles.range}
           />
-          <span className={styles.progressValue}>{formData.progress}%</span>
+          <span className={styles.progressValue}>
+            {formData.progress}
+            %
+          </span>
         </div>
       </div>
 
@@ -257,4 +266,3 @@ export default function TaskForm({
     </form>
   )
 }
-

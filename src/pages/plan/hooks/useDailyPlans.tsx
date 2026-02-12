@@ -72,7 +72,7 @@ export function useDailyPlans() {
       const dateRecords = records.filter(record => record.date === date)
 
       // 组合模板和记录
-      return activeTemplates.map(template => {
+      return activeTemplates.map((template) => {
         const todayRecord = dateRecords.find(
           record => record.templateId === template.id,
         )
@@ -213,4 +213,3 @@ export default function UseDailyPlansPage(): React.ReactElement {
     </MyLayout>
   )
 }
-

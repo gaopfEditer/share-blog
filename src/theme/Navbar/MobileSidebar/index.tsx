@@ -9,7 +9,6 @@ export default function NavbarMobileSidebar(): JSX.Element | null {
   const mobileSidebar = useNavbarMobileSidebar()
   useLockBodyScroll(mobileSidebar.shown)
 
-
   // if (!mobileSidebar.shouldRender) {
   //   return null
   // }

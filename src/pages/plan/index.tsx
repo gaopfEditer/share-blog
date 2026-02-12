@@ -48,6 +48,7 @@ function PlanContent() {
     addTask,
     updateTask,
     deleteTask,
+    getTaskWithSubTasks,
     tasksByCategory,
     tasksSortedByTime,
     getAllSubCategories,
@@ -286,6 +287,7 @@ function PlanContent() {
                 onDelete={handleDelete}
                 onUpdateProgress={handleUpdateProgress}
                 onUpdateSubTasks={handleUpdateSubTasks}
+                getTaskWithSubTasks={getTaskWithSubTasks}
               />
             ))}
           </MagicContainer>
@@ -323,6 +325,7 @@ function PlanContent() {
                   onDelete={handleDelete}
                   onUpdateProgress={handleUpdateProgress}
                   onUpdateSubTasks={handleUpdateSubTasks}
+                  getTaskWithSubTasks={getTaskWithSubTasks}
                 />
               ))}
             </MagicContainer>

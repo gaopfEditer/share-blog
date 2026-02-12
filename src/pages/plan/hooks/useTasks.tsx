@@ -5,11 +5,12 @@ import { translate } from '@docusaurus/Translate'
 import MyLayout from '@site/src/theme/MyLayout'
 import type { Task } from '../types'
 
-// 开发环境使用本地代理服务器，生产环境使用完整 URL
+// 开发环境使用本地代理服务器，生产环境直接使用后端 API
 // 注意：开发环境需要先运行 `npm run start:proxy` 启动代理服务器
+// 生产环境需要后端配置 CORS 允许 https://gaopf.top 访问
 const API_BASE_URL = typeof window !== 'undefined' && window.location.hostname === 'localhost'
   ? 'http://localhost:9000/dev' // 开发环境：使用本地代理服务器
-  : 'https://ffz.c.gaopf.top/api' // 生产环境：使用完整 URL
+  : 'https://ffz.c.gaopf.top/api' // 生产环境：直接使用后端 API（需要后端配置 CORS）
 
 // ==================== API 响应类型 ====================
 interface ApiResponse<T> {
@@ -45,6 +46,23 @@ interface ApiTaskListResponse {
     size: number
     total: number
   }
+}
+
+interface ApiSubTask {
+  id: number
+  planId: number
+  content: string
+  completed: number // 0-未完成，1-已完成
+  order: number
+}
+
+interface ApiTaskWithSubTasks {
+  id: number
+  name: string
+  description?: string
+  status?: '待开始' | '进行中' | '已完成' | '已暂停' | '已取消'
+  progress: number
+  subTasks?: ApiSubTask[]
 }
 
 // ==================== 字段转换函数 ====================
@@ -186,6 +204,16 @@ function convertFrontendTaskToApi(task: Partial<Task>): Partial<ApiTask> {
   return apiTask
 }
 
+// API SubTask -> 前端 SubTask
+function convertApiSubTaskToFrontend(apiSubTask: ApiSubTask): import('../types').SubTask {
+  return {
+    id: String(apiSubTask.id),
+    content: apiSubTask.content,
+    completed: apiSubTask.completed === 1,
+    order: apiSubTask.order,
+  }
+}
+
 // ==================== API 调用函数 ====================
 // 获取任务列表
 async function fetchTasks(): Promise<Task[]> {
@@ -320,6 +348,36 @@ async function deleteTaskById(id: string): Promise<boolean> {
   }
 }
 
+// 获取任务详情（包含子任务）
+async function fetchTaskWithSubTasks(id: string): Promise<import('../types').SubTask[] | null> {
+  if (!ExecutionEnvironment.canUseDOM) {
+    return null
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/task/plan/infoWithSub`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ id: Number(id) }),
+    })
+
+    const result: ApiResponse<ApiTaskWithSubTasks> = await response.json()
+
+    if (result.code === 1000 && result.data && result.data.subTasks) {
+      return result.data.subTasks.map(convertApiSubTaskToFrontend)
+    }
+
+    console.error('Failed to fetch task with sub tasks:', result.message)
+    return null
+  }
+  catch (error) {
+    console.error('Failed to fetch task with sub tasks:', error)
+    return null
+  }
+}
+
 export function useTasks() {
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(false)
@@ -446,12 +504,18 @@ export function useTasks() {
     }
   }, [tasks])
 
+  // 获取任务详情（包含子任务）
+  const getTaskWithSubTasks = useCallback(async (id: string) => {
+    return await fetchTaskWithSubTasks(id)
+  }, [])
+
   return {
     tasks,
     loading,
     addTask,
     updateTask,
     deleteTask,
+    getTaskWithSubTasks,
     tasksByCategory,
     tasksByModuleAndSubCategory,
     tasksSortedByTime,

@@ -12,4 +12,3 @@ export interface InfoCategory {
 export interface InfoData {
   categories: InfoCategory[]
 }
-

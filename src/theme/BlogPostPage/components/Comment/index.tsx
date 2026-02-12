@@ -31,19 +31,25 @@ export default function Comment(): JSX.Element {
   giscus.theme = useColorMode().colorMode === 'dark' ? giscus.darkTheme : giscus.theme
   giscus.lang = i18n.currentLocale
 
-  return <BrowserOnly fallback={<div>Loading Comments...</div>}>{() => <Giscus 
-    id="comments"
-      repo="gaopfEditer/share-blog"
-      repoId="R_kgDOOiLTjA"
-      category="Announcements"
-      categoryId="DIC_kwDOOiLTjM4CpoD9"
-      mapping="title"
-      term="Welcome to @giscus/react component!"
-      reactionsEnabled="1"
-      emitMetadata="0"
-      inputPosition="top"
-      theme="light"
-      lang="zh-CN"
-      loading="lazy"
-    />}</BrowserOnly>
+  return (
+    <BrowserOnly fallback={<div>Loading Comments...</div>}>
+      {() => (
+        <Giscus
+          id="comments"
+          repo="gaopfEditer/share-blog"
+          repoId="R_kgDOOiLTjA"
+          category="Announcements"
+          categoryId="DIC_kwDOOiLTjM4CpoD9"
+          mapping="title"
+          term="Welcome to @giscus/react component!"
+          reactionsEnabled="1"
+          emitMetadata="0"
+          inputPosition="top"
+          theme="light"
+          lang="zh-CN"
+          loading="lazy"
+        />
+      )}
+    </BrowserOnly>
+  )
 }
