@@ -5,90 +5,386 @@ import { translate } from '@docusaurus/Translate'
 import MyLayout from '@site/src/theme/MyLayout'
 import type { Task } from '../types'
 
-const STORAGE_KEY = 'plan-tasks'
+// 开发环境使用本地代理服务器，生产环境使用完整 URL
+// 注意：开发环境需要先运行 `npm run start:proxy` 启动代理服务器
+const API_BASE_URL = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+  ? 'http://localhost:9000/dev' // 开发环境：使用本地代理服务器
+  : 'https://ffz.c.gaopf.top/api' // 生产环境：使用完整 URL
 
-// 从 localStorage 读取任务列表
-function loadTasksFromStorage(): Task[] {
+// ==================== API 响应类型 ====================
+interface ApiResponse<T> {
+  code: number
+  message: string
+  data: T
+}
+
+interface ApiTask {
+  id: number
+  moduleCategory?: string
+  name: string
+  description?: string
+  subCategory?: string
+  progress: number
+  plannedStartDate?: string
+  plannedEndDate?: string
+  actualStartDate?: string
+  actualEndDate?: string
+  plannedTime?: string
+  actualTime?: string
+  priority?: '低' | '中' | '高'
+  tags?: string[]
+  status?: '待开始' | '进行中' | '已完成' | '已暂停' | '已取消'
+  createTime: string
+  updateTime: string
+}
+
+interface ApiTaskListResponse {
+  list?: ApiTask[]
+  pagination?: {
+    page: number
+    size: number
+    total: number
+  }
+}
+
+// ==================== 字段转换函数 ====================
+// API status -> 前端 status
+function convertApiStatusToFrontend(apiStatus?: string): 'pending' | 'in-progress' | 'completed' {
+  const statusMap: Record<string, 'pending' | 'in-progress' | 'completed'> = {
+    待开始: 'pending',
+    进行中: 'in-progress',
+    已完成: 'completed',
+    已暂停: 'pending',
+    已取消: 'pending',
+  }
+  return statusMap[apiStatus || ''] || 'pending'
+}
+
+// 前端 status -> API status
+function convertFrontendStatusToApi(status: 'pending' | 'in-progress' | 'completed'): '待开始' | '进行中' | '已完成' {
+  const statusMap: Record<string, '待开始' | '进行中' | '已完成'> = {
+    'pending': '待开始',
+    'in-progress': '进行中',
+    'completed': '已完成',
+  }
+  return statusMap[status] || '待开始'
+}
+
+// API priority -> 前端 priority
+function convertApiPriorityToFrontend(apiPriority?: string): 'low' | 'medium' | 'high' {
+  const priorityMap: Record<string, 'low' | 'medium' | 'high'> = {
+    低: 'low',
+    中: 'medium',
+    高: 'high',
+  }
+  return priorityMap[apiPriority || ''] || 'medium'
+}
+
+// 前端 priority -> API priority
+function convertFrontendPriorityToApi(priority: 'low' | 'medium' | 'high'): '低' | '中' | '高' {
+  const priorityMap: Record<string, '低' | '中' | '高'> = {
+    low: '低',
+    medium: '中',
+    high: '高',
+  }
+  return priorityMap[priority] || '中'
+}
+
+// 时间格式转换：API "2026-01-09 14:05:03" -> ISO string
+function convertApiTimeToISO(apiTime: string): string {
+  if (!apiTime) return new Date().toISOString()
+  // 将 "2026-01-09 14:05:03" 转换为 ISO 格式
+  return new Date(apiTime.replace(' ', 'T')).toISOString()
+}
+
+// ISO string -> API 时间格式 "YYYY-MM-DD HH:mm:ss"
+function convertISOToApiTime(isoTime: string): string {
+  if (!isoTime) return ''
+  const date = new Date(isoTime)
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  const seconds = String(date.getSeconds()).padStart(2, '0')
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+}
+
+// API Task -> 前端 Task
+function convertApiTaskToFrontend(apiTask: ApiTask): Task {
+  return {
+    id: String(apiTask.id),
+    moduleCategory: apiTask.moduleCategory || '',
+    name: apiTask.name,
+    description: apiTask.description || '',
+    subCategory: apiTask.subCategory || '',
+    progress: apiTask.progress || 0,
+    status: convertApiStatusToFrontend(apiTask.status),
+    plannedStartDate: apiTask.plannedStartDate || '',
+    plannedEndDate: apiTask.plannedEndDate || '',
+    actualStartDate: apiTask.actualStartDate,
+    actualEndDate: apiTask.actualEndDate,
+    plannedTime: apiTask.plannedTime || '',
+    actualTime: apiTask.actualTime,
+    priority: convertApiPriorityToFrontend(apiTask.priority),
+    tags: apiTask.tags || [],
+    createdAt: convertApiTimeToISO(apiTask.createTime),
+    updatedAt: convertApiTimeToISO(apiTask.updateTime),
+  }
+}
+
+// 前端 Task -> API Task (用于新增/更新)
+function convertFrontendTaskToApi(task: Partial<Task>): Partial<ApiTask> {
+  const apiTask: Partial<ApiTask> = {}
+
+  if (task.id) {
+    apiTask.id = Number(task.id)
+  }
+  if (task.moduleCategory !== undefined) {
+    apiTask.moduleCategory = task.moduleCategory
+  }
+  if (task.name !== undefined) {
+    apiTask.name = task.name
+  }
+  if (task.description !== undefined) {
+    apiTask.description = task.description
+  }
+  if (task.subCategory !== undefined) {
+    apiTask.subCategory = task.subCategory
+  }
+  if (task.progress !== undefined) {
+    apiTask.progress = task.progress
+  }
+  if (task.status !== undefined) {
+    apiTask.status = convertFrontendStatusToApi(task.status)
+  }
+  if (task.plannedStartDate !== undefined) {
+    apiTask.plannedStartDate = task.plannedStartDate
+  }
+  if (task.plannedEndDate !== undefined) {
+    apiTask.plannedEndDate = task.plannedEndDate
+  }
+  if (task.actualStartDate !== undefined) {
+    apiTask.actualStartDate = task.actualStartDate
+  }
+  if (task.actualEndDate !== undefined) {
+    apiTask.actualEndDate = task.actualEndDate
+  }
+  if (task.plannedTime !== undefined) {
+    apiTask.plannedTime = task.plannedTime
+  }
+  if (task.actualTime !== undefined) {
+    apiTask.actualTime = task.actualTime
+  }
+  if (task.priority !== undefined) {
+    apiTask.priority = convertFrontendPriorityToApi(task.priority)
+  }
+  if (task.tags !== undefined) {
+    apiTask.tags = task.tags
+  }
+
+  return apiTask
+}
+
+// ==================== API 调用函数 ====================
+// 获取任务列表
+async function fetchTasks(): Promise<Task[]> {
   if (!ExecutionEnvironment.canUseDOM) {
     return []
   }
+
   try {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    return stored ? JSON.parse(stored) : []
+    const response = await fetch(`${API_BASE_URL}/admin/task/plan/list`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({}),
+    })
+
+    const result: ApiResponse<ApiTask[] | ApiTaskListResponse> = await response.json()
+
+    if (result.code === 1000 && result.data) {
+      // 处理两种可能的返回格式
+      let apiTasks: ApiTask[] = []
+      if (Array.isArray(result.data)) {
+        apiTasks = result.data
+      }
+      else if (!Array.isArray(result.data) && result.data.list) {
+        apiTasks = result.data.list
+      }
+
+      return apiTasks.map(convertApiTaskToFrontend)
+    }
+
+    console.error('Failed to fetch tasks:', result.message)
+    return []
   }
   catch (error) {
-    console.error('Failed to load tasks from storage:', error)
+    console.error('Failed to fetch tasks:', error)
     return []
   }
 }
 
-// 保存任务列表到 localStorage
-function saveTasksToStorage(tasks: Task[]): void {
+// 新增任务
+async function createTask(taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>): Promise<Task | null> {
   if (!ExecutionEnvironment.canUseDOM) {
-    return
+    return null
   }
+
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks))
+    const apiData = convertFrontendTaskToApi(taskData)
+
+    const response = await fetch(`${API_BASE_URL}/admin/task/plan/add`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(apiData),
+    })
+
+    const result: ApiResponse<ApiTask> = await response.json()
+
+    if (result.code === 1000 && result.data) {
+      return convertApiTaskToFrontend(result.data)
+    }
+
+    console.error('Failed to create task:', result.message)
+    return null
   }
   catch (error) {
-    console.error('Failed to save tasks to storage:', error)
+    console.error('Failed to create task:', error)
+    return null
+  }
+}
+
+// 更新任务
+async function updateTaskById(id: string, taskData: Partial<Task>): Promise<Task | null> {
+  if (!ExecutionEnvironment.canUseDOM) {
+    return null
+  }
+
+  try {
+    const apiData = convertFrontendTaskToApi({ ...taskData, id })
+
+    const response = await fetch(`${API_BASE_URL}/admin/task/plan/update`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(apiData),
+    })
+
+    const result: ApiResponse<ApiTask> = await response.json()
+
+    if (result.code === 1000 && result.data) {
+      return convertApiTaskToFrontend(result.data)
+    }
+
+    console.error('Failed to update task:', result.message)
+    return null
+  }
+  catch (error) {
+    console.error('Failed to update task:', error)
+    return null
+  }
+}
+
+// 删除任务
+async function deleteTaskById(id: string): Promise<boolean> {
+  if (!ExecutionEnvironment.canUseDOM) {
+    return false
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/task/plan/delete`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ids: [Number(id)] }),
+    })
+
+    const result: ApiResponse<void> = await response.json()
+
+    if (result.code === 1000) {
+      return true
+    }
+
+    console.error('Failed to delete task:', result.message)
+    return false
+  }
+  catch (error) {
+    console.error('Failed to delete task:', error)
+    return false
   }
 }
 
 export function useTasks() {
   const [tasks, setTasks] = useState<Task[]>([])
+  const [loading, setLoading] = useState(false)
 
-  // 初始化时从 localStorage 加载任务
+  // 初始化时从 API 加载任务
   useEffect(() => {
-    setTasks(loadTasksFromStorage())
+    const loadTasks = async () => {
+      setLoading(true)
+      try {
+        const fetchedTasks = await fetchTasks()
+        setTasks(fetchedTasks)
+      }
+      catch (error) {
+        console.error('Failed to load tasks:', error)
+      }
+      finally {
+        setLoading(false)
+      }
+    }
+
+    loadTasks()
   }, [])
 
   // 添加任务
-  const addTask = useCallback((taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const newTask: Task = {
-      ...taskData,
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+  const addTask = useCallback(async (taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const newTask = await createTask(taskData)
+    if (newTask) {
+      setTasks(prev => [...prev, newTask])
+      return newTask
     }
-    setTasks((prev) => {
-      const updated = [...prev, newTask]
-      saveTasksToStorage(updated)
-      return updated
-    })
-    return newTask
+    throw new Error('Failed to create task')
   }, [])
 
   // 更新任务
-  const updateTask = useCallback((id: string, taskData: Partial<Task>) => {
-    setTasks((prev) => {
-      const updated = prev.map(task =>
-        task.id === id
-          ? { ...task, ...taskData, updatedAt: new Date().toISOString() }
-          : task,
+  const updateTask = useCallback(async (id: string, taskData: Partial<Task>) => {
+    const updatedTask = await updateTaskById(id, taskData)
+    if (updatedTask) {
+      setTasks(prev =>
+        prev.map(task => (task.id === id ? updatedTask : task)),
       )
-      saveTasksToStorage(updated)
-      return updated
-    })
+      return updatedTask
+    }
+    throw new Error('Failed to update task')
   }, [])
 
   // 删除任务
-  const deleteTask = useCallback((id: string) => {
-    setTasks((prev) => {
-      const updated = prev.filter(task => task.id !== id)
-      saveTasksToStorage(updated)
-      return updated
-    })
+  const deleteTask = useCallback(async (id: string) => {
+    const success = await deleteTaskById(id)
+    if (success) {
+      setTasks(prev => prev.filter(task => task.id !== id))
+    }
+    else {
+      throw new Error('Failed to delete task')
+    }
   }, [])
 
   // 按模块类别分组
   const tasksByCategory = useCallback(() => {
     const grouped: Record<string, Task[]> = {}
     tasks.forEach((task) => {
-      if (!grouped[task.moduleCategory]) {
-        grouped[task.moduleCategory] = []
+      const category = task.moduleCategory || ''
+      if (!grouped[category]) {
+        grouped[category] = []
       }
-      grouped[task.moduleCategory].push(task)
+      grouped[category].push(task)
     })
     return grouped
   }, [tasks])
@@ -97,15 +393,16 @@ export function useTasks() {
   const tasksByModuleAndSubCategory = useCallback(() => {
     const grouped: Record<string, Record<string, Task[]>> = {}
     tasks.forEach((task) => {
-      if (!grouped[task.moduleCategory]) {
-        grouped[task.moduleCategory] = {}
+      const category = task.moduleCategory || ''
+      if (!grouped[category]) {
+        grouped[category] = {}
       }
       // 如果没有子类目，使用 '未分类' 作为默认值
       const subCategory = task.subCategory || '未分类'
-      if (!grouped[task.moduleCategory][subCategory]) {
-        grouped[task.moduleCategory][subCategory] = []
+      if (!grouped[category][subCategory]) {
+        grouped[category][subCategory] = []
       }
-      grouped[task.moduleCategory][subCategory].push(task)
+      grouped[category][subCategory].push(task)
     })
     return grouped
   }, [tasks])
@@ -151,6 +448,7 @@ export function useTasks() {
 
   return {
     tasks,
+    loading,
     addTask,
     updateTask,
     deleteTask,

@@ -16,6 +16,7 @@
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
     "start:en": "docusaurus start --locale en",
+    "start:proxy": "node proxy-server.js",
     "build": "docusaurus build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
