@@ -59,11 +59,11 @@ divergence_lookback = input.int(9, title="历史K线周期", minval=5, maxval=50
 enable_continuous_wick = input.bool(true, title="启用连续插针预警", tooltip="检测上下轨附近连续插针信号", group="连续插针设置")
 continuous_wick_count = input.int(2, title="插针数量", minval=2, maxval=5, tooltip="触发信号所需的连续插针数量", group="连续插针设置")
 
-// 单边启动/结束检测设置
-enable_trend_signal = input.bool(true, title="启用单边信号", tooltip="检测单边启动和结束信号", group="单边信号设置")
-trend_lookback = input.int(10, title="检测周期", minval=5, maxval=50, tooltip="检测连续下跌的K线数量", group="单边信号设置")
-trend_start_threshold = input.float(5.0, title="启动阈值（%）", minval=1.0, maxval=20.0, step=0.5, tooltip="连续下跌超过此百分比视为单边启动", group="单边信号设置")
-trend_end_threshold = input.float(3.0, title="结束阈值（%）", minval=1.0, maxval=20.0, step=0.5, tooltip="价格回踩超过此百分比视为单边结束", group="单边信号设置")
+// K线形态设置（射击之星、吞没）
+enable_candle_pattern = input.bool(true, title="启用K线形态预警", tooltip="检测射击之星和吞没形态", group="K线形态设置")
+enable_shooting_star = input.bool(true, title="射击之星", tooltip="上影线长、实体小、下影线短，看跌信号", group="K线形态设置")
+enable_engulfing = input.bool(true, title="吞没形态", tooltip="当前K线实体完全包住前一根K线实体", group="K线形态设置")
+pattern_upper_wick_ratio = input.float(2.0, title="射击之星上影线/实体比", minval=1.5, maxval=5.0, step=0.1, tooltip="上影线至少为实体的倍数", group="K线形态设置")
 
 // 颜色设置
 color_upper_wick = input.color(color.new(color.red, 0), title="上插针颜色", group="颜色设置")
@@ -90,6 +90,32 @@ detect_wick(upper_band, lower_band, high_price, low_price, open_price, close_pri
     lower_wick_condition = low_price < lower_band and lower_wick > 0 and (body_size == 0 or lower_wick / math.max(body_size, 0.0001) >= wick_ratio)
     [upper_wick_condition, lower_wick_condition, upper_wick, lower_wick]
 
+// ==================== 函数：检测射击之星 ====================
+// 射击之星：上影线长、实体小、下影线短，看跌反转信号
+detect_shooting_star(h_price, l_price, o_price, c_price, ratio) =>
+    body = math.abs(c_price - o_price)
+    upper_w = h_price - math.max(o_price, c_price)
+    lower_w = math.min(o_price, c_price) - l_price
+    // 实体不能为0，上影线>=实体*ratio，下影线<=实体*0.5
+    body > 0 and upper_w >= body * ratio and lower_w <= body * 0.5
+
+// ==================== 函数：检测吞没形态 ====================
+// 看涨吞没：当前阳线实体包住前一根阴线实体
+// 看跌吞没：当前阴线实体包住前一根阳线实体
+detect_bullish_engulfing(o1, c1, o0, c0) =>
+    prev_bearish = c1 < o1  // 前一根阴线
+    curr_bullish = c0 > o0  // 当前阳线
+    curr_open_below_prev_close = o0 <= c1
+    curr_close_above_prev_open = c0 >= o1
+    prev_bearish and curr_bullish and curr_open_below_prev_close and curr_close_above_prev_open
+
+detect_bearish_engulfing(o1, c1, o0, c0) =>
+    prev_bullish = c1 > o1  // 前一根阳线
+    curr_bearish = c0 < o0  // 当前阴线
+    curr_open_above_prev_close = o0 >= c1
+    curr_close_below_prev_open = c0 <= o1
+    prev_bullish and curr_bearish and curr_open_above_prev_close and curr_close_below_prev_open
+
 // ==================== 辅助函数：获取标签大小 ====================
 get_label_size() =>
     switch label_size
@@ -105,18 +131,14 @@ wick_alert = false  // 合并的上插针和下插针警报
 rsi_alert = false  // 合并的RSI超买超卖警报
 rsi_divergence_alert = false  // 合并的RSI背离警报
 continuous_wick_alert = false  // 连续插针警报
-trend_signal_alert = false  // 单边信号警报
+candle_pattern_alert = false  // K线形态警报（射击之星、吞没）
 
 // 警报消息
 wick_alert_message = ""
 rsi_alert_message = ""
 rsi_divergence_alert_message = ""
 continuous_wick_alert_message = ""
-trend_signal_alert_message = ""
-
-// 单边信号状态
-var bool trend_started = false  // 是否处于单边启动状态
-var float trend_start_price = na  // 单边启动时的价格
+candle_pattern_alert_message = ""
 
 // 连续插针计数（用于检测连续插针信号）
 var int continuous_upper_wick_counter = 0  // 连续上插针计数（上下轨附近）
@@ -432,57 +454,45 @@ if enable_continuous_wick
                 if show_labels
                     label.new(bar_index, low, "非下轨连续下插针", color=color.new(color.purple, 0), textcolor=color.white, style=label.style_label_up, size=label_size_value)
 
-// ==================== 单边启动/结束信号检测 ====================
-// 初始化单边信号警报
-trend_signal_alert := false
-trend_signal_alert_message := ""
+// ==================== K线形态检测（射击之星、吞没，需在布林带上下轨附近）====================
+candle_pattern_alert := false
+candle_pattern_alert_message := ""
 
-if enable_trend_signal
-    // 检查最近N根K线整体跌幅
-    if bar_index >= trend_lookback
-        // 获取N根K线前的收盘价
-        start_close = close[trend_lookback]
-        current_close = close
-        
-        // 计算价格变化百分比（相对于起始价格）
-        price_change_pct = (start_close - current_close) / start_close * 100
-        
-        // 单边启动检测：整体跌幅超过启动阈值（不需要每根都连续下跌）
-        if price_change_pct >= trend_start_threshold
-            if not trend_started
-                // 触发单边启动信号
-                trend_started := true
-                trend_start_price := current_close
-                trend_signal_alert := true
-                trend_signal_alert_message := "单边启动(" + str.tostring(price_change_pct, "#.##") + "%)"
-                if show_labels
-                    label.new(bar_index, low, "单边启动", color=color.new(color.red, 0), textcolor=color.white, style=label.style_label_up, size=label_size_value)
-            else
-                // 如果已经处于单边启动状态，但价格继续下跌超过启动阈值，清空重新计数
-                // 计算从上次启动价格到当前价格的变化
-                if not na(trend_start_price)
-                    restart_change_pct = (trend_start_price - current_close) / trend_start_price * 100
-                    if restart_change_pct >= trend_start_threshold
-                        // 清空状态，重新开始
-                        trend_start_price := current_close
-                        trend_signal_alert := true
-                        trend_signal_alert_message := "单边重启(" + str.tostring(restart_change_pct, "#.##") + "%)"
-                        if show_labels
-                            label.new(bar_index, low, "单边重启", color=color.new(color.red, 0), textcolor=color.white, style=label.style_label_up, size=label_size_value)
-        
-        // 单边结束检测：如果处于单边启动状态，检查价格回踩
-        if trend_started and not na(trend_start_price)
-            // 计算从启动价格到当前价格的回踩百分比
-            pullback_pct = (current_close - trend_start_price) / trend_start_price * 100
-            
-            // 如果回踩超过结束阈值，触发单边结束信号
-            if pullback_pct >= trend_end_threshold
-                trend_started := false
-                trend_start_price := na
-                trend_signal_alert := true
-                trend_signal_alert_message := "单边结束(" + str.tostring(pullback_pct, "#.##") + "%)"
-                if show_labels
-                    label.new(bar_index, high, "单边结束", color=color.new(color.green, 0), textcolor=color.white, style=label.style_label_down, size=label_size_value)
+if enable_candle_pattern
+    // 布林带位置判断：上轨附近（85%以上）、下轨附近（15%以内）
+    mid_to_upper_bb = upper_current - basis_current
+    upper_zone_bb = basis_current + mid_to_upper_bb * 0.85
+    mid_to_lower_bb = basis_current - lower_current
+    lower_zone_bb = lower_current + mid_to_lower_bb * 0.15
+    at_upper_band = high >= upper_zone_bb
+    at_lower_band = low <= lower_zone_bb
+
+    // 射击之星：看跌信号，需在布林带上轨附近
+    if enable_shooting_star and at_upper_band and detect_shooting_star(high, low, open, close, pattern_upper_wick_ratio)
+        candle_pattern_alert := true
+        candle_pattern_alert_message := "射击之星"
+        if show_labels
+            label.new(bar_index, high, "射击之星", color=color.new(color.orange, 0), textcolor=color.white, style=label.style_label_down, size=label_size_value)
+
+    // 看涨吞没：当前阳线包住前一根阴线，需在布林带下轨附近
+    if enable_engulfing and at_lower_band and detect_bullish_engulfing(open[1], close[1], open, close)
+        candle_pattern_alert := true
+        if candle_pattern_alert_message != ""
+            candle_pattern_alert_message := candle_pattern_alert_message + ",看涨吞没"
+        else
+            candle_pattern_alert_message := "看涨吞没"
+        if show_labels
+            label.new(bar_index, low, "看涨吞没", color=color.new(color.green, 0), textcolor=color.white, style=label.style_label_up, size=label_size_value)
+
+    // 看跌吞没：当前阴线包住前一根阳线，需在布林带上轨附近
+    if enable_engulfing and at_upper_band and detect_bearish_engulfing(open[1], close[1], open, close)
+        candle_pattern_alert := true
+        if candle_pattern_alert_message != ""
+            candle_pattern_alert_message := candle_pattern_alert_message + ",看跌吞没"
+        else
+            candle_pattern_alert_message := "看跌吞没"
+        if show_labels
+            label.new(bar_index, high, "看跌吞没", color=color.new(color.red, 0), textcolor=color.white, style=label.style_label_down, size=label_size_value)
 
 // ==================== 实时检测当前K线的插针 ====================
 if barstate.islast
@@ -511,19 +521,17 @@ if barstate.islast
 
 // ==================== 警报条件定义（合并后）====================
 // 创建用于警报的plot（隐藏显示）
-plot_wick_alert = plot(wick_alert ? 1 : 0, title="插针警报", display=display.none)
+plot_wick_alert = plot((wick_alert or continuous_wick_alert) ? 1 : 0, title="插针/连续插针警报", display=display.none)
 plot_rsi_alert = plot(rsi_alert ? 1 : 0, title="RSI警报", display=display.none)
 plot_rsi_divergence_alert = plot(rsi_divergence_alert ? 1 : 0, title="RSI背离警报", display=display.none)
-plot_continuous_wick_alert = plot(continuous_wick_alert ? 1 : 0, title="连续插针警报", display=display.none)
-plot_trend_signal_alert = plot(trend_signal_alert ? 1 : 0, title="单边信号警报", display=display.none)
+plot_candle_pattern_alert = plot(candle_pattern_alert ? 1 : 0, title="K线形态警报", display=display.none)
 
-// 插针警报条件（合并上插针和下插针）- 只能使用 TradingView 模板变量，不能使用字符串连接
-alertcondition(wick_alert, title="插针预警", message="{{ticker}} | wick_alert | {{time}} | {{close}} | {{high}} | {{low}} ; 插针")
+// 插针警报条件（合并：单次插针 + 连续插针，节省警报额度）
+alertcondition(wick_alert or continuous_wick_alert, title="插针/连续插针预警", message="{{ticker}} | wick_continuous_alert | {{time}} | {{close}} | {{high}} | {{low}} ; 插针")
 // RSI 警报条件（合并超买和超卖）
 alertcondition(rsi_alert, title="RSI预警", message="{{ticker}} | rsi_alert | {{time}} | {{close}} | {{high}} | {{low}} ; RSI")
 // RSI 背离警报条件（合并看跌和看涨背离）
 alertcondition(rsi_divergence_alert, title="RSI背离预警", message="{{ticker}} | rsi_divergence_alert | {{time}} | {{close}} | {{high}} | {{low}} ; RSI背离")
-// 连续插针警报条件
-alertcondition(continuous_wick_alert, title="连续插针预警", message="{{ticker}} | continuous_wick_alert | {{time}} | {{close}} | {{high}} | {{low}} ; 连续插针")
-// 单边信号警报条件
-alertcondition(trend_signal_alert, title="单边信号预警", message="{{ticker}} | trend_signal_alert | {{time}} | {{close}} | {{high}} | {{low}} ; 单边信号")
+// K线形态警报条件（射击之星、吞没）
+alertcondition(candle_pattern_alert, title="K线形态预警", message="{{ticker}} | candle_pattern_alert | {{time}} | {{close}} | {{high}} | {{low}} ; K线形态")
+
