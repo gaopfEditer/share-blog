@@ -91,13 +91,22 @@ detect_wick(upper_band, lower_band, high_price, low_price, open_price, close_pri
     [upper_wick_condition, lower_wick_condition, upper_wick, lower_wick]
 
 // ==================== 函数：检测射击之星 ====================
-// 射击之星：上影线长、实体小、下影线短，看跌反转信号
+// 射击之星：上影线长、实体小，下方可有插针但下影线长度 < 上影线1/3
 detect_shooting_star(h_price, l_price, o_price, c_price, ratio) =>
     body = math.abs(c_price - o_price)
     upper_w = h_price - math.max(o_price, c_price)
     lower_w = math.min(o_price, c_price) - l_price
-    // 实体不能为0，上影线>=实体*ratio，下影线<=实体*0.5
-    body > 0 and upper_w >= body * ratio and lower_w <= body * 0.5
+    // 实体不能为0，上影线>=实体*ratio，下影线 < 上影线/3（允许有下影线但须远短于上影线）
+    body > 0 and upper_w >= body * ratio and lower_w < upper_w / 3
+
+// ==================== 函数：检测倒锤子（射击之星倒过来的形态）====================
+// 倒锤子：下影线长、实体小，上方可有插针但上影线 < 下影线1/3，看涨 reversal 信号
+detect_inverted_shooting_star(h_price, l_price, o_price, c_price, ratio) =>
+    body = math.abs(c_price - o_price)
+    upper_w = h_price - math.max(o_price, c_price)
+    lower_w = math.min(o_price, c_price) - l_price
+    // 实体不能为0，下影线>=实体*ratio，上影线 < 下影线/3（允许有上影线但须远短于下影线）
+    body > 0 and lower_w >= body * ratio and upper_w < lower_w / 3
 
 // ==================== 函数：检测吞没形态 ====================
 // 看涨吞没：当前阳线实体包住前一根阴线实体
@@ -466,13 +475,25 @@ if enable_candle_pattern
     lower_zone_bb = lower_current + mid_to_lower_bb * 0.15
     at_upper_band = high >= upper_zone_bb
     at_lower_band = low <= lower_zone_bb
+    above_mid_band = high >= basis_current  // 中轨之上
+    below_mid_band = low <= basis_current   // 中轨之下
 
-    // 射击之星：看跌信号，需在布林带上轨附近
-    if enable_shooting_star and at_upper_band and detect_shooting_star(high, low, open, close, pattern_upper_wick_ratio)
+    // 射击之星：看跌信号，需在中轨之上
+    if enable_shooting_star and above_mid_band and detect_shooting_star(high, low, open, close, pattern_upper_wick_ratio)
         candle_pattern_alert := true
         candle_pattern_alert_message := "射击之星"
         if show_labels
             label.new(bar_index, high, "射击之星", color=color.new(color.orange, 0), textcolor=color.white, style=label.style_label_down, size=label_size_value)
+
+    // 倒锤子：看涨信号，射击之星倒过来的形态，需在中轨之下，上影线 < 下影线/3
+    if enable_shooting_star and below_mid_band and detect_inverted_shooting_star(high, low, open, close, pattern_upper_wick_ratio)
+        candle_pattern_alert := true
+        if candle_pattern_alert_message != ""
+            candle_pattern_alert_message := candle_pattern_alert_message + ",倒锤子"
+        else
+            candle_pattern_alert_message := "倒锤子"
+        if show_labels
+            label.new(bar_index, low, "倒锤子", color=color.new(color.aqua, 0), textcolor=color.white, style=label.style_label_up, size=label_size_value)
 
     // 看涨吞没：当前阳线包住前一根阴线，需在布林带下轨附近
     if enable_engulfing and at_lower_band and detect_bullish_engulfing(open[1], close[1], open, close)
@@ -519,19 +540,44 @@ if barstate.islast
             else
                 wick_alert_message := "实时下插针@" + str.tostring(low) + " 价格:" + str.tostring(close)
 
-// ==================== 警报条件定义（合并后）====================
-// 创建用于警报的plot（隐藏显示）
-plot_wick_alert = plot((wick_alert or continuous_wick_alert) ? 1 : 0, title="插针/连续插针警报", display=display.none)
-plot_rsi_alert = plot(rsi_alert ? 1 : 0, title="RSI警报", display=display.none)
-plot_rsi_divergence_alert = plot(rsi_divergence_alert ? 1 : 0, title="RSI背离警报", display=display.none)
-plot_candle_pattern_alert = plot(candle_pattern_alert ? 1 : 0, title="K线形态警报", display=display.none)
+// ==================== 警报：动态消息携带信号类型（合并为单一日志）====================
+// 格式：ticker | 信号中文描述 | time | close | high | low ; 触发信号【周期】
+// 插针：仅连续插针预警；K线形态：具体到射击之星/倒锤子/看涨吞没/看跌吞没
+get_alert_time() =>
+    str.format("{0,date,yyyy-MM-dd'T'HH:mm:ss'Z'}", time)
 
-// 插针警报条件（合并：单次插针 + 连续插针，节省警报额度）
-alertcondition(wick_alert or continuous_wick_alert, title="插针/连续插针预警", message="{{ticker}} | wick_continuous_alert | {{time}} | {{close}} | {{high}} | {{low}} ; 插针")
-// RSI 警报条件（合并超买和超卖）
-alertcondition(rsi_alert, title="RSI预警", message="{{ticker}} | rsi_alert | {{time}} | {{close}} | {{high}} | {{low}} ; RSI")
-// RSI 背离警报条件（合并看跌和看涨背离）
-alertcondition(rsi_divergence_alert, title="RSI背离预警", message="{{ticker}} | rsi_divergence_alert | {{time}} | {{close}} | {{high}} | {{low}} ; RSI背离")
-// K线形态警报条件（射击之星、吞没）
-alertcondition(candle_pattern_alert, title="K线形态预警", message="{{ticker}} | candle_pattern_alert | {{time}} | {{close}} | {{high}} | {{low}} ; K线形态")
+// 当前图表周期转可读标签：15->15m, 60->1h, 240->4h, 360->6h, D->1D, W->1W
+get_timeframe_label() =>
+    p = timeframe.period
+    n = str.tonumber(p)
+    if not na(n)
+        if n >= 60 and n % 60 == 0
+            str.tostring(n / 60) + "h"
+        else
+            p + "m"
+    else if p == "D" or p == "1D"
+        "1D"
+    else if p == "W" or p == "1W"
+        "1W"
+    else
+        p
+
+all_signals = continuous_wick_alert or rsi_alert or rsi_divergence_alert or candle_pattern_alert
+if all_signals
+    sig_desc = ""
+    if continuous_wick_alert
+        sig_desc := continuous_wick_alert_message != "" ? continuous_wick_alert_message : "连续插针"
+    else if rsi_alert
+        sig_desc := rsi_alert_message != "" ? rsi_alert_message : "RSI超买超卖"
+    else if rsi_divergence_alert
+        sig_desc := rsi_divergence_alert_message != "" ? rsi_divergence_alert_message : "RSI背离"
+    else if candle_pattern_alert
+        sig_desc := candle_pattern_alert_message != "" ? candle_pattern_alert_message : "K线形态"
+    else
+        sig_desc := "未知信号"
+    t_str = get_alert_time()
+    tf_label = get_timeframe_label()
+    // 触发信号【15m】/【1h】/【4h】等，与警报所选周期一致
+    final_msg = str.format("{0} | {1} | {2} | {3} | {4} | {5} ; 触发信号【{6}】", syminfo.ticker, sig_desc, t_str, str.tostring(close), str.tostring(high), str.tostring(low), tf_label)
+    alert(final_msg, alert.freq_once_per_bar_close)
 
