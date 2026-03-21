@@ -546,21 +546,19 @@ if barstate.islast
 get_alert_time() =>
     str.format("{0,date,yyyy-MM-dd'T'HH:mm:ss'Z'}", time)
 
-// 当前图表周期转可读标签：15->15m, 60->1h, 240->4h, 360->6h, D->1D, W->1W
+// 当前图表周期转可读标签（兜底不为空）
 get_timeframe_label() =>
-    p = timeframe.period
-    n = str.tonumber(p)
+    tf = timeframe.period
+    // 分钟周期：1/3/5/15/30/45/60/120/240...
+    n = str.tonumber(tf)
     if not na(n)
-        if n >= 60 and n % 60 == 0
-            str.tostring(n / 60) + "h"
-        else
-            p + "m"
-    else if p == "D" or p == "1D"
-        "1D"
-    else if p == "W" or p == "1W"
-        "1W"
+        n >= 60 and n % 60 == 0 ? str.tostring(int(n / 60)) + "h" : str.tostring(int(n)) + "m"
     else
-        p
+        // 非分钟周期：D/W/M 等
+        tf == "D" or tf == "1D" ? "1D" :
+         tf == "W" or tf == "1W" ? "1W" :
+         tf == "M" or tf == "1M" ? "1M" :
+         (str.length(tf) > 0 ? tf : "unknown_tf")
 
 all_signals = continuous_wick_alert or rsi_alert or rsi_divergence_alert or candle_pattern_alert
 if all_signals
@@ -578,6 +576,6 @@ if all_signals
     t_str = get_alert_time()
     tf_label = get_timeframe_label()
     // 触发信号【15m】/【1h】/【4h】等，与警报所选周期一致
-    final_msg = str.format("{0} | {1} | {2} | {3} | {4} | {5} ; 触发信号【{6}】", syminfo.ticker, sig_desc, t_str, str.tostring(close), str.tostring(high), str.tostring(low), tf_label)
+    final_msg = str.format("{0} | {1} | {2} | {3} | {4} | {5} | {6}; 触发信号", syminfo.ticker, sig_desc, t_str, str.tostring(close), str.tostring(high), str.tostring(low), tf_label)
     alert(final_msg, alert.freq_once_per_bar_close)
 
