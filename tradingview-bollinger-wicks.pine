@@ -65,6 +65,12 @@ enable_shooting_star = input.bool(true, title="射击之星", tooltip="上影线
 enable_engulfing = input.bool(true, title="吞没形态", tooltip="当前K线实体完全包住前一根K线实体", group="K线形态设置")
 pattern_upper_wick_ratio = input.float(2.0, title="射击之星上影线/实体比", minval=1.5, maxval=5.0, step=0.1, tooltip="上影线至少为实体的倍数", group="K线形态设置")
 
+// 定时日线推送设置
+enable_daily_line_push = input.bool(true, title="启用定时日线推送", tooltip="按设定时间推送指定交易对的日线数据", group="定时日线推送")
+daily_push_symbol = input.symbol("BINANCE:BTCUSDT", title="推送交易对", group="定时日线推送")
+daily_push_hour = input.int(8, title="推送小时（北京时间）", minval=0, maxval=23, group="定时日线推送")
+daily_push_minute = input.int(1, title="推送分钟（北京时间）", minval=0, maxval=59, group="定时日线推送")
+
 // 颜色设置
 color_upper_wick = input.color(color.new(color.red, 0), title="上插针颜色", group="颜色设置")
 color_lower_wick = input.color(color.new(color.green, 0), title="下插针颜色", group="颜色设置")
@@ -559,6 +565,31 @@ get_timeframe_label() =>
          tf == "W" or tf == "1W" ? "1W" :
          tf == "M" or tf == "1M" ? "1M" :
          (str.length(tf) > 0 ? tf : "unknown_tf")
+
+// 生成北京时间日期键，用于限制每天只推送一次
+get_bj_day_key() =>
+    y = year(time, "Asia/Shanghai")
+    m = month(time, "Asia/Shanghai")
+    d = dayofmonth(time, "Asia/Shanghai")
+    y * 10000 + m * 100 + d
+
+// 记录最近一次日线推送日期
+var int last_daily_line_push_day = na
+
+// 定时推送指定交易对上一根完整日线（北京时间）
+if enable_daily_line_push and barstate.isconfirmed
+    is_push_time = hour(time, "Asia/Shanghai") == daily_push_hour and minute(time, "Asia/Shanghai") == daily_push_minute
+    day_key = get_bj_day_key()
+    if is_push_time and day_key != last_daily_line_push_day
+        d_open = request.security(daily_push_symbol, "1D", open[1], lookahead=barmerge.lookahead_off)
+        d_high = request.security(daily_push_symbol, "1D", high[1], lookahead=barmerge.lookahead_off)
+        d_low = request.security(daily_push_symbol, "1D", low[1], lookahead=barmerge.lookahead_off)
+        d_close = request.security(daily_push_symbol, "1D", close[1], lookahead=barmerge.lookahead_off)
+        d_time = request.security(daily_push_symbol, "1D", time[1], lookahead=barmerge.lookahead_off)
+        d_time_str = str.format("{0,date,yyyy-MM-dd}", d_time)
+        daily_msg = str.format("{0} | 日线播报 | {1} | O:{2} H:{3} L:{4} C:{5}; 定时推送", daily_push_symbol, d_time_str, str.tostring(d_open), str.tostring(d_high), str.tostring(d_low), str.tostring(d_close))
+        alert(daily_msg, alert.freq_once_per_bar_close)
+        last_daily_line_push_day := day_key
 
 all_signals = continuous_wick_alert or rsi_alert or rsi_divergence_alert or candle_pattern_alert
 if all_signals
