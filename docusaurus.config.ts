@@ -315,6 +315,12 @@ Love what you do and do what you love.
         name: 'description',
         content: '长篙的个人博客',
       },
+    }, {
+      tagName: 'meta',
+      attributes: {
+        name: 'algolia-site-verification',
+        content: 'A884DCB8C69C2C33',
+      },
     },
   ],
   stylesheets: [
