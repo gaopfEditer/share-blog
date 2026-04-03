@@ -9,7 +9,7 @@ const beian1 = '浙ICP备2024113995号-2' // '闽公网安备35021102000847号'
 
 const config: Config = {
   title: 'gaopf',
-  url: 'https://gaopf.top',
+  url: 'https://bz.b.ezcoin.ink',
   baseUrl: '/',
   favicon: 'img/favicon.ico',
   organizationName: 'gaopf',
@@ -19,6 +19,13 @@ const config: Config = {
     description:
       '是一个由长篙创建的个人博客，主要分享编程开发知识和项目，该网站基于 React 驱动的静态网站生成器 Docusaurus 构建。',
   },
+  scripts: [{
+    'src': 'https://bz.ezcoin.ink/script.js',
+    'async': true,
+    'defer': true,
+    'data-website-id': '0d6cae48-a570-45Ac-89d4-a0a0eaedf1fa',
+  },
+  ],
   themeConfig: {
     // announcementBar: {
     //   id: 'announcementBar-3',
@@ -123,8 +130,7 @@ const config: Config = {
       ],
       copyright: `
         <p style="margin-bottom: 0;"><a href="http://beian.miit.gov.cn/">${beian}</a></p>
-        <p style="display: inline-flex; align-items: center;"><img style="height:20px;margin-right: 0.5rem;" src="/img/police.png" alt="police" height="20"/><a href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=${
-          beian1.match(/\d+/)?.[0]
+        <p style="display: inline-flex; align-items: center;"><img style="height:20px;margin-right: 0.5rem;" src="/img/police.png" alt="police" height="20"/><a href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=${beian1.match(/\d+/)?.[0]
         }" >${beian1}</a></p>
         <p>Copyright © 2020 - ${new Date().getFullYear()} gaopf.top | Built with Docusaurus.</p>
         `,
