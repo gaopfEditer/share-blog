@@ -40,21 +40,21 @@ jobs:
           echo "REMOTE_HOST: ${{ vars.REMOTE_HOST }}"
           echo "REMOTE_USER: ${{ vars.REMOTE_USER }}"
           echo "TARGET: ${{ vars.TARGET }}"
-          echo "SSH_PRIVATE_KEY: ${{ vars.SSH_PRIVATE_KEY }}"
+          echo "SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}"
 
       - name: Setup SSH Key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ vars.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan ${{ vars.REMOTE_HOST }} >> ~/.ssh/known_hosts
         env:
-          SSH_PRIVATE_KEY: ${{ vars.SSH_PRIVATE_KEY }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: SSH Deploy
         uses: easingthemes/ssh-deploy@v4.1.10
         env:
-          SSH_PRIVATE_KEY: ${{ vars.SSH_PRIVATE_KEY }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           ARGS: '-avzr --delete'
           SOURCE: ''
           REMOTE_HOST: ${{ vars.REMOTE_HOST }}
